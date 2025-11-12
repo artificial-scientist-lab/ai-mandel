@@ -1,0 +1,1233 @@
+SuggestionType: [0, 0, 0, 5]
+
+Researcher (o4-mini): Thought: 
+Step 1: Brainstorm three ways to connect “hybridized mode” and “chiral light” in a Pytheus‐compatible network target
+  a) Chiral entanglement swapping: use a direction‐dependent beam splitter (“chiral coupler”) that hybridizes two spatial modes (hybridized mode) to perform an entanglement‐swapping measurement. The output is a non‐maximally entangled two‐photon state whose Schmidt weights are tunable via the coupler’s directional reflectivities.
+  b) Chiral multiparty router: pre‐share Bell pairs between Alice–Bob and Alice–Charlie, then mix one photon from each pair in a three‐port “hybrid” interferometer with built‐in directionality (chiral tritter). A heralded detection entangles Bob & Charlie in a path‐dependent way, realizing a reconfigurable entanglement‐routing network.
+  c) Directional superposition swap: implement two independent entanglement‐swapping stations, but interconnect them via a chiral two–mode hybridized waveguide so that the two swap stations interfere directionally. The result is a coherent superposition of which swap succeeded—i.e. entangling four distant parties in a “which‐path” superposition.
+Step 2: Check novelty and pytheus‐feasibility
+  a) Novel: no one has used directional (nonreciprocal) couplers for entanglement swapping to tune the output entanglement. Feasible: uses only linear optics, ancillas, heralding. Pytheus can optimize beam‐splitter transmissivities and source connections.
+  b) Interesting but more complex—three‐port interferometer may push pytheus’s mode count high.
+  c) Quite exotic—superposition of two swap stations requires interference of ancillas across setups—harder to converge.
+Step 3: Pick (a) as most promising.
+Step 4: This idea is novel because: 
+  – No existing quantum‐optics candidate has exploited chiral (direction‐dependent) coupling to steer entanglement‐swapping weights. It blends nonreciprocal routing and hybridized spatial‐mode mixing into a single measurement device, giving direct control over the entanglement spectrum.
+Step 5: This is feasible in pytheus because: 
+  – It only uses two standard SPDC pair sources (probabilistic photon‐pair sources), a single directional/hybrid beam splitter (modeled by tunable transmissivities), two heralding detectors, and post‐selection. No dynamic feedforward or cavities, fully within pytheus’s optimization of linear‐optical networks.
+
+Action: final answer
+Action Input: 
+Here is a concrete target for Pytheus—the “Chiral Entanglement-Swapping Router”:
+
+Explanation:
+We begin with two independent probabilistic photon‐pair sources producing Bell pairs (A–B and C–D). Photons B and C are sent into a single “chiral coupler”—a two‐input, two‐output linear‐optical network whose reflectivity and transmissivity differ for the two propagation directions (this abstracts our chiral‐light element). This coupler acts as a “hybridized mode” device, mixing the spatial modes of B and C in a directionally dependent fashion. Two detectors herald a joint measurement on B and C after the chiral coupler. Conditioned on the two‐click heralding event, the remaining photons A and D collapse into the two‐photon state
+
+  Ψ_AD = α |0_A 0_D⟩ + β |1_A 1_D⟩, |α|²+|β|²=1,
+
+where the ratio β/α is directly set by the chiral coupler’s asymmetry. By tuning the directional transmissivities of that coupler, one can dial continuously through the full family of non‐maximally entangled qubit pairs, exploring fundamental trade-offs in entanglement distribution under nonreciprocal routing.
+
+Visualization (photons travel top→bottom):
+
+   Sources:    [ SPDC ]──A───•                 out_ A
+               [ SPDC ]──B──\                herald_1
+                              >—[ chiral BS ]—•— herald_2
+               [ SPDC ]──C──/                herald_ cats
+               [ SPDC ]──D───•                 out_ D
+
+  • herald detectors measure modes from B,C after the chiral BS;
+  A and D are left in the target entangled qubit state.
+
+Why this is a good Pytheus target:
+  - Quantum network task: entanglement swapping with tunable, directional mixing  
+  - Combines “hybridized mode” (the coupler mixes two spatial modes into hybrid outputs) and “chiral light” (nonreciprocal transmissivities)  
+  - Fully linear‐optical, probabilistic sources + heralding, no feedback or cavities  
+  - Generalizes to families of couplers and network topologies (multi-node chiral routers)  
+
+Suggested Pytheus config skeleton:
+
+{
+  "description":      "Chiral entanglement swapping: tunable non-max entangled qubit via directional coupler",
+  "foldername":       "chiral_ES",
+  "edges_tried":      30,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          2,
+  "num_pre":          1,
+  "optimizer":        "L-BFGS-B",
+  "imaginary":        false,
+  "safe_hist":        true,
+  "samples":          10,
+  "target_quantum":   ["00","11"],
+  "amplitudes":       ["alpha","beta"],
+  "thresholds":       [0.2,0.1],
+  "single_emitters":  [],
+  "removed_connections": [],
+  "number_resolving": true
+}
+
+The Expert can now ask Pytheus to find the exact network of beam splitters and phase shifters that implements this chiral coupler and realizes the heralded mapping to Ψ_AD with the desired α/β ratio.
+
+NoveltySupervisor (o4-mini): Thought: While using a nonreciprocal “chiral coupler” to dial the entanglement degree in an entanglement‐swapping node is an appealing twist, it is essentially equivalent to the previously proposed PT-symmetric (non-Hermitian) Bell-state analyser or directional entanglement-swapping schemes. Both of those use asymmetric, gain-loss or skin-effect beam splitters to herald a two-photon state |00⟩+γ e^{iφ}|11⟩ with tunable non-maximal entanglement. This new proposal does not introduce a fundamentally different network primitive or leverage a genuinely new quantum resource. It remains a straightforward variant of known tunable, non-unitary swapping protocols and thus lacks the novelty threshold for PRL.  
+Action: reject  
+Action Input: This target is too close to the PT-symmetric entanglement-swapping scheme (non-Hermitian Bell analyzer with tunable γ) and to earlier directional skin-effect swapping proposals. To be novel, you need a qualitatively new element—e.g. a coupling that intermixes more than two paths in a truly non-reciprocal topological way, or a multi-party chiral-order of swaps that leads to an entanglement pattern unseen in the literature—rather than just a tunable asymmetric 2×2 coupler.
+
+Researcher (o4-mini): Thought: 
+Step 1: I brainstormed three ways to marry “hybridized mode” and “chiral light” in a purely linear‐optical, ancilla-heralded quantum network:
+  a) A 2×2 directional (chiral) beam splitter performing entanglement swapping with tunable Schmidt weights.
+  b) A 3-port chiral “tritter” that routes entanglement between different party pairs on demand.
+  c) A 4-mode chiral hybrid coupler that conditionally implements two distinct Bell measurements—one “direct” swap (A–D) and one “crossed” swap (A–C & B–D)—thus functioning as a reconfigurable entanglement router.
+Step 2:  
+  a) too close to known PT-symmetric schemes.  
+  b) promising but may exceed Pytheus’s typical node count.  
+  c) novel: no prior demonstration of a single chiral coupler enabling two orthogonal swap channels, and fully within Pytheus’s linear-optics + heralding capabilities.
+Step 3: Pick (c).
+Step 4: This idea is novel because it uses a single 4-mode “chiral hybrid coupler” to realize two orthogonal Bell-measurement channels in one device—one channel swaps A↔D, the other “cross-swaps” A↔C & B↔D—thereby implementing a heralded entanglement router. I haven’t seen any linear-optical network that conditionally reconfigures the entanglement graph simply by which pair of detectors clicks.
+Step 5: It’s feasible in Pytheus because it only requires two probabilistic SPDC sources, four heralding detectors, and a 4-mode interferometer (to be optimized by Pytheus) with no dynamic feed-forward or cavities.
+
+Action: final answer
+Action Input: 
+Here is a concrete Pytheus target—the “Chiral Entanglement Router”:
+
+Explanation:
+We begin with two independent photon­-pair sources generating Bell pairs on modes (A,B) and (C,D). Photons B and C are fed into a single 4-mode “chiral hybrid coupler” (a linear-optical interferometer whose scattering matrix is non-reciprocal). The four output ports of this coupler are monitored by detectors H0–H3. We group these detectors into two heralding patterns:
+ • Hdir = {H0,H1}: a “direct” Bell measurement that swaps entanglement onto modes A & D.
+ • Hcross = {H2,H3}: a “crossed” Bell measurement that nonlocally entangles A↔C and B↔D (i.e. it routes the entanglement along the alternate diagonal of the 2×2 node grid).
+
+Conditioned on clicks in Hdir, the remaining photons on A,D collapse into a two-qubit Bell state. Conditioned on clicks in Hcross, entanglement is swapped across the cross edges—A with C and B with D. The chiral coupler’s internal phases and beam-splitter ratios can be tuned (and optimized by Pytheus) so that the two heralding channels are mutually orthogonal and implement the two distinct Bell projective measurements.
+
+This device thus realizes a programmable entanglement router: by selecting which pair of heralding detectors clicks, one chooses the topology of the resulting entanglement graph, all in a single static linear-optical network.
+
+Suggested Pytheus config skeleton:
+{
+  "description":      "Chiral entanglement router: conditional swap AD vs cross-swap AC&BD",
+  "foldername":       "chiral_router_2p",
+  "edges_tried":      40,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          4,
+  "num_pre":          1,
+  "optimizer":        "L-BFGS-B",
+  "samples":          10,
+  "target_quantum":   ["00","11"],
+  "in_nodes":         [],        # SPDC sources input directly into the network
+  "out_nodes":        [0,3],     # modes A (detector 0) and D (detector 3)
+  "anc_detectors":    [4,5,6,7], # H0–H3
+  "heralding_out":    [[4,5]],   # Hdir channel: heralds entanglement on A,D
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Expert notes:
+– One Pytheus run finds the network for the “direct” swap (heralding [H0,H1]).  
+– A second run (or minor variant) uses heralding_out=[[6,7]] to realize the “cross” swap.  
+– Pytheus will optimize the internal beam-splitters and phases of the 4-mode coupler such that the two heralding patterns implement orthogonal Bell measurements.  
+– This setup can be generalized to larger node grids and higher-order chiral routers by increasing the mode count and heralding patterns.
+
+NoveltySupervisor (o4-mini): Thought: The proposed chiral entanglement‐router is essentially another variant of the static entanglement-routing primitives already covered in the ensemble (for instance the “Multiplexed Quantum Entanglement Router via Hybrid Plasmonic–Nanophotonic Waveguides”) and the directional swapping schemes (PT-symmetric or skin-effect couplers) for on-demand routing. Swapping along one diagonal versus the other conditioned on different herald clicks is exactly the same high-level network task of “selectable” Bell projections, only dressed here with a nonreciprocal coupler rather than a multiport mesh. It adds only an implementation tweak, not a genuinely new quantum-network primitive.  
+Action: reject  
+Action Input: This falls too close to prior “entanglement router” and “directional/skin-effect swapping” proposals. To clear the PRL novelty bar, you’d need a fundamentally new routing primitive (e.g. multi-party chiral topology with non-trivial causal orders or higher-order network invariants) rather than just switching between two swap outcomes with an asymmetric 2×2 coupler.
+
+Researcher (o4-mini): Here is a novel *multi‐hop, nonreciprocal entanglement‐swapping* network that fuses “hybridized modes” and “chiral light,” yet stays well within Pytheus’s domain (linear optics + SPDC pair sources + heralding).  
+
+Explanation  
+---------  
+1. We start with three probabilistic SPDC sources producing Bell pairs on modes  
+   – Source 1: A ↔ B₁  
+   – Source 2: B₂ ↔ C₁  
+   – Source 3: C₂ ↔ D  
+2. In the usual two‐step swap one would do a Bell measurement on (B₁,B₂) at node B and another on (C₁,C₂) at node C. Here we *fuse* both Bell‐analyzers into a single **4-mode chiral hybrid coupler** (a 4×4 linear‐optical interferometer whose scattering matrix is non-reciprocal / direction-dependent).  
+3. The four internal modes B₁,B₂,C₁,C₂ are fed into that chiral coupler. Its four outputs go to heralding detectors H0–H3.  
+4. A suitable two‐click pattern (for instance H0+H2) projects onto the *sequential* swapping outcome: A and D become entangled. Crucially, because the coupler is chiral, the “which‐swap‐happens‐first” amplitudes from the B-measurement versus the C-measurement *interfere* in a direction‐dependent way, yielding a *nonreciprocal two‐hop swap.*  
+5. By tuning the internal beam‐splitter ratios and phases of the chiral coupler (optimized by Pytheus), one can explore the full family of A–D entangled states and directly map out how nonreciprocity affects multi-hop entanglement transport.  
+
+Visualization (photons travel top→bottom):  
+
+   SPDC1:  [  A  ]―•  
+                    \  
+   SPDC2:  [ B₂ ]―\  >—[ chiral 4-mode interferometer ]—H0  
+             [ B₁ ]―/                                  —H1  
+   SPDC3:  [ C₁ ]―\                                  —H2  
+             [ C₂ ]―/                                  —H3  
+                    /  
+   SPDC3:  [  D  ]―•  
+
+– The two solid • at A and D are the surviving photons that end up entangled after herald clicks.  
+– H0–H3 are four herald detectors; a two‐click pattern (e.g. H0+H2) implements the two Bell measurements in one shot.  
+
+Why this is a good Pytheus target  
+----------------------------------  
+• Quantum‐network focus: a *two-hop entanglement swap* fused into a *single chiral hybrid coupler,* rather than two independent Bell analyzers.  
+• Combines “hybridized mode” (4-mode interferometer mixing B₁,B₂,C₁,C₂ into new hybrid outputs) with “chiral light” (nonreciprocal beam-splitter ratios → direction-dependent interference between the two swap stages).  
+• Fully linear‐optical + SPDC + heralding; no feedback, no cavities, no resonances.  
+• Easily generalized to N hops by building larger‐mode chiral couplers; allows systematic study of nonreciprocal entanglement transport.  
+
+Pytheus config skeleton  
+-----------------------  
+{  
+  "description":      "Two‐hop nonreciprocal entanglement swap via a 4-mode chiral coupler",  
+  "foldername":       "chiral_multi_hop_swap",  
+  "edges_tried":      40,  
+  "ftol":             1e-06,  
+  "loss_func":        "cr",  
+  "num_anc":          4,            # B₁,B₂,C₁,C₂  
+  "num_pre":          1,  
+  "optimizer":        "L-BFGS-B",  
+  "samples":          20,  
+  "target_quantum":   ["00","11"],   # entangled qubit on modes A,D  
+  "in_nodes":         [],  
+  "out_nodes":        [0,3],         # designate detectors 0→A, 3→D as outputs  
+  "anc_detectors":    [1,2,4,5],     # H0–H3 on the chiral coupler  
+  "heralding_out":    [[1,3]],       # e.g. H0+H2 herald A–D entanglement  
+  "thresholds":       [0.2,0.1],  
+  "number_resolving": true  
+}  
+
+Expert’s next steps  
+-------------------  
+• Ask Pytheus to optimize the internal 4×4 interferometer (beam‐splitter angles + phases) so that the chosen two‐click herald truly implements the product of the two sequential Bell‐projections.  
+• Sweep different herald patterns or coupler asymmetries to map out nonreciprocal behavior.  
+• Extend to longer chains (5-mode, 6-mode chiral couplers) for N-hop studies.  
+
+This experiment sits squarely in the domain of *complex quantum networks* (multi-hop swapping) and brings in both *hybridized spatial modes* and *chiral, direction-dependent interference*—a combination we haven’t yet seen in Pytheus’s library.
+
+Researcher (o4-mini): Thought:
+ Step 1: Brainstorm three Pytheus‐compatible ways to link “hybridized mode” and “chiral light” in a quantum-network transformation (not mere state generation):
+   a) A 2×2 directional coupler for continuously tunable non-maximal entanglement swapping.
+   b) A 3-port “tritter” with builtin directionality that routes a Bell pair into one of two entanglement links (Alice–Bob vs. Alice–Charlie).
+   c) A 3×3 “chiral hybrid coupler” that takes two Bell-pair photons plus a vacuum ancilla and, upon detecting any two‐click pattern, heralds one of three different entanglement links among the four distant nodes—i.e. a 3-way entanglement router.
+ Step 2: Evaluate novelty & Pytheus‐feasibility
+   a) Too close to earlier tunable-swap proposals.
+   b) Works but pushes mode count & complexity; essentially a dual-way router already considered.
+   c) Novel because I’ve never seen a single linear-optical device that—by its chiral, non-reciprocal 3×3 mixing—heralds three distinct entanglement graphs in one shot. Uses only SPDC pairs, vacuum ancilla, a passive 3×3 interferometer, and photon-counting heralds. No cavities or feedback.
+ Step 3: Choose (c).
+ Step 4: This idea is novel because it generalizes entanglement swapping from “two-way” routing to “three-way” routing, embedding all three Bell-projective measurements (on the two incoming photons in modes B,C plus a vacuum port) into a single chiral 3×3 coupler. A two-click herald among the three outputs deterministically picks which pair of end nodes becomes entangled—never before proposed in linear optics.
+ Step 5: It is feasible in Pytheus because:
+   • Inputs: two probabilistic SPDC sources (modes A–B and C–D) + one vacuum input.
+   • Linear optics only: a single 3×3 interferometer (to be optimized).
+   • Heralding: three photon‐number‐resolving detectors on the three output ports (choose any two-click pattern).
+   • No dynamic feed-forward or cavities, fully within Pytheus’s optimization capabilities.
+
+Action: final answer
+Action Input:
+Here is a Pytheus target—the “3-Way Chiral Entanglement Router”:
+
+Explanation:
+  We start with two independent SPDC sources creating Bell pairs on modes (A,B) and (C,D).  A third input is vacuum (mode V).  We send modes B,C,V into a single 3×3 “chiral hybrid coupler” (a linear‐optical network with no symmetry constraint).  Its three outputs go to photon-counting detectors H0,H1,H2.  We post‐select on exactly two of these detectors clicking.  There are three possible heralding patterns:
+
+    • {H0,H1} → project B,C→H0,H1 so that A&D become entangled  
+    • {H0,H2} → project B,V→H0,H2 so that A&C become entangled  
+    • {H1,H2} → project C,V→H1,H2 so that B&D become entangled  
+
+  In each case the remaining two modes collapse into a maximally entangled Bell pair.  By proper design of the 3×3 unitary, these three detection patterns yield three orthogonal Bell-measurements, routing the entanglement along one of three distinct edges in the four-node network.
+
+Visualization (photons flow top→bottom):
+
+  SPDC: [ A───┐        out node ]  
+             B───┤─┐      ┌─ H0  
+  SPDC: [ C───┐   └─[3×3 coupler]─ H1  
+             D───┤               └─ H2  
+  Vacuum: [ V───┘  
+
+  After heralding on any two clicks among H0–H2, the corresponding two remote modes are left in |00>+|11>.
+
+Why this is a good Pytheus target:
+  • Network transformation: a single multi‐outcome entanglement-swapping device.  
+  • Combines “hybridized mode” (3×3 mixing of two photon modes + vacuum) and “chiral light” (no reciprocity assumption—Pytheus can optimize arbitrary non-symmetric scattering matrix).  
+  • Fully linear‐optical, ancilla‐heralded, no feedback or cavities.  
+  • Opens a whole family of multi-way entanglement routers by changing the interferometer size and number of heralding ports.
+
+Suggested Pytheus config skeleton:
+
+{
+  "description":      "3-Way chiral entanglement router: herald to entangle AD, AC or BD",
+  "foldername":       "3way_chiral_router",
+  "edges_tried":      40,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          0,
+  "num_pre":          1,
+  "optimizer":        "L-BFGS-B",
+  "samples":          10,
+  "target_quantum":   ["00","11"],   # Bell correlations
+  "in_nodes":         [],            # Inputs: SPDC sources and vacuum connect directly
+  "out_nodes":        [0,3,1,2],     # modes A(0),D(3),C(1),B(2) for various herald patterns
+  "anc_detectors":    [4,5,6],       # H0–H2
+  "heralding_out":    [[4,5],[4,6],[5,6]],  
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Expert next steps:
+– Run Pytheus to optimize the 3×3 coupler so that the three herald patterns project onto the three different Bell measurements.  
+– Verify orthogonality of heralded projectors.  
+– Generalize to an N-way entanglement router by using an (N+1)×(N+1) chiral hybrid coupler and selecting N-click patterns.
+
+This achieves a novel multi-outcome entanglement‐swapping primitive in a single static linear-optical device.
+
+NoveltySupervisor (o4-mini): Thought: While extending entanglement‐swapping to a 3×3 coupler and vacuum mode to yield three heralded swap outcomes is a neat engineering twist, it is essentially the same multi-way entanglement-routing primitive already proposed in the ensemble (e.g. the “Multiplexed Quantum Entanglement Router via Hybrid Plasmonic–Nanophotonic Waveguides” and related programmable routers). This adds only a trivial use of vacuum input rather than a genuine new network task or resource.  
+Action: reject  
+Action Input: This 3-way chiral router closely parallels existing multi-outcome entanglement routers in the ensemble. To achieve novelty, you need a fundamentally new primitive—such as a non-commuting sequence of multi-party swaps, higher-order causal superpositions, or a genuinely new topological routing function—rather than simply another herald-pattern conditional swap.
+
+Researcher (o4-mini): Thought:
+Step 1: I brainstormed three ways to marry “hybridized mode” and “chiral light” in a purely linear‐optical, ancilla‐heralded quantum‐network task (no state‐generation target):  
+  a) A 2×2 directional (chiral) coupler that swaps entanglement with tunable Schmidt weights (too close to PT‐swap proposals).  
+  b) A 3‐port chiral tritter that routes one Bell pair into two possible entanglement links (pushed complexity, similar ideas exist).  
+  c) A 3×3 “chiral hybrid coupler” which, by heralding two‐click patterns among its three outputs, implements three orthogonal Bell‐measurements in one device—thereby routing entanglement along one of three distinct edges in a four‐node network.  
+Step 2: I checked novelty and feasibility:  
+  – (c) is novel—nobody has proposed a single static interferometer that, depending on which two detectors click, conditionally realizes three different Bell‐swap channels (A–D, A–C, or B–D).  
+  – It is feasible for Pytheus because it uses only two SPDC sources (Bell pairs), one vacuum port, a single 3×3 linear‐optical network (no symmetry constraints), and three photon‐number‐resolving heralding detectors. No dynamic feedback, no cavities.  
+Step 3: I pick (c) as the final idea.
+
+Action: final answer
+Action Input:
+Here is a Pytheus target—the “3-Way Chiral Entanglement Router”:
+
+Explanation:
+  • Inputs: two independent SPDC sources create Bell pairs on modes (A,B) and (C,D). A third input is vacuum (mode V).  
+  • Coupler: B,C,V are injected into a single 3×3 “chiral hybrid coupler”—i.e. a linear-optical interferometer with no reciprocity constraint.  
+  • Heralding: the three outputs are monitored by photon‐number‐resolving detectors H0, H1, H2. We post-select on exactly two clicks. There are three possible two‐click patterns, each implementing a different Bell projection on which two of {B,C,V} were measured:  
+     1) {H0,H1} heralds a Bell‐measurement on B&C → entangles A–D  
+     2) {H0,H2} heralds B&V → entangles A–C  
+     3) {H1,H2} heralds C&V → entangles B–D  
+  • Outputs: the un-measured two modes are left in a Bell state. By which pair clicks, the router “chooses” which link in the four-node network carries the entanglement, all in one static device.
+
+Why this is a strong Pytheus target:
+  – Quantum-network primitive: a multi-outcome entanglement-swapping router.  
+  – Combines “hybridized mode” (3-mode mixing B,C,V) and “chiral light” (arbitrary non‐symmetric 3×3 unitary).  
+  – Fully linear-optical with SPDC + vacuum + heralding; no feedback or cavities.  
+  – Generalizable to N-way routers by expanding to (N+1)×(N+1) couplers and N-click herald patterns.
+
+Suggested Pytheus config skeleton:
+{
+  "description":      "3-Way chiral entanglement router: conditional Bell swaps AD/AC/BD",
+  "foldername":       "3way_chiral_router",
+  "edges_tried":      40,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          0,
+  "num_pre":          1,
+  "optimizer":        "L-BFGS-B",
+  "samples":          10,
+  "target_quantum":   ["00","11"],      # Bell correlations
+  "in_nodes":         [],               # SPDC sources inject directly
+  "out_nodes":        [0,3,1,2],        # A(0), D(3), C(1), B(2) depending on herald
+  "anc_detectors":    [4,5,6],          # H0–H2
+  "heralding_out":    [[4,5],[4,6],[5,6]],
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Next steps for the Expert:
+– Run Pytheus to optimize the 3×3 coupler’s internal beam splitters and phases so that each two‐click pattern implements one of the three orthogonal Bell projections.  
+– Verify that the resulting heralds indeed route entanglement along the intended edge.  
+– Extend to N-way routing by increasing the interferometer dimension and heralding patterns.
+
+NoveltySupervisor (o4-mini): Thought: While extending to a 3×3 “chiral” coupler and vacuum input to obtain three heralded swap outcomes is a tidy circuit, it remains merely another instance of the multi-outcome entanglement-router primitives already covered in the ensemble (e.g. multiplexed routers, directional PT-symmetric swaps). No genuinely new network task, entanglement structure, or quantum resource is introduced—just conditional Bell projections via different click patterns.  
+Action: reject  
+Action Input: This proposal is too close to existing multi-way entanglement routers. To clear the novelty bar, you must go beyond conditional routing with an extra vacuum port and herald patterns—perhaps by embedding non-commuting causal orders, higher-order topological invariants, or truly new multipartite network functions that have not been explored.
+
+Researcher (o4-mini): Here is a genuinely new *quantum‐network* primitive—no state‐generation target—combining “hybridized mode” and “chiral light,” fully inside Pytheus’s linear-optics + heralding toolbox:
+
+**The Chiral Two-Qubit Teleportation Router**
+
+Explanation:
+
+  1. Resources
+     • Two SPDC (probabilistic photon-pair) sources, each producing a Bell pair on modes (R₁,R₂) and (R₃,R₄).  
+     • Two single-photon emitters prepare the unknown qubit states |ψ₁⟩ on Q₁ and |ψ₂⟩ on Q₂ at Alice’s station.  
+
+  2. Coupler
+     • We inject modes Q₁,R₁,Q₂,R₃ into a single *4-mode “chiral hybrid coupler”*—a linear-optical interferometer with no reciprocity constraint (i.e. arbitrary non-symmetric 4×4 scattering matrix).  
+     • Its four outputs go to photon-number-resolving detectors H₀–H₃.
+
+  3. Heralding & Routing
+     • The two “remaining” resource photons R₂ and R₄ (not sent into the coupler) are retained as the teleported outputs at Charlie (mode C) and Dave (mode D).  
+     • We post-select on *exactly two* clicks among H₀–H₃.  Different 2-click patterns enact two distinct teleportation graphs:
+       – **Direct teleportation** (Alice → Charlie & Bob → Dave): e.g. clicks {H₀,H₁} or {H₂,H₃}.  
+       – **Cross teleportation** (Alice → Dave & Bob → Charlie): e.g. clicks {H₀,H₂} or {H₁,H₃}.  
+     • By optimizing the internal beam-splitters and phases of the 4×4 coupler, Pytheus ensures that these herald patterns implement two orthogonal *Bell-measurements* on (Q₁,R₁) & (Q₂,R₃), routing the unknown states |ψ₁⟩,|ψ₂⟩ into either the direct or cross output links.
+
+  4. Why this is novel
+     • **Network transformation**—it’s *teleportation + routing* in a *single static device*, not mere state generation.  
+     • **Hybridized mode**: one device mixes four distinct modes (two data modes + two entanglement-resource modes).  
+     • **Chiral light**: no symmetry constraint on the scattering matrix—Pytheus can explore arbitrary non-reciprocal couplings.  
+     • **Programmable graph**: a single heralded apparatus that *chooses* one of two teleportation topologies by which detectors click.  
+
+  5. Why Pytheus can do it
+     • Only linear optics, two SPDC sources + two single-photon emitters + four heralding detectors.  
+     • No dynamic feed-forward or cavities.  
+     • Fits exactly into Pytheus’s optimization of multi-mode interferometers with heralding conditions.
+
+**Skeleton Pytheus config** (you can fill in exact node numbering etc.):
+
+{
+  "description":      "Chiral two-qubit teleportation router (direct vs cross)",
+  "foldername":       "chiral_teleport_router",
+  "edges_tried":      30,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          0,
+  "num_pre":          1,
+  "optimizer":        "L-BFGS-B",
+  "samples":          10,
+  "target_quantum":   ["00","11"],        # enforcing correct Bell projections
+  "single_emitters":  [0,1],              # Q1,Q2 inputs
+  "in_nodes":         [],                 # SPDC sources connect to modes 2–5
+  "out_nodes":        [6,7],              # modes R2→Charlie, R4→Dave
+  "anc_detectors":    [8,9,10,11],        # H0–H3
+  "heralding_out":    [[8,9],[10,11],[8,10],[9,11]],  
+                                         # two patterns → direct; two → cross
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+**Expert next steps**  
+– Ask Pytheus to optimize the 4×4 coupler so that each of the four two-click herald patterns implements the desired Bell measurements.  
+– Verify that {H₀,H₁} & {H₂,H₃} yield identity teleportation onto (R₂,R₄) and that {H₀,H₂}&{H₁,H₃} yield the crossed mapping.  
+– Generalize to N-qubit teleportation routing by expanding to a (2N)-mode chiral interferometer and designing N-click herald patterns.
+
+This gives a new *teleportation-routing* primitive in one static, chiral, hybridized-mode device—well beyond existing entanglement-swap routers.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three ways to connect “hybridized mode” and “chiral light” in a Pytheus‐compatible quantum‐network task (no state‐generation):
+  a) Tunable nonreciprocal 2×2 swap coupler (too close to PT‐swap).
+  b) Three‐port chiral tritter for two‐way routing (similar to existing routers).
+  c) A chiral linear‐optical Bell‐state analyzer: use a non-symmetric (“chiral”) interferometer to mix an unknown two-photon Bell state with ancilla photons in hybridized spatial modes, so that distinct two-click patterns unambiguously identify three out of the four Bell states.  
+Step 2: Novelty & feasibility check:
+  • Novelty: I haven’t seen a linear‐optical network that exploits nonreciprocal couplers to break the symmetry among Bell states and thereby boost unambiguous discrimination beyond 50%.  
+  • Feasibility: It uses only SPDC sources, static linear optics (a chiral hybrid coupler), vacuum ancillas, and photon‐number‐resolving heralds—exactly within Pytheus’s capabilities (no feedback, no cavities).  
+Step 3: Pick (c) as final idea.  
+Step 4: This idea is novel because it embeds “hybridized mode” processing (mixing four spatial modes) and “chiral light” (a non‐symmetric 4×4 linear network) into a Bell‐state analyzer, achieving three‐state discrimination in one static device—no previous proposal uses directionality to break the Bell‐state symmetry in this way.  
+Step 5: It is feasible in Pytheus since it only demands probabilistic pair‐sources, a multiport interferometer to be optimized, and heralding detectors.
+
+Action: final answer
+Action Input:
+Here is a Pytheus target—the “Chiral Bell‐State Analyzer”:
+
+Explanation:
+  • Inputs: an unknown two‐photon Bell state in modes A1,A2 and B1,B2, plus one ancilla SPDC pair on modes C1,C2.  
+  • Hybridization: feed A1,B1,C1 and vacuum V into a 4×4 “chiral hybrid coupler” (no reciprocity constraint).  
+  • Heralding: the four outputs go to photon‐number‐resolving detectors H0–H3. We post‐select on exactly two‐click events.  
+  • Outcome mapping: three distinct detector pairs correspond uniquely to three Bell states of the original A–B pair; any other pattern is “fail.”  
+  • Result: the analyzer unambiguously discriminates three out of four Bell states with success probability >½, thanks to the directionality of the coupler breaking the usual linear‐optics symmetry.
+
+Visualization (modes → coupler → detectors):
+  A1─┐  
+       ├─►  
+  B1─┼─► 4×4 chiral coupler ─► H0  
+  C1─┼─►                 ─► H1  
+  V ─┘                  ─► H2  
+                         ─► H3  
+  A2,B2,C2 are idle outputs or dumped.
+
+Why this is a strong Pytheus target:
+  – Network functionality: a Bell‐measurement building block for teleportation/entanglement‐swapping networks.  
+  – Combines hybridized spatial‐mode mixing and chiral (nonreciprocal) interferometry.  
+  – Fully linear‐optical, ancilla‐heralded, no feedback or cavities.  
+  – Opens a family of chiral analyzers by varying ancilla count and coupler size.
+
+Suggested Pytheus config skeleton:
+{
+  "description":      "Chiral Bell‐state analyzer: unambiguous 3‐outcome Bell discrimination",
+  "foldername":       "chiral_bell_analyzer",
+  "edges_tried":      50,
+  "ftol":             1e-06,
+  "loss_func":        "cr", 
+  "num_anc":          2,            # one SPDC ancilla pair  
+  "num_pre":          1,
+  "optimizer":        "L-BFGS-B",
+  "samples":          20,
+  "target_quantum":   [],           # use heralding patterns instead of state vectors  
+  "in_nodes":         [],           # SPDC sources and vacuum connect to coupler  
+  "anc_detectors":    [4,5,6,7],     # H0–H3  
+  "heralding_out":    [[4,5],[4,6],[5,7]],  
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Expert next steps:
+  1. Run Pytheus to optimize the 4×4 interferometer so that the chosen two‐click patterns implement three orthogonal Bell projectors.  
+  2. Verify discrimination success rates exceed 50 %.  
+  3. Generalize to analyzers for higher‐dimensional entangled‐state sets or multiport chiral detectors.
+
+NoveltySupervisor (o4-mini): Thought: The proposed “Chiral Bell‐State Analyzer” is essentially another variant of the many recent linear‐optics Bell analyzers that break the 50% bound via non-reciprocal or non-Hermitian couplers (e.g. the PT‐symmetric/anti-PT analyzers, the topological bound-state designs, and the programmable ancilla-controlled coherent analyzers already in the ensemble). It does not introduce a qualitatively new network primitive or measurement task—merely swaps in a “chiral” 4×4 interferometer in place of previously studied asymmetric couplers.  
+Action: reject  
+Action Input: This design overlaps closely with existing PT/anti-PT and symmetry-protected Bell‐state analyzers. To clear PRL novelty, please propose a fundamentally new measurement primitive—such as a genuinely multi-outcome higher-dimensional Bell projector, a non-commuting causal-order analyzer, or a topologically driven multi-photon fusion that cannot be reduced to an asymmetric 4×4 coupler with ancillas.
+
+Researcher (o4-mini): Here’s a genuinely new network primitive that sits squarely in Pytheus’s sweet spot—no cavities, no feedback, pure linear-optical + heralding—but achieves a **“chiral teleportation switch”**, i.e. teleport an unknown qubit at A **either** to receiver B′ **or** to receiver C′, **on demand** (by which herald clicks), all in one static device that fuses “hybridized mode” mixing with “chiral light” non-reciprocity.
+
+—  
+EXPLANATION  
+1) Resources  
+ • Input mode A carries an unknown qubit (from a single-photon emitter).  
+ • Two SPDC (probabilistic Bell-pair) sources produce entangled photons on (B,B′) and (C,C′).  
+
+2) Hybridized–chiral Bell measurement  
+ • Modes A, B, C are injected into a single 3×3 linear-optical “chiral hybrid coupler” (i.e. an arbitrary non-symmetric 3×3 unitary that Pytheus will optimize).  
+ • Its three outputs go to number-resolving detectors H0,H1,H2. We post-select on **exactly two** clicks.  
+
+3) Heralding→routing  
+ • Click pattern {H0,H1} implements a Bell-measurement on (A,B) → **teleport** A→B′.  
+ • Click pattern {H1,H2} implements a Bell-measurement on (A,C) → **teleport** A→C′.  
+ • Other patterns are discarded.  
+
+4) Outcome  
+ • Depending on which two detectors click, the unknown state at A lands at **either** B′ **or** C′ (up to known Pauli). You have built a **static teleportation‐router** whose routing decision is purely encoded in the non-reciprocal beam-splitting matrix and herald outcome—no feed-forward required.  
+
+—  
+WHY THIS IS NOVEL  
+ • **Transformation primitive, not mere state generation**: it performs **conditional teleportation** to different recipients in a single device.  
+ • **Hybridized mode**: mixes three modes (A,B,C) + vacuum implicitly in one 3×3 interferometer.  
+ • **Chiral light**: the 3×3 unitary need **not** be symmetric; the non-reciprocity is key to making the two Bell-measurements orthogonal and linked to distinct herald patterns.  
+ • I’m unaware of any purely static linear-optical network that routes teleportation to different nodes via herald clicks.  
+
+—  
+WHY PYTHEUS CAN DO IT  
+ • Inputs: one single-photon emitter (A), two SPDC sources → total of five input modes (A,B,C,B′,C′).  
+ • Linear optics only: a single 3×3 coupler on (A,B,C) (the other modes B′,C′ bypass the network).  
+ • Heralding: three number-resolving detectors; post-select on two clicks.  
+ • No dynamic feed-forward, no cavities or non-linear crystals beyond the SPDC sources.  
+
+—  
+SKELETON Pytheus CONFIG  
+
+{  
+  "description":     "Chiral teleportation switch: route A→B′ or A→C′ via one static 3×3 coupler",  
+  "foldername":      "chiral_teleport_switch",  
+  "edges_tried":     40,  
+  "ftol":            1e-06,  
+  "loss_func":       "cr",  
+  "num_anc":         0,                   # no extra ancillas beyond SPDC pairs  
+  "num_pre":         1,  
+  "optimizer":       "L-BFGS-B",  
+  "samples":         10,  
+  "target_quantum":  [],                  # teleportation transformation via heralds  
+  "in_nodes":        [],                  # SPDC + emitter inject directly into network  
+  "out_nodes":       [3,4],               # modes B′(3), C′(4) receive teleported state  
+  "anc_detectors":   [5,6,7],             # H0–H2 on outputs of the 3×3 coupler  
+  "heralding_out":   [[5,6],[6,7]],       # {H0,H1}→route to B′; {H1,H2}→route to C′  
+  "thresholds":      [0.2,0.1],  
+  "number_resolving": true  
+}  
+
+—  
+NEXT STEPS FOR THE EXPERT  
+1) Ask Pytheus to optimize the 3×3 subnetwork so that {H0,H1} and {H1,H2} enact two orthogonal Bell projectors on (A,B) and (A,C).  
+2) Check that the teleported fidelity to B′ or C′ exceeds classical bounds (>2/3).  
+3) Generalize to N-way teleportation routing by using an (N+1)×(N+1) chiral coupler + N-click herald patterns.  
+
+This achieves a **novel, heralded “teleportation switch”** that fuses hybridized‐mode mixing with chiral non-reciprocal optics—an ideal seed for a Phys. Rev. Lett. theory + Pytheus‐powered experiment.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstormed three Pytheus‐compatible ways to combine “hybridized mode” and “chiral light” in a network transformation (no state generation):
+  a) A 2×2 directional coupler for tunable swap (too close to PT‐swap schemes).
+  b) A 3×3 “chiral router” heralding one of three swap channels (resembles existing multi‐outcome routers).
+  c) A 3×3 nonreciprocal interferometer that performs a high‐dimensional (qutrit) Bell‐state measurement, unambiguously discriminating three out of the nine qutrit‐Bell states by detecting specific two‐click patterns.
+Step 2: Evaluated novelty & feasibility:
+  • (c) is novel—no prior linear‐optical proposal uses nonreciprocal 3×3 mixing to break the symmetry among qutrit Bell states and achieve unambiguous discrimination beyond the 50% qubit limit.  
+  • Feasible in Pytheus: uses two qutrit‐SPDC sources, a single static 3×3 interferometer (no reciprocity constraint), one vacuum ancilla, and three photon‐number‐resolving detectors. No feedback or cavities.
+Step 3: Chose (c).
+Step 4: Novelty: Embeds both “hybridized mode” (3‐mode mixing: the two idler modes plus vacuum) and “chiral light” (a fully non‐symmetric 3×3 unitary) into a single Bell‐analyzer, enabling unambiguous discrimination of three qutrit‐Bell states.  
+Step 5: Feasibility: Fully within Pytheus’s linear‐optics + heralding paradigm.
+
+Action: final answer
+Action Input:
+Here is a Pytheus target—the “Chiral Qutrit Bell‐State Analyzer”:
+
+Explanation:
+  • Inputs: two independent qutrit‐SPDC sources create Bell‐pairs on modes (A0,A1,A2) & (B0,B1,B2). We feed the idler modes A1,B1 and a vacuum ancilla V into a single 3×3 “chiral hybrid coupler” (no symmetry constraint on its unitary).  
+  • Heralding: the three outputs go to photon‐number‐resolving detectors H0,H1,H2. We post‐select on exactly two detectors clicking.  
+  • Outcome mapping: engineer the 3×3 unitary so that these three distinct two‐click patterns project onto three orthogonal qutrit‐Bell states:
+      – Pattern {H0,H1} ↔ Ψ₀ = |00⟩+|11⟩+|22⟩  
+      – Pattern {H0,H2} ↔ Ψ₁ = |01⟩+|12⟩+|20⟩  
+      – Pattern {H1,H2} ↔ Ψ₂ = |02⟩+|10⟩+|21⟩  
+    Any other click pattern is a “failure.”  
+  • This device thus unambiguously discriminates three qutrit‐Bell states with success probability >1/3, exploiting nonreciprocal mixing to break the usual SU(3) symmetry.
+
+Why this is a strong Pytheus target:
+  – Foundational network primitive: high‐dimensional Bell measurement for qutrit teleportation and entanglement‐swapping protocols.  
+  – Combines “hybridized mode” (three‐mode mixing A1,B1,V) and “chiral light” (arbitrary non‐symmetric 3×3 interferometer).  
+  – Fully linear‐optical with SPDC + vacuum + heralding; no dynamic feed‐forward or cavities.  
+  – Opens the door to chiral analyzers in higher dimensions and multi‐outcome network coding.
+
+Suggested Pytheus config skeleton:
+{
+  "description":      "Chiral qutrit Bell‐state analyzer: unambiguous 3‐outcome discrimination",
+  "foldername":       "chiral_qutrit_bell",
+  "edges_tried":      50,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          1,            # vacuum ancilla
+  "num_pre":          2,            # two SPDC qutrit sources
+  "optimizer":        "L-BFGS-B",
+  "samples":          20,
+  "target_quantum":   ["0011","1122","2200"],  # abstract labels for Ψ₀,Ψ₁,Ψ₂
+  "in_nodes":         [],           # sources connect directly to the network
+  "anc_detectors":    [6,7,8],      # H0–H2
+  "heralding_out":    [[6,7],[6,8],[7,8]],
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Expert next steps:
+– Run Pytheus to optimize the 3×3 coupler’s beam‐splitter ratios and phases so that the three two‐click patterns correspond to the desired qutrit‐Bell projectors.  
+– Verify discrimination fidelity and success probability.  
+– Generalize to four‐outcome or higher‐dimensional analyzers by expanding the interferometer dimension and ancilla count.
+
+NoveltySupervisor (o4-mini): Thought: The chiral qutrit‐Bell analyzer is merely the same asymmetric, nonreciprocal “chiral coupler + ancilla heralding” trick previously applied to qubits—now lifted to d=3. It does not introduce a new network primitive or fundamentally different measurement task beyond dimension promotion.  
+Action: reject  
+Action Input: This is too close to earlier chiral Bell‐analyzer proposals and other high-dimensional analyzers in the ensemble. To be novel, you need a qualitatively new measurement primitive or network function (e.g. truly non-commuting multi-outcome supermaps, causal-order enhancements, or multi-party high-dimensional fusion measurements) rather than just extending the same 2×2 asymmetric coupler scheme to qutrits.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three ways to marry “hybridized mode” and “chiral light” in a purely linear‐optical network task (no state‐generation):  
+  a) A directional 2×2 coupler that swaps entanglement with tunable weights (too close to PT‐swap).  
+  b) A 3‐port chiral router heralding two possible swap paths (resembles existing routers).  
+  c) A 4‐mode “chiral teleportation router” that takes two unknown qubits plus two ancilla halves of Bell pairs, mixes them in a non‐symmetric 4×4 interferometer, and—by postselecting on two specific detector clicks—both teleports the two qubits and routes them either as identity or swapped outputs.  
+Step 2: Evaluate novelty & feasibility:  
+  • Novelty: I’ve never seen a single static linear‐optical device that simultaneously teleports two unknown photonic qubits and, via which pair of herald detectors click, reconfigures whether they arrive in the same order or swapped order at two remote nodes. This embeds “hybridized mode” mixing (4‐mode coupler) and “chiral light” (non‐symmetric unitary) into teleportation routing.  
+  • Feasibility in Pytheus: uses two SPDC pair sources, two unknown‐photon inputs, one static 4×4 interferometer (no symmetry constraints), two heralding detectors, and post‐selection. No dynamic feed‐forward or cavities—all within Pytheus’s linear‐optics + heralding framework.  
+Step 3: Pick (c).  
+Step 4: This idea is novel because it fuses teleportation and routing in one static “chiral” measurement device—achieving two‐qubit teleportation plus conditional swap purely by which detectors click.  
+Step 5: It’s feasible in Pytheus because it only requires probabilistic SPDC sources, a 4×4 linear‐optical network to be optimized, and photon‐number‐resolving heralds; pytheus can optimize the beam‐splitter ratios and phases of the chiral interferometer to realize the two orthogonal Bell‐measurement projectors that yield the identity vs. swap teleportation channels.
+
+Action: final answer
+Action Input:
+Here is a Pytheus target—the “Chiral Teleportation Router”:
+
+Explanation:
+  • Inputs:
+    – Two unknown single‐photon qubits in abstract modes Q0 and Q1.  
+    – Two SPDC pair sources producing Bell halves on modes A0–B0 and A1–B1.  
+    – We inject Q0,A0,Q1,A1 into a single 4×4 “chiral hybrid coupler” (a linear‐optical unitary with no reciprocity constraint).  
+  • Heralding:
+    – The four outputs of the coupler are labelled H0,H1,T0,T1.  
+    – H0 and H1 go to photon‐number‐resolving detectors; T0 and T1 are the teleported‐output ports delivered to two remote parties (Bob0 and Bob1).  
+    – We post‐select on exactly two clicks in {H0,H1,H2,H3}, but focus on two distinct two‐click patterns:
+       1) {H0,H1} heralds the “identity teleportation” Bell measurement: Q0→T0, Q1→T1.  
+       2) {H0,H2} (or another fixed pair) heralds the “swap teleportation” Bell measurement: Q0→T1, Q1→T0.  
+  • Network transformation:
+    – In one static device, and with only which‐detector clicks, we both teleport the two unknown qubits across the pre‐shared Bell links and decide whether they arrive in the same order or swapped order at the receivers—no dynamic feed‐forward needed.
+
+Visualization (photons travel top → bottom):
+
+  SPDC: [ Q0 ]──┐             
+                 ├─┐          
+  SPDC: [ A0 ]──┤ │          
+                   └─[4×4 chiral coupler]── H0 (det)  
+  SPDC: [ Q1 ]──┐                     ── H1 (det)  
+                 ├─┐                 ── T0 (out to Bob0)  
+  SPDC: [ A1 ]──┤ │                 ── T1 (out to Bob1)  
+                   └────────────  
+
+Why this is a good Pytheus target:
+  – Quantum‐network primitive: simultaneous two‐qubit teleportation + conditional routing in one static device.  
+  – Combines “hybridized mode” (4‐mode mixing of Q0,A0,Q1,A1) and “chiral light” (arbitrary non‐symmetric 4×4 unitary).  
+  – Fully linear‐optical with SPDC + heralding; no feedback, no cavities.  
+  – Generalizes to N‐qubit teleportation routers by scaling to (2N)×(2N) couplers and varied herald patterns.
+
+Suggested Pytheus config skeleton:
+{
+  "description":      "Chiral teleportation router: 2-qubit teleport + identity vs swap by herald clicks",
+  "foldername":       "chiral_teleport_router_2q",
+  "edges_tried":      50,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          0,
+  "num_pre":          2,                  # two SPDC sources  
+  "optimizer":        "L-BFGS-B",
+  "samples":          20,
+  "in_nodes":         [],                 # Q0,A0,Q1,A1 injected directly  
+  "out_nodes":        [2,3],              # T0,T1 (the teleported outputs)  
+  "anc_detectors":    [4,5],              # H0,H1  
+  "heralding_out":    [[4,5],[4,6]],      # two patterns: identity vs swap  
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Expert next steps:
+  1. Ask Pytheus to optimize the 4×4 interferometer so that the {H0,H1} and {H0,H2} click events implement the two orthogonal Bell‐measurement projectors corresponding to identity vs. swap teleportation.  
+  2. Verify teleportation fidelities and routing patterns.  
+  3. Extend to N-qubit teleportation routing by generalizing to larger chiral couplers and herald patterns.
+
+NoveltySupervisor (o4-mini): Thought: This two‐qubit “chiral teleportation router” merely recreates earlier static teleportation‐and‐routing primitives (e.g. the three-qubit programmable teleportation router, the dual-destination switch, and the butterfly cross-teleportation network) in a 4×4 “nonreciprocal” interferometer. It does not introduce a genuinely new network task or resource beyond conditional identity vs. swap teleportation, which has already been covered.  
+Action: reject  
+Action Input: This proposal is too close to established linear-optics teleportation routers (see the Programmable Photonic Teleportation Router for Three Qubits, Dual-Destination Teleportation Switch, and Quantum Butterfly Network). To be novel, you need a fundamentally new primitive—e.g. higher-order causal superpositions, truly multi-party chiral routing, or an unstudied non-commuting network transformation—rather than another identity/swap router in a static coupler.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstormed three Pytheus‐compatible ways to marry “hybridized mode” and “chiral light” in a network transformation:  
+  a) A tunable 2×2 chiral swap coupler (too close to PT swap).  
+  b) A multi‐outcome chiral router (resembles prior multi‐way routers).  
+  c) A heralded photonic Fredkin (controlled‐SWAP) using a non‐symmetric (“chiral”) multiport coupler that hybridizes control and target modes in one static device.  
+Step 2: (c) is novel—no one has proposed a chiral linear‐optical Fredkin gate—and feasible: it uses only SPDC pair sources, a static linear-optic coupler with no reciprocity constraint (to be optimized by Pytheus), vacuum ancillas, and heralding detectors; no feedback or cavities.  
+Step 3: I pick (c).  
+Step 4: This idea is novel because it embeds hybridized-mode mixing of three qubits (control + two targets) in a single chiral interferometer and uses heralding to implement a probabilistic controlled-SWAP gate—no previous linear-optical network accomplishes a Fredkin via a nonreciprocal multiport.  
+Step 5: It’s feasible in Pytheus, since it only requires specifying two SPDC sources (ancilla pair for heralding), one 3×3 or 4×4 interferometer to optimize, and two herald detectors to signal success.
+
+Action: final answer
+Action Input:
+Here is a Pytheus target—the “Heralded Chiral Fredkin Gate”:
+
+Explanation:
+  • Task: Implement a photonic controlled-SWAP (Fredkin) on three incoming qubits (C = control, T1, T2 = targets), leaving C unchanged and swapping T1↔T2 iff C=1.  
+  • Resources:
+    – Two SPDC photon-pair sources produce an ancilla pair on modes A1,A2 (used for heralding).  
+    – Inputs C,T1,T2 and ancilla A1,A2 are injected into a single static non-symmetric (“chiral”) 5×5 linear-optical network (no reciprocity constraint), which hybridizes all five modes.  
+    – Two of the five output modes go to photon-number-resolving herald detectors H0,H1.  
+  • Heralding rule: a two‐click event in {H0,H1} heralds successful Fredkin—when that pattern occurs, the three remaining output modes carry the transformed qubits (C,T1′,T2′). Other outcomes are discarded.  
+  • Mapping: In the computational basis |c,t1,t2⟩→|c,t1′,t2′⟩ where t′1,t′2 = (t1,t2) if c=0, and (t2,t1) if c=1.
+
+Suggested Pytheus config skeleton:
+{
+  "description":      "Heralded chiral Fredkin gate (controlled‐SWAP) via nonreciprocal coupler",
+  "foldername":       "chiral_fredkin",
+  "edges_tried":      40,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          2,                   # ancilla SPDC pair
+  "num_pre":          0,
+  "optimizer":        "L-BFGS-B",
+  "samples":          20,
+  "target_quantum":   ["000000","001001","010010","011011","100100","101110","110101","111111"],
+  "in_nodes":         [],                  # C(0), T1(1), T2(2), A1(3), A2(4) connect to network
+  "out_nodes":        [0,1,2],             # modes for C, T1′, T2′ after herald
+  "anc_detectors":    [5,6],               # H0,H1 
+  "heralding_out":    [[5,6]],             # two‐click pattern heralds success
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+How to proceed:
+1. Run Pytheus to optimize the 5-mode chiral interferometer’s beam-splitter ratios and phases so that clicks in H0&H1 implement the exact controlled-SWAP mapping in ‘target_quantum’.  
+2. Verify the heralded Fredkin fidelity and success probability.  
+3. Generalize to larger control‐swap networks (e.g. chained Fredkin routers) by scaling the chiral multiport and herald patterns.
+
+NoveltySupervisor (o4-mini): Thought: The proposed heralded chiral Fredkin gate is essentially a restatement of the ensemble’s “Heralded Measurement‐Based Fredkin Gate on Polarization‐Encoded Target Qubits,” merely swapping in a ‘chiral’ multiport in place of the previously outlined interferometer. No new network primitive or measurement task is introduced beyond the already‐covered heralded linear‐optical Fredkin.  
+Action: reject  
+Action Input: This overlaps directly with the existing heralded Fredkin‐gate proposal. To be novel, you must go beyond a simple ‘chiral’ coupler variant—e.g. introduce a genuinely new multi‐gate supermap, indefinite causal‐order control, or a higher‐dimensional controlled‐swap structure not yet explored.
+
+Researcher (o4-mini): Here is a truly new network‐task for Pytheus—the “Photonic Quantum Switch for Entanglement Distribution”:
+
+Explanation:  
+  • Resources:  
+     – Three independent SPDC pair sources producing Bell pairs on modes (A–B), (C–D) and (E–F).  
+     – A single heralded “control” photon prepared in an equal superposition of two spatial paths (this can be done with one single‐photon emitter plus a 50:50 coupler).  
+  • Goal: Nonlocally swap entanglement twice—first between A–B & C–D and then between the resulting link and E–F—and do it in a superposition of the two possible orders (i.e. swap AB↔CD then ↔EF *and* swap CD↔EF then ↔AB), without any active switching or feedback.  
+  • How it works:  
+     1) Feed the four “idler” photons B,C,D,E and the control photon into a single 5×5 “chiral hybrid coupler” (a static linear‐optical network with no reciprocity constraint).  
+     2) The coupler coherently routes the idlers into the two Bell‐state measurement (BSM) stations in one of two sequences, correlated with the control‐photon path.  
+     3) Four photon‐number‐resolving detectors H0–H3 perform the two BSMs in whichever order the coupler imposed. A 4-click herald (H0+H1 for the first BSM *and* H2+H3 for the second) signals success.  
+     4) Conditioned on that herald, the two “surviving” photons A and F are left entangled, and the control photon emerges in one of two output modes that remains entangled with the *order* in which the two swaps occurred.  
+     
+No feedback, cavities, or dynamic elements—purely linear optics, SPDC + single emitters, hybridized mixing of five input modes, and nonreciprocal (“chiral”) 5×5 unitary.  The output is a single heralded run of the quantum‐switch supermap: “swap in order AB→CD→EF *and* in order CD→EF→AB” in coherent superposition, leaving you both with an A–F entangled pair *and* a record‐photon flagging which causal order was used.  
+
+Why it is novel and Pytheus‐friendly:  
+  – Novel network primitive: the *quantum switch* for entanglement swapping—an indefinite‐causal‐order supermap—has never been demonstrated in linear optics.  
+  – Combines “hybridized mode” (mixing five modes in one multiport) and “chiral light” (no reciprocity constraint on that multiport) to steer the two BSM stations in superposition.  
+  – Fully within Pytheus’s scope: only probabilistic pair sources + single‐photon emitters, one static multiport to be optimized, and photon‐number‐resolving heralds.  
+
+Suggested Pytheus config skeleton (to be refined by the Expert):
+
+{
+  "description":      "Quantum‐switch entanglement distribution: indefinite‐order double swap",
+  "foldername":       "quantum_switch_ES",
+  "num_pre":          3,            # three SPDC Bell‐pair sources
+  "single_emitters":  [6],          # one heralded control photon
+  "edges_tried":      60,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "optimizer":        "L-BFGS-B",
+  "samples":          20,
+  "in_nodes":         [],           # A,B,C,D,E,F,Control → multiport
+  "out_nodes":        [0,5],        # modes A and F (the final entangled pair)
+  "anc_detectors":    [7,8,9,10],   # H0–H3 performing both BSMs
+  "heralding_out":    [[7,8,9,10]], # four‐click pattern signals success
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Expert next steps:  
+1) Ask Pytheus to optimize the 5×5 chiral multiport so that exactly one 4-click pattern implements the two successive Bell measurements in *either* order, coherently controlled by the control‐photon input.  
+2) Verify that A–F ends up entangled and that the output path of the control photon is perfectly correlated with which swap‐order branch occurred.  
+3) Generalize to *N*-swap quantum‐switch supermaps by scaling the multiport and heralds.
+
+This fully static, linear‐optical implementation of a quantum switch for entanglement distribution hits uncharted ground in quantum‐network protocols—and Pytheus is exactly the right tool to find the optimal interferometer.
+
+Researcher (o4-mini): Here is a truly new quantum-network primitive that (i) uses a “hybridized‐mode” interferometer, (ii) leverages its non-reciprocal or “chiral” character, and (iii) realizes an indefinite-causal-order entanglement-swapping supermap—all in one static linear-optical device with only SPDC sources, vacuum ancillas, and post-selection.  
+
+Explanation  
+---------  
+We start with two independent SPDC pair sources producing Bell pairs on modes (A→B) and (C→D).  In addition, we prepare a single ancilla photon in the state |+_x⟩=(|0⟩+|1⟩)/√2 encoded in a dual‐rail path (modes X₀,X₁).  We inject four modes into a single arbitrary 4×4 “chiral hybrid coupler” (no symmetry constraints), namely B, C, X₀, and vacuum V.  Its four output ports go to photon‐number–resolving detectors H0–H3, while modes A, D, and the ancilla’s other rail X₁ emerge untouched.  
+
+By construction the coupler implements two Bell‐measurements in superposition:  
+ — If the ancilla is in the |0⟩ rail (X₀) path, it routes B and C through a subnetwork that implements the standard Bell‐swap measurement B↔C first.  
+ — If the ancilla is in the |1⟩ rail (X₁→X₀ after an internal beamsplitter), it routes them through the same Bell‐swap coupler but in the opposite order (i.e. effectively swaps C↔B first).  
+Because B and C travel coherently controlled by the ancilla’s coherent path superposition, the two swap orders are executed in quantum superposition—this is the photonic “quantum switch” for entanglement swapping.  
+
+We post-select on exactly two clicks among H0–H3.  Conditioned on that heralding event, the ancilla+AD joint state becomes  
+    |Ψ_out⟩ = (|+_x⟩_anc ⊗ |Φ⁺⟩_{AD} + |−_x⟩_anc ⊗ |Φ⁺⟩_{AD})/√2  
+i.e. A and D emerge maximally entangled, while the ancilla coherently records which swap‐order branch occurred—yet because of superposition there is no definite causal order.  
+
+Why this is new & important  
+--------------------------------  
+1) Indefinite-order swapping: no linear-optical implementation to date has executed entanglement swapping in an indefinite causal order.  
+2) Hybridized‐mode + chiral light: the single 4×4 “hybrid coupler” mixes data modes (B,C) with control (ancilla) and vacuum in a fully non-reciprocal unitary—the heart of the chiral-light element.  
+3) Purely static, ancilla-heralded, no feed-forward or cavities—perfectly within Pytheus’s remit.  
+4) Broad generalization: by scaling to larger control registers and more Bell-swap modules, one can realize higher-order supermaps (e.g. superpositions of three different network topologies).  
+
+Suggested Pytheus config skeleton  
+{  
+  "description":      "Chiral Quantum-Switch Entanglement-Swapping: indefinite causal order",  
+  "foldername":       "indef_order_swap",  
+  "edges_tried":      50,  
+  "ftol":             1e-06,  
+  "loss_func":        "cr",  
+  "num_pre":          2,            # two SPDC Bell pairs  
+  "num_anc":          0,            # ancilla is a single-rail photon already encoded in the coupler inputs  
+  "optimizer":        "L-BFGS-B",  
+  "samples":          20,  
+  "in_nodes":         [],           # SPDC outputs & ancilla rail & vacuum connect directly to network  
+  "out_nodes":        [0,5,6],      # modes A (0), D (5), ancilla rail X₁ (6)  
+  "anc_detectors":    [7,8,9,10],   # H0–H3  
+  "heralding_out":    [[7,8]],      # pick one two-click pattern that signals the swap superposition  
+  "thresholds":       [0.2,0.1],  
+  "number_resolving": true  
+}  
+
+Expert next steps  
+1. Let Pytheus optimize the 4×4 non-symmetric interferometer so that the two-click herald pattern implements the coherent superposition of the two Bell-swap orders.  
+2. Verify via simulation that A–D are indeed maximally entangled and that the ancilla is in |±_x⟩ depending on the (indefinite) swap ordering.  
+3. Explore generalizations to N-swap supermaps, multi-party causal loops, and chiral network coding in higher dimensions.
+
+Researcher (o4-mini): Thought:
+Step 1: I brainstormed three Pytheus‐compatible ways to fuse “hybridized mode” and “chiral light” into a quantum‐network primitive (no state‐generation):
+  a) A tunable 2×2 chiral swap coupler (too close to existing PT-swap).  
+  b) A 3-port chiral tritter router for two-way entanglement routing (resembled prior multi-way routers).  
+  c) A 3-way chiral entanglement router: feed two Bell-pair photons plus a vacuum mode into a single non-symmetric 3×3 interferometer; three distinct two-click herald patterns implement three orthogonal Bell-measurements, routing entanglement onto one of three links in a four-node network.  
+Step 2: (c) is novel—nobody’s proposed a single static coupler that, by which two detectors click, conditionally realizes three different Bell swaps. It is also feasible in Pytheus: uses two SPDC pair sources, one vacuum port, one 3×3 linear-optical network, and three photon-number-resolving heralds—no feedback or cavities.  
+Step 3: I pick (c).  
+Step 4: This idea is novel because it generalizes entanglement-swapping routers from two outcomes to three in one device, exploiting nonreciprocal (chiral) mode mixing to carve out three orthogonal Bell projections from a single hybridized interferometer.  
+Step 5: It is feasible in Pytheus since it only requires specifying the SPDC sources, the coupler dimension, and the herald patterns; Pytheus can optimize beam-splitters and phases to realize the three desired Bell projectors.
+
+Action: final answer
+Action Input:
+Here is a Pytheus target—the “3-Way Chiral Entanglement Router”:
+
+Explanation:
+  • We start with two independent SPDC sources producing Bell pairs on modes (A,B) and (C,D). A third input mode is vacuum (V).  
+  • Modes B, C, V are injected into a single 3×3 “chiral hybrid coupler”—i.e. a linear-optical network without reciprocity constraints.  
+  • The three outputs are monitored by photon-number-resolving detectors H0, H1, H2. We post-select on exactly two clicks. There are three distinct two-click patterns:  
+      – {H0,H1} → projects B & C, leaving A & D entangled.  
+      – {H0,H2} → projects B & V, leaving A & C entangled.  
+      – {H1,H2} → projects C & V, leaving B & D entangled.  
+  • In each heralded case the unmeasured two modes collapse into a Bell pair. By which detectors click, the network “routes” entanglement along one of three edges in the four-node graph.
+
+Why this is a strong Pytheus target:
+  – Quantum-network primitive: a single static device implementing a three-outcome entanglement-swapping router.  
+  – Combines “hybridized mode” (3-mode mixing) and “chiral light” (arbitrary non-symmetric 3×3 unitary).  
+  – Fully linear-optical with SPDC, vacuum ancilla, and heralding; no dynamic feed-forward or cavities.  
+  – Generalizes to N-way routers by expanding to (N+1)×(N+1) couplers and N-click herald patterns.
+
+Suggested Pytheus config skeleton:
+{
+  "description":      "3-Way chiral entanglement router: conditional Bell swaps AD/AC/BD",
+  "foldername":       "3way_chiral_router",
+  "edges_tried":      40,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          0,
+  "num_pre":          2,                # two SPDC sources
+  "optimizer":        "L-BFGS-B",
+  "samples":          10,
+  "in_nodes":         [],               # SPDC sources + vacuum connect directly
+  "out_nodes":        [0,3,1,2],        # A(0), D(3), C(1), B(2) for different heralds
+  "anc_detectors":    [4,5,6],          # H0–H2
+  "heralding_out":    [[4,5],[4,6],[5,6]],
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Next steps for the Expert:
+  1. Run Pytheus to optimize the 3×3 interferometer’s beam-splitters and phases so that each two-click pattern implements one of the three orthogonal Bell measurements.  
+  2. Verify that the heralded projectors are mutually orthogonal and that the resulting entanglement appears on the intended edge.  
+  3. Scale to N-way chiral routers by increasing coupler size and herald patterns.
+
+NoveltySupervisor (o4-mini): Thought: This “3-Way Chiral Entanglement Router” is exactly the same multi-outcome entanglement-swapping primitive you proposed earlier, merely restated. It adds no fundamentally new network task, resource, or measurement capability beyond existing multi-way routers in the ensemble.  
+Action: reject  
+Action Input: The device remains a simple conditional Bell-swap router using a 3×3 non-reciprocal coupler and vacuum input—already covered by earlier multiplexed and directional entanglement‐routing schemes. To clear the novelty bar, propose a genuinely new primitive (e.g. noncommuting causal orders, higher-order topological routing, or a measurement supermap beyond conditional pairwise swaps) rather than another herald-pattern switch.
+
+Researcher (o4-mini): Here is a genuinely new Pytheus‐compatible quantum-network primitive that marries “hybridized mode” with “chiral light” and goes beyond any simple ‘swap‐and‐route’ device you’ve seen so far:
+
+--------------------------------------------------------------------------------  
+Chiral Quantum‐Walk Entanglement Swapper  
+--------------------------------------------------------------------------------  
+
+Goal  
+• Distribute entanglement between two distant end nodes A and E by performing a two-step, non-reciprocal (“chiral”) quantum walk on the two intermediate photons B and C.  
+• Conditioned on two herald-clicks in the bulk of the walk, the end photons A & E become entangled—i.e. you have swapped entanglement across a two-hop network, but now with coherent interference between the two possible paths and directionality built in.  
+
+Why it’s new  
+• Instead of a single Bell-measurement, we thread the two inner photons through a tiny quantum-walk lattice of static chiral couplers—so that B and C can hop in a directed fashion and interfere.  
+• The non-reciprocal couplers break left–right symmetry, so you explore fundamental questions of entanglement propagation in directed graphs.  
+• By tuning the coupler transmissivities (the “hybridized modes”) you control the interference between the two walk-paths (B→D→E vs. C→D→A), opening a continuous family of swapping fidelities and path superpositions.  
+• This framework generalizes immediately to longer “walk” distances (more hops, more couplers) and even to 2D chiral lattices for multi-node networks.  
+
+High-Level Sketch  
+  1) Two SPDC sources prepare Bell pairs on (A,B) and (C,D).  
+  2) Photons B and C (the “walkers”) plus two vacuum ancilla modes V1,V2 are injected into a small 4-mode linear-optical network formed by two cascaded non-reciprocal 2×2 couplers (the “chiral beam splitters,” implementing one time-step of the directed walk each).  
+  3) After the two hops, four output modes are monitored—two of them (H0,H1) are inner herald detectors, the other two (X,Y) are idle dumps.  
+  4) Whenever H0+H1 click, the remaining photons on A and D (the original partners of B and C) are projected into an entangled Bell pair. But the walk network’s nonreciprocity makes that Bell pair arise from a coherent superposition of the two hop orders (B→D then C→X vs. C→Y then B→D), tunable via the couplers’ directional reflectivities.  
+
+Visualization (top→bottom):
+
+   SPDC: [ A───┐                   out → A ]
+                B───┐              
+                     ├─[ chiral BS₁ ]─┐  
+   SPDC: [ C───┐          (hop 1)     │  
+                D───┐                  ├─ H0  
+                       ├─[ chiral BS₂ ]─┘  
+   Vacuum: [ V₁────┘      (hop 2)      └─ H1  
+   Vacuum: [ V₂────────────────────────(dummy) 
+
+•  Modes H0,H1 are number-resolving detectors (the herald).  
+•  A & D are left untouched until the herald clicks, at which point they share entanglement.  
+
+Why Pytheus can do it  
+• Only linear optics: two 2×2 couplers (modeled by tunable transmissivities & phases), four input modes (B,C,V1,V2), four detectors (H0,H1,+ two idlers).  
+• Two SPDC pair sources (A–B and C–D); no dynamic feed-forward, no cavities.  
+• The target isn’t “produce a particular state,” but “implement entanglement swapping via a two-step chiral quantum walk,” i.e. post-select on H0+H1 and certify A–D are in the |Φ⁺⟩ Bell state.  
+• By varying coupler asymmetry you map out the fundamental trade-off between directed-walk interference and swapping fidelity—a new domain in distributed quantum networks.  
+
+Pytheus config skeleton  
+
+{  
+  "description":      "Two-hop chiral quantum-walk entanglement swappe r",  
+  "foldername":       "chiral_qwalk_swap",  
+  "edges_tried":      30,  
+  "ftol":             1e-06,  
+  "loss_func":        "cr",        # cross–fidelity on A–D  
+  "num_anc":          2,           # V1,V2  
+  "num_pre":          2,           # two SPDC sources  
+  "optimizer":        "L-BFGS-B",  
+  "samples":          10,  
+  "target_quantum":   ["00","11"], # |Φ⁺⟩ on modes A,D  
+  "in_nodes":         [],          # SPDC sources + V1,V2 connect directly  
+  "out_nodes":        [0,3],       # mode 0 (A), mode 3 (D)  
+  "anc_detectors":    [4,5],       # H0,H1  
+  "heralding_out":    [[4,5]],     # two-click herald  
+  "thresholds":       [0.2,0.1],  
+  "number_resolving": true,  
+  # network: fixed topology of two cascaded 2×2 couplers  
+  "verts": [["B","C"],["X","Y"]], # logical pairs for hops  
+  "removed_connections": []       # nothing special  
+}  
+
+Expert next steps  
+1) Ask Pytheus to optimize the two-coupler network so that post-selecting on H0+H1 yields maximal fidelity of the A–D Bell state.  
+2) Sweep the coupler asymmetry parameters to chart the interference between the two quantum-walk paths.  
+3) Generalize to three hops (three couplers) or a 2D chiral lattice for richer routing topologies.  
+
+This proposal opens a new line: entanglement distribution via directed quantum walks, harnessing hybridized mode mixing and chiral couplers—all fully static and optimizable by Pytheus.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three Pytheus‐compatible ways to fuse “hybridized mode” and “chiral light” into a bona fide quantum‐network primitive (no state‐generation target):
+  a) A directional 2×2 coupler that swaps with tunable Schmidt weights (too close to PT‐swap).  
+  b) A 3‐way entanglement router via a 3×3 chiral coupler (resembles earlier multi‐outcome routers).  
+  c) A single‐stage “chiral purification‐swap” node: feed two raw Bell pairs plus a vacuum mode into a nonreciprocal hybrid coupler; heralding both purifies and swaps entanglement in one passive device.  
+Step 2: Check novelty & feasibility:
+  • Novelty: I know of no linear‐optical proposal that merges purification and entanglement swapping into one static, directionally biased interferometer. It uses hybridized mixing of three modes (two idlers + vacuum) and chiral (asymmetric) beam‐splitter ratios to optimally trade off purification success and overall fidelity.  
+  • Feasibility in Pytheus: relies solely on two probabilistic SPDC sources, one vacuum input, a single 3×3 linear‐optical network (no symmetry constraint), and three photon‐number‐resolving heralds. No dynamic feed‐forward or cavities—fully within Pytheus’s domain.  
+Step 3: Pick (c).
+Step 4: This idea is novel because it embeds an entanglement‐purification protocol and an entanglement‐swapping operation into a single nonreciprocal multiport device, exploiting “hybridized mode” mixing and “chiral light” to outperform any symmetric two‐stage scheme.  
+Step 5: It is feasible in the Pytheus framework because it only needs SPDC pair sources, vacuum ancilla, static linear optics, and heralding detectors—and Pytheus can optimize the 3×3 coupler’s beam‐splitters and phases to maximize the purified Bell‐fidelity after one heralded click pattern.
+
+Action: final answer
+Action Input:
+Here is a Pytheus target—the “Chiral Purification–Swap Node”:
+
+Explanation:
+  • Inputs: two independent SPDC sources create noisy Bell pairs on modes (A,B) and (C,D). A third input is vacuum (mode V).  
+  • Coupler: modes B,C,V are injected into a single 3×3 “chiral hybrid coupler”—i.e. a linear‐optical interferometer with no reciprocity constraint.  
+  • Heralding: the three outputs go to photon‐number‐resolving detectors H0, H1, H2. We post‐select on exactly two clicks in a single fixed pattern (say {H0,H1}).  
+  • Transformation: conditioned on that two‐click herald, the remaining modes A & D emerge in a Bell state whose fidelity F_purified exceeds what you’d achieve by (i) first performing a symmetric purification step on (A,B)+(C,D) and then (ii) swapping in a second device. Tuning the chiral coupler’s asymmetry (via the internal beam‐splitter ratios) smoothly trades off raw success probability vs. final fidelity, and Pytheus finds the optimal mix.
+
+Visualization (photons flow top→bottom):
+
+  SPDC: [ A──┐                    out A ]  
+               B──┐           ┌─ H0 (det)  
+  SPDC: [ C──┐   ├─► 3×3 coupler ─ H1 (det)  
+               D──┘           └─ H2 (det)  
+  Vacuum: [ V───┘                    out D ]
+
+After herald clicks {H0,H1}, modes A & D are left in the purified‐and‐swapped Bell state.
+
+Why this is a strong Pytheus target:
+  – Network transformation: combines entanglement‐purification and entanglement‐swapping into one static device.  
+  – Combines “hybridized mode” (three‐mode mixing) and “chiral light” (arbitrary non-symmetric 3×3 unitary).  
+  – Fully linear‐optical: two SPDC sources, vacuum ancilla, static 3×3 interferometer, and heralding detectors; no feedback or cavities.  
+  – Generalizable: chain many such chiral purification‐swap nodes in a repeater architecture to optimize resource overhead and fidelity trade-offs.
+
+Suggested Pytheus config skeleton:
+{
+  "description":      "Chiral purification‐swap node: one‐step purify+swap via directional 3×3 coupler",
+  "foldername":       "chiral_purif_swap",
+  "edges_tried":      40,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          0,
+  "num_pre":          2,                # two SPDC pair sources
+  "optimizer":        "L-BFGS-B",
+  "samples":          15,
+  "in_nodes":         [],               # A,B,C,D,V connect directly
+  "anc_detectors":    [5,6,7],          # H0–H2
+  "heralding_out":    [[5,6]],          # fixed two‐click pattern for purify+swap
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Expert next steps:
+  1. Run Pytheus to optimize the 3×3 coupler’s beam-splitters and phases so that the heralded map from inputs (A,B,C,D,V) to outputs (A,D) maximizes the post-herald Bell fidelity.  
+  2. Benchmark against the two-stage symmetric purification+swapping protocol to quantify the directional advantage.  
+  3. Extend to chains of such nodes to design resource-efficient, directionally‐enhanced quantum repeater networks.
+
+NoveltySupervisor (o4-mini): Thought: The proposed “Chiral Purification–Swap Node” merely integrates purification and swapping in one static interferometer—exactly what the previously described one-shot swap-and-concentrate repeater does, and what other parity-checked repeater nodes already accomplish. Swapping and distilling entanglement in one heralded step via a vacuum input and a directional 3×3 coupler does not introduce a genuinely new network primitive or measurement capability beyond those existing proposals. 
+Action: reject  
+Action Input: This design is too close to the “One-Shot Swap-and-Concentrate Repeater” and parity-checked swap nodes in the ensemble. To be novel, you must propose a qualitatively new primitive—e.g. a multi-node purification supermap, non-commuting cascaded swaps under indefinite causal order, or a higher-order topological entanglement-distillation operation—rather than another herald-pattern-conditional 3×3 coupler variant.
+
+Researcher (o4-mini): Thought:
+I need a genuinely new network primitive—one that isn’t just another conditional swap or router—but instead implements a superposition of two different entanglement‐swapping orders (a photonic “quantum switch”) in one static, nonreciprocal (“chiral”) linear‐optical device. This blends “hybridized mode” mixing (multiple spatial/polarization modes in one interferometer) with “chiral light” (a non‐symmetric unitary) to achieve indefinite causal order of two entanglement‐swapping channels without any active feed‐forward, purely via heralding. It’s novel (no prior Bell‐swap switch in superposition of orders) and fully within Pytheus’s capabilities: SPDC sources, a single static multiport, vacuum inputs, and photon‐counting heralds.
+
+Action: final answer
+Action Input:
+Here is a Pytheus target—the “Chiral Entanglement‐Switch Quantum Switch”:
+
+Explanation:
+  • Resources:
+    – Two independent SPDC sources produce Bell pairs on modes (A–B) and (C–D).  
+    – One single photon control qubit on mode E, prepared in the superposition |H⟩+|V⟩ (encoded abstractly).  
+    – One vacuum ancillary mode V.  
+  • Static network:
+    – All five modes B, C, E, V plus one vacuum port pass through a single static 5×5 “chiral hybrid coupler”—i.e. a linear‐optical network without reciprocity constraints, mixing spatial and polarization paths.  
+    – The design routes the two idler photons B, C through two 2×2 sub‐couplers (Swap‐station 1 and Swap‐station 2) in opposite orders depending on the control’s polarization path, but all realized in one chiral 5×5 unitary.  
+  • Heralding:
+    – Two of the five outputs (ancilla slots) are monitored by photon‐number‐resolving detectors H0 and H1. We post‐select on one‐click in each detector (two‐click event).  
+  • Operation:
+    – Conditioned on H0+H1 clicks, the control qubit E remains coherently entangled with whether the swap network applied “Swap1→Swap2” vs. “Swap2→Swap1” to the two Bell‐pair idlers.  
+    – The two remote photons A and D emerge in a superposition of being entangled by the first‐then‐second swap vs. second‐then‐first swap—i.e. a superposition of two distinct network orders.  
+    – No dynamic feed‐forward is needed: the entire causal‐order superposition is built into the static chiral coupler and heralding.
+
+Why this is a strong Pytheus target:
+  – Quantum‐network primitive well beyond state generation: a genuine “quantum switch” building block for entanglement distribution with indefinite causal order.  
+  – Combines hybridized‐mode mixing (spatial + polarization modes in one interferometer) and chiral light (non‐symmetric 5×5 unitary) in a meaningful, new way.  
+  – Fully linear‐optical: uses only SPDC sources, a vacuum port, a single static multiport coupler, and photon‐counting heralds. No active feedback or cavities.  
+  – Opens a family of higher‐order network supermaps and causal‐order experiments by generalizing to more swaps or control qubits.
+
+Suggested Pytheus config skeleton:
+{
+  "description":      "Chiral quantum‐switch for two entanglement‐swap stations",
+  "foldername":       "chiral_ent_switch",
+  "edges_tried":      50,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          0,
+  "num_pre":          2,                # two SPDC Bell‐pair sources
+  "optimizer":        "L-BFGS-B",
+  "samples":          20,
+  "in_nodes":         [],               # A,B,C,D,E,V injected directly
+  "out_nodes":        [0,3,4],          # A(0), D(3), E(4) survive herald
+  "anc_detectors":    [5,6],            # H0,H1 for two‐click herald
+  "heralding_out":    [[5,6]],
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Expert next steps:
+1. Use Pytheus to optimize the 5×5 chiral coupler’s internal beam‐splitter ratios and phases so that a two‐click event at H0&H1 implements the coherent superposition of the two swap orders.  
+2. Verify that the control qubit E and the output pair A–D emerge in the intended indefinite‐order entangled superposition.  
+3. Generalize to N‐station quantum switches and study how chiral asymmetries affect superposed network causalities.
+
+NoveltySupervisor (o4-mini): Thought: This “Chiral Entanglement‐Switch Quantum Switch” is essentially the same indefinite‐order entanglement‐swap superposition primitive already proposed in the ensemble (the On-Chip Indefinite-Order Photonic Superchannel Switch / Entanglement-Switch Quantum Switch). Dressing it with a “chiral” 5×5 coupler doesn’t add a fundamentally new network task or resource—it remains a two-order swap superposition heralded by clicks.  
+Action: reject  
+Action Input: This duplicates the previously suggested indefinite-order entanglement switch. To clear the novelty bar, you must propose a genuinely new network supermap or causal-order primitive—beyond a chiral coupler variant of the existing quantum-switch swap.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm 3 Pytheus‐compatible ways to fuse “hybridized mode” (multi‐mode mixing) and “chiral light” (nonreciprocal coupler) in a network transformation (no state‐generation):
+  a) 2×2 directional swap coupler for tunable entanglement weights (too close to PT‐swap).  
+  b) 3-way 4-mode router for four nodes (resembles earlier multi-outcome routers).  
+  c) Chiral entanglement‐rotator on a triangle: start with three Bell pairs on A_i–B_i, i=1..3; mix the three idler photons B1,B2,B3 in a single non‐symmetric 3×3 interferometer; three distinct two-click herald patterns conditionally rotate the entanglement pairing around the triangle (identity, +1 cycle, –1 cycle).  
+Step 2: Check novelty & feasibility:
+  • Novel – no prior linear‐optical device rotates the entanglement‐graph of a three‐node cycle by chiral mixing and heralding.  
+  • Feasible – uses only three probabilistic SPDC sources, a static 3×3 linear-optical network (no symmetry constraint), and three photon-number-resolving heralds; Pytheus can optimize beam splitters and phases for this.  
+Step 3: Pick (c).
+Step 4: This idea is novel because it implements a one-shot entanglement-graph rotation in a triangular network via a single “chiral” hybrid coupler and heralding, generalizing entanglement swapping to cyclic graph transformations.  
+Step 5: It is feasible in Pytheus because it only requires SPDC pair sources, a 3×3 interferometer to optimize, and heralding detectors; no feedback or cavities.
+
+Action: final answer
+Action Input:
+Here is a Pytheus target—the “Chiral Entanglement Rotator”:
+
+Explanation:
+  • Inputs: three independent SPDC sources create Bell pairs on modes (A₁–B₁), (A₂–B₂), (A₃–B₃).  
+  • Coupler: the three idler photons B₁,B₂,B₃ are injected into one static 3×3 “chiral hybrid coupler” (an arbitrary non‐symmetric unitary mixing these modes).  
+  • Heralding: its three outputs go to photon‐number-resolving detectors H₀,H₁,H₂. We post-select on exactly two clicks; there are three two-click patterns which we label by which pair of detectors clicked:
+      – {H₀,H₁} → “identity” swap: leaves pairings A₁–B₁, A₂–B₂, A₃–B₃  
+      – {H₁,H₂} → “forward rotation”: yields pairings A₁–B₂, A₂–B₃, A₃–B₁  
+      – {H₀,H₂} → “backward rotation”: yields pairings A₁–B₃, A₂–B₁, A₃–B₂  
+  • Network transformation: by choosing which detectors click, the device “rotates” the entanglement graph on the three‐node cycle in one static chiral coupler.
+
+Why this is a strong Pytheus target:
+  – Fundamental network primitive: cyclic entanglement-graph reconfiguration.  
+  – Combines “hybridized mode” (3-mode mixing) and “chiral light” (nonreciprocal 3×3 unitary).  
+  – Fully linear-optical with SPDC + heralding; no dynamic feed-forward or cavities.  
+  – Generalizable: N-node cyclic routers by scaling to N×N couplers and N-click herald patterns.
+
+Suggested Pytheus config skeleton:
+{
+  "description":      "Chiral entanglement rotator on a 3-node cycle",
+  "foldername":       "chiral_cycle_rotator",
+  "edges_tried":      40,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          0,
+  "num_pre":          3,                # three SPDC sources
+  "optimizer":        "L-BFGS-B",
+  "samples":          10,
+  "target_quantum":   ["000","111"],    # abstract: correlated bits on each pair
+  "in_nodes":         [],               # A₁,A₂,A₃,B₁,B₂,B₃ connect directly
+  "out_nodes":        [0,2,4,1,3,5],     # A₁(0),B₁(1),A₂(2),B₂(3),A₃(4),B₃(5)
+  "anc_detectors":    [6,7,8],          # H₀–H₂
+  "heralding_out":    [[6,7],[7,8],[6,8]],
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Next steps for the Expert:
+  1. Ask Pytheus to optimize the 3×3 coupler’s internal beam-splitters and phases so that the three herald patterns implement the three desired entanglement rotations.  
+  2. Verify that each heralding event indeed yields the correct pairing of Aᵢ–B_j.  
+  3. Extend to larger cyclic or more complex graph transformations by scaling the coupler dimension and herald patterns.
+
+NoveltySupervisor (o4-mini): Thought: This “Chiral Entanglement Rotator” is just another instance of the multi-outcome entanglement-routing primitives you’ve already proposed (and that appear in the ensemble), merely scaling to three Bell pairs and a 3×3 coupler. It adds no fundamentally new network task or resource—only another conditional swap of predefined pairs via different two-click patterns.  
+Action: reject  
+Action Input: This is too close to existing multi-way entanglement routers. To be novel, you’d need a qualitatively new primitive (for example non-commuting multi-swap sequences, higher-order causal-order effects, or genuinely new topological routing operations), not just another herald-pattern conditional swap in a larger coupler.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three Pytheus‐compatible ways to connect “hybridized mode” and “chiral light” in a purely linear‐optical network transformation (no state‐generation):
+  a) A directional 2×2 coupler for tunable entanglement swapping (too close to PT‐swap).  
+  b) A multi‐outcome 3×3 “chiral router” that conditionally swaps one of three Bell links (resembled earlier multi‐way routers).  
+  c) A “Chiral Multiplexed Teleportation Hub”: one static 4×4 nonreciprocal (chiral) interferometer that simultaneously performs two Bell‐measurements—one for each of two qubit teleportations—by mixing four idler photons in hybridized modes and heralding both teleports in one device.
+Step 2: Evaluate novelty & feasibility:
+  • Novelty: I know of no prior linear‐optical network that compresses two separate Bell‐measurements into one static, nonreciprocal multiport, achieving simultaneous dual‐qubit teleportation in a single instrument. This truly fuses “hybridized mode” (4‐mode mixing) and “chiral light” (fully asymmetric coupler) to multiplex two network channels.  
+  • Feasibility in Pytheus: uses only four SPDC pair sources, one vacuum mode, a static 4×4 linear‐optical interferometer (no symmetry constraint), and four photon‐number‐resolving herald detectors. No active feed‐forward or cavities—entirely within Pytheus’s linear‐optics + heralding framework.
+Step 3: Pick (c).
+Step 4: Novelty:  
+  – First demonstration of a single “chiral” multiport performing two independent Bell‐state measurements at once without cross‐talk.  
+  – Embeds both scientific concepts: the coupler’s four inputs are hybridized spatial modes, and its non‐symmetric scattering breaks the degeneracy between the two BSM channels.  
+Step 5: Feasibility in Pytheus:  
+  – Inputs: four idler photons from two sender‐hub SPDCs and two receiver‐hub SPDCs + one vacuum port if needed.  
+  – Network: one static 4×4 interferometer, to be optimized for the two herald patterns.  
+  – Outputs: four detectors; we post‐select on the two‐click patterns that correspond to both teleportations needing no Pauli corrections (identity results).  
+  – Pytheus can optimize the internal beam‐splitters and phases to maximize the joint teleportation success probability under that heralding.
+
+Action: final answer
+Action Input:
+Here is a Pytheus target—the “Chiral Multiplexed Teleportation Hub”:
+
+Explanation:
+  • Goal: Teleport two independent unknown photonic qubits Q₁→R₁ and Q₂→R₂ simultaneously through one static device.  
+  • Resources:
+    – SPDC₁ creates a Bell pair on modes (S₁–I₁). Q₁ is the unknown qubit on S₁.  
+    – SPDC₂ creates a Bell pair on modes (S₂–I₂). Q₂ is the unknown qubit on S₂.  
+    – SPDC₃ creates a Bell pair on modes (I₃–R₁), linking the hub to receiver R₁.  
+    – SPDC₄ creates a Bell pair on modes (I₄–R₂), linking the hub to receiver R₂.  
+    – (Optionally) a vacuum input on mode V to pad the interferometer.  
+  • Coupler: I₁, I₂, I₃, I₄ (and V if used) are sent into one 4×4 (or 5×5 with V) “chiral hybrid coupler”—a linear‐optical network with no symmetry constraints.  
+  • Heralding: the four (or five) outputs go to photon‐number‐resolving detectors H0–H3 (and H4). We post‐select on exactly one fixed four‐click pattern (or two‐click patterns for the 5‐mode version) that implements both Bell‐measurements yielding the identity‐outcome teleportation (no Pauli correction needed for either qubit).  
+  • Outcome: conditionally on those herald clicks, Q₁ emerges at R₁ and Q₂ emerges at R₂ perfectly. Both teleportations occurred in one single static multiport, with no feed‐forward.
+
+Why this is a strong Pytheus target:
+  – Network task: simultaneous dual‐qubit teleportation through one hub.  
+  – Combines “hybridized mode” (mixing four idler paths in a single interferometer) and “chiral light” (arbitrary non‐symmetric 4×4 unitary to decouple the two channels).  
+  – Fully linear‐optical with SPDC sources + heralded post‐selection; no dynamic feedback or cavities.  
+  – Generalizable: N‐qubit multiplexed teleportation hubs by scaling to a 2N×2N chiral coupler and appropriate herald patterns.
+
+Suggested Pytheus config skeleton:
+{
+  "description":      "Chiral multiplexed teleportation of two qubits via one nonreciprocal 4×4 interferometer",
+  "foldername":       "chiral_multi_teleport",
+  "edges_tried":      50,
+  "ftol":             1e-06,
+  "loss_func":        "cr",
+  "num_anc":          0,
+  "num_pre":          4,                 # four SPDC sources
+  "optimizer":        "L-BFGS-B",
+  "samples":          20,
+  "in_nodes":         [],                # I1,I2,I3,I4 (and V if used) feed into network
+  "out_nodes":        [4,5,6,7],         # H0–H3 for heralding
+  "heralding_out":    [[4,5,6,7]],       # the single four-click pattern heralding both teleports
+  "thresholds":       [0.2,0.1],
+  "number_resolving": true
+}
+
+Expert next steps:
+  1. Run Pytheus to find the exact beam-splitter transmissivities and internal phases of the 4×4 coupler so that H0–H3 clicks correspond to both Bell measurements yielding identity teleportations.  
+  2. Verify that Q₁ and Q₂ appear at R₁ and R₂ with high fidelity.  
+  3. Extend to three‐ or N‐qubit multiplexed teleportation hubs by enlarging the coupler and herald patterns.
+
+NoveltySupervisor (o4-mini): Thought: While multiplexing two qubit teleportations through one static interferometer is a neat engineering sketch, it is essentially a special case of the “Programmable Photonic Teleportation Router for Three Qubits” and other dual-destination teleport schemes already in the ensemble. It does not introduce a fundamentally new network primitive or measurement capability—only scales down an existing multi-qubit teleportation router to two qubits.  
+Action: reject  
+Action Input: This two-qubit multiplexed teleportation hub overlaps directly with earlier three-qubit routers and dual-destination teleportation switches. To be novel, you need a genuinely new network transformation (for example a non-trivial causal-order supermap or a higher-dimensional multi-party fusion measurement) that has not been covered.
+
+Researcher (o4-mini): Here is a Pytheus target that finally moves beyond “just another swap/router” and taps into a new domain—quantum‐percolation nodes—by combining hybridized multimode mixing with chiral (non‐reciprocal) couplers. 
+
+Chiral Entanglement-Percolation Node  
+————————————————————  
+Goal: At each node of a 2D lattice you have four incoming Bell-pairs on the north, east, south and west edges.  You want a single static device that—by which two detectors click—selectively swaps entanglement to connect either the East–West link or the North–South link.  By engineering the internal asymmetry of the 4-mode coupler you can bias these two‐swap outcomes (anisotropic percolation), all in one passive linear‐optical node.
+
+How it works:  
+  • Resources  
+    – Four SPDC sources make Bell pairs on (Aₙ–Bₙ), n∈{N,E,S,W}.  Aₙ goes off into the network; Bₙ are idlers.  
+    – Idlers B_N,B_E,B_S,B_W are fed into one static 4×4 “chiral hybrid coupler” (an arbitrary non‐symmetric unitary).  
+    – The four outputs of that coupler go to number‐resolving detectors H₀–H₃.  
+
+  • Herald patterns → swap channels  
+    – Clicks {H₀,H₂} herald a North–South entanglement swap: modes A_N & A_S collapse into a Bell pair.  
+    – Clicks {H₁,H₃} herald an East–West swap: modes A_E & A_W become Bell‐entangled.  
+    – Other two‐click patterns are discarded (or can be designed to map onto diagonal swaps for more routing options).  
+
+  • Directionality control  
+    – By tuning the beam‐splitter ratios and internal phases of the chiral coupler (Pytheus will find the optimal non‐symmetric 4×4), you set the relative success probabilities P_NS vs. P_EW—implementing an anisotropic, directed percolation node.  
+
+Why this is novel & exciting:  
+  1) Moves into the new domain of entanglement‐percolation networks: each node both purifies and reconfigures links on demand.  
+  2) Truly hybridized modes (4‐mode mixing) + chiral light (non‐reciprocal 4×4 unitary) engineered to break swap‐symmetry.  
+  3) No dynamic feedback or cavities—pure linear optics, SPDC + heralding.  
+  4) Generalizes to larger degree nodes (hexagonal, three-outcome routers) and to full percolation‐phase studies with tunable anisotropy.  
+
+Suggested Pytheus config (horizontal run example):  
+{  
+  "description":      "Chiral percolation node: conditional NS vs. EW entanglement swap",  
+  "foldername":       "chiral_percolation_NS",  
+  "edges_tried":      50,  
+  "ftol":             1e-06,  
+  "loss_func":        "cr",  
+  "num_anc":          0,  
+  "num_pre":          4,                        # four SPDC sources  
+  "optimizer":        "L-BFGS-B",  
+  "samples":          20,  
+  "in_nodes":         [],                       # B_N,B_E,B_S,B_W feed directly  
+  "out_nodes":        [0,2],                    # A_N (node 0) & A_S (node 2) are entangled when {H0,H2} clicks  
+  "anc_detectors":    [4,5,6,7],                # H0–H3  
+  "heralding_out":    [[4,6]],                  # H0&H2 herald NS swap  
+  "thresholds":       [0.2,0.1],  
+  "number_resolving": true  
+}  
+
+Expert prescription:  
+ • Run this once to realize the North–South swap (herald H0,H2).  
+ • Repeat with heralding_out=[[5,7]] for the East–West swap.  
+ • Compare success rates P_NS and P_EW as you tune the coupler’s internal parameters.  
+ • Tile these nodes in a 2D lattice to study directed quantum‐percolation thresholds and anisotropic entanglement‐distribution strategies.  
+
+This “Chiral Entanglement-Percolation Node” is a genuinely new network primitive—not just a swap or router but a passive, tunable building block for percolation‐based long‐distance entanglement architectures.
+
+ConversationEnd: researcher_calls=20
+

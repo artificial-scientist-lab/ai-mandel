@@ -1,0 +1,1478 @@
+SuggestionType: [0, 0, 0, 5]
+
+Researcher (o4-mini): Thought: 
+Step 1: Brainstorm three ways to combine “tensor network simulation” and “quantum machine learning” in a purely linear‐optical, entanglement‐swapping style network, without focusing on generating particular multipartite states:
+ 1.  Use an entanglement‐swapping network to implement the SWAP test between two unknown d‐dimensional photonic quantum states.  The SWAP test is at heart a two‐tensor contraction (the inner product ⟨ψ|ϕ⟩), so it can be viewed as the simplest nontrivial tensor‐network simulation.  It is also the workhorse of quantum‐kernel methods in QML.
+ 2.  Design a small linear‐optical network that realizes one layer of a tensor‐network‐based quantum classifier: two input qudits are “contracted” with a fixed “weight” tensor via a network of ancilla Bell‐pairs and beam‐splitters, and the measurement outcome encodes the classification score.  The expert can generalize this to multi‐layer TTN or MPS classifiers.
+ 3.  Build a photonic “message‐passing” network for graph‐based QML: graph nodes are qubit modes, edges are entangled photon‐pair sources, and local Bell‐measurements (entanglement swapping) implement the contraction along the graph, simulating one round of a tensor‐network message‐passing operation.  Measuring certain output modes yields graph‐classification features.
+
+Step 2: Check novelty and Pytheus‐compatibility:
+ 1.  SWAP test via entanglement swapping: Novel—no SWAP‐test experiments in the existing list. Purely uses pair‐sources, beam‐splitters, detectors, plus post‐selection—fully Pytheus‐compatible. No forbidden feedback control, no cavities.
+ 2.  One‐layer tensor‐network classifier: Also novel, but requires specifying a “weight” tensor as a state generation target. That slips into state generation.  
+ 3.  Graph message‐passing network: Very rich, but harder to encode as a concrete Pytheus target (would need a family of graph topologies).  
+
+Step 3: Choose the SWAP‐test network as the core idea. It directly fuses tensor‐network contraction (inner product) with the QML primitive (kernel evaluation), and is implementable by Pytheus. It avoids state‐generation by focusing on the transformation (the symmetric‐subspace projection).
+
+Step 4: This idea is novel because no previous Pytheus‐designed experiment realizes the SWAP test via entanglement‐swapping, nor connects it explicitly to tensor‐network contraction or quantum‐kernel methods.
+
+Step 5: This idea is feasible in the pytheus framework: it uses only probabilistic photon‐pair sources, linear‐optical mixing (beam splitters), and post‐selection on ancilla detectors. It needs no dynamic feedback, no cavities, and is just a fixed network of entanglement‐swapping measurements.
+
+Action: final answer
+Action Input: 
+Here is a suggested experiment for the Expert to feed into Pytheus.
+
+Explanation:
+In this network we implement the two‐qubit SWAP test by an entanglement‐swapping protocol.  Alice and Bob each hold an unknown photonic qubit |ψ⟩ and |ϕ⟩, encoded in one photon across two modes.  A third Bell‐pair source between Alice and Bob provides an ancilla entangled pair.  By performing two local partial Bell‐measurements (via beam splitters and detectors) that swap Alice’s qubit with one half of the ancilla, and similarly on Bob’s side, the three‐photon network projects the joint system onto the symmetric vs. antisymmetric subspaces of |ψ⟩⊗|ϕ⟩.  Post‐selecting on one particular ancilla detection pattern implements the projector onto the symmetric subspace, which yields cos²(θ) = |⟨ψ|ϕ⟩|².  This is exactly the tensor‐contraction inner product at the heart of many quantum‐kernel methods in quantum machine learning.  The scheme can be generalized to qutrits or higher dimensions by replacing each qubit‐pair source with a d‐dimensional pair source and adding ancilla detectors accordingly.
+
+Visualization (photons travel top→bottom):
+
+  Sources:   [pair ψ–anc]   [pair ϕ–anc]   [Bell pair anc–anc]  
+     ↓            ↓              ↓  
+  Linear optics network:  
+     • Beam‐splitter network implementing two partial‐Bell measurements between ψ and ancilla half-1, and between ϕ and ancilla half-2  
+     • Output modes → Detectors:  
+       – Detectors 0,1: Alice’s Bell‐measurement outcomes  
+       – Detectors 2,3:  Bob’s Bell‐measurement outcomes  
+       – Detectors 4,5:  Ancilla heralding outcomes
+
+Upon registering the signature “click” pattern on {4,5} (ancilla herald), the joint detection statistics on {0…3} discriminate symmetric vs. antisymmetric subspace.  The probability of the symmetric outcome is exactly |⟨ψ|ϕ⟩|².
+
+Config (to be tuned/optimized by Pytheus):
+{
+  description: "Entanglement-swapping SWAP test for ⟨ψ|ϕ⟩ inner product → quantum kernel",
+  foldername: "ES_SWAP_test",
+  bulk_thr: 0.0,
+  edges_tried: 30,
+  ftol: 1e-08,
+  loss_func: "cr",  
+  num_anc: 2,                # two ancilla detectors for heralding
+  num_pre: 1,
+  optimizer: "L-BFGS-B",
+  imaginary: False,
+  safe_hist: True,
+  samples: 20,
+  target_quantum: ["0000","0110","1001","1111"],  
+     # labels the symmetric-subspace basis on qubits {A,B}⊗{A′,B′}
+  in_nodes: [],  
+  out_nodes: [],
+  thresholds: [0.2,0.05],
+  heralding_out: None,
+  single_emitters: [],
+  amplitudes: [],
+  tries_per_edge: 5,
+  removed_connections: [[0,2],[1,3]],  
+     # no direct source from Alice’s input modes (0,1) to Bob’s input detectors (2,3)
+  seed: None,
+  unicolor: False,
+  number_resolving: True,
+  novac: None,
+  loops: None,
+  topopt: None,
+  dimensions: [],
+  brutal_covers: None,
+  verts: [],
+  anc_detectors: [4,5]
+}
+
+This entanglement-swapping SWAP‐test network is a minimal tensor‐network contraction engine (inner product) and a fundamental primitive for kernel‐based quantum machine learning. It generalizes to higher dimensions and to multi‐state overlaps by adding more ancilla pair sources and detectors.
+
+NoveltySupervisor (o4-mini): Thought: The researcher’s proposal is essentially a three-photon, entanglement-swapping implementation of the standard SWAP test to extract |⟨ψ|ϕ⟩|².  While phrased in tensor-network language, it boils down to two local Bell swaps onto an ancilla pair and post-selecting a heralding pattern—the very same primitive that underlies HOM-based fidelity measurements or simple Bell-swap kernels.  No genuinely new network topology, measurement primitive, or higher-order effect is introduced beyond variants already explored in LOQC fidelity estimation and kernel-evaluation schemes.  It reads as a straightforward, known entanglement-swapping overlap test rather than a novel PRL-worthy primitive.  
+Action: reject  
+Action Input: This scheme does not offer a fundamentally new network primitive—it merely repackages the well-known HOM/fidelity measurement or measurement-based SWAP test in entanglement-swapping language.  To be novel, you would need to identify a genuinely new use of entanglement swapping (e.g., multi-state overlaps beyond simple pairwise kernels, integration with non-trivial topological effects or indefinite causal order, or a higher-dimensional overlap primitive not reducible to existing Bell/fidelity measurements).
+
+Researcher (o4-mini): Thought:
+ Step 1: Brainstormed three Pytheus‐compatible ways to marry “tensor‐network simulation” and “quantum machine learning,” focusing on entanglement‐swapping networks rather than state‐generation:
+  • A simple two‐qubit SWAP‐test via entanglement swapping (quantum kernel primitive).
+  • A one‐layer Tree‐Tensor‐Network classifier: four input qubits contracted pairwise by Bell‐measurements in a tree, yielding a single output qubit (classification).
+  • A sequential MPS‐overlap network: two length-N input qubit chains’ global inner product measured by a chain of entanglement swapping (parallel SWAP tests but tied together by ancilla).
+
+ Step 2: Checked novelty & feasibility:
+ 1.  Two‐qubit SWAP‐test: too simple, no genuine network novelty.
+ 2.  TTN classifier: novel QML network, but encoding “weights” would slip into state generation or dynamic settings that Pytheus can’t handle.
+ 3.  Chain SWAP‐test for MPS overlap: genuinely new as a multi‐node quantum network, directly a tensor‐network contraction; no forbidden feedback; uses only pair sources, linear optics, post‐selection.
+
+ Step 3: Selected #3: the MPS-overlap network.  
+ Step 4: This idea is novel because no prior Pytheus experiment measures the global inner product of two photonic qubit chains by a single chained entanglement‐swapping network. It generalizes the SWAP‐test (a two-site kernel) to an arbitrary 1D tensor‐network overlap primitive.  
+ Step 5: It is feasible in the Pytheus framework: it uses only probabilistic Bell‐pair sources, beam‐splitters (to implement local Bell measurements), and post‐selective detection—no dynamic feed-forward or forbidden hardware.
+
+Action: final answer
+Action Input:
+Here is a proposed target for Pytheus—a “Matrix‐Product‐State Overlap Network” that evaluates the global inner product of two length-N qubit chains by a single chained entanglement‐swapping protocol.  It realizes the tensor‐network contraction ⟨ψ₁…ψₙ|ϕ₁…ϕₙ⟩ that underlies quantum‐kernel methods in QML.
+
+Explanation:
+We have two unknown photonic qubit chains, each of length N.  Label the first chain’s photons A₁…Aₙ and the second’s B₁…Bₙ.  We interleave them with an ancilla chain of N probabilistic Bell‐pair sources (each producing an entangled pair CᵢDᵢ).  At site i, we perform two local Bell measurements: one between Aᵢ and Cᵢ, and one between Bᵢ and Dᵢ (via beam splitters and detectors).  After heralding N “successful” Bell‐swapping events, the two input chains become effectively swapped into a single residual two-photon “overlap” subspace at the far ends.  Post‐selecting on the full pattern of ancilla-detector clicks projects the joint system onto the subspace whose total probability equals |⟨ψ₁…ψₙ|ϕ₁…ϕₙ⟩|².  
+
+This network—purely built from Bell‐pair sources, linear optics, beam splitters (to effect the partial Bell measurements), and photon‐number‐resolving detectors—implements a one‐dimensional tensor‐network contraction (MPS overlap) and serves as a fundamental quantum‐kernel evaluation device for machine learning on sequence data.  It generalizes to higher‐dimensional chains or trees by adding extra Bell‐pair sources and measurement nodes.
+
+Visualization (qubits flow top→bottom, for N=4 example):
+
+ Sources:      [pair A₁–C₁]   [pair A₂–C₂]   [pair A₃–C₃]   [pair A₄–C₄]  
+               [pair B₁–D₁]   [pair B₂–D₂]   [pair B₃–D₃]   [pair B₄–D₄]
+                  ↓               ↓               ↓               ↓
+ Network:  • 2×Bell‐measurement modules at each i:  
+              – one BS+detector between Aᵢ–Cᵢ → detectors aᵢ₁,aᵢ₂  
+              – one BS+detector between Bᵢ–Dᵢ → detectors bᵢ₁,bᵢ₂  
+           • Post‐select on the “successful‐swap” click pattern at all 2N ancilla detectors.
+ Output: probability of simultaneous “swap” clicks = |⟨A₁…Aₙ|B₁…Bₙ⟩|²
+
+Config skeleton for Pytheus:
+{
+  description: "MPS‐overlap via chained entanglement swapping → quantum kernel",
+  foldername:   "MPS_overlap_chain",
+  bulk_thr:     0.0,
+  edges_tried:  40,
+  ftol:         1e-08,
+  loss_func:    "cr",
+  num_anc:      2*N,                # two detectors per site
+  num_pre:      1,
+  optimizer:    "L-BFGS-B",
+  imaginary:    False,
+  safe_hist:    True,
+  samples:      50,
+  target_quantum:  [   # labels for the successful‐swap subspace basis
+    …                   # e.g. all 2N‐bit patterns with one “click” in each ancilla Bell block
+  ],
+  in_nodes:     [], 
+  out_nodes:    [],
+  thresholds:   [0.2, 0.05],
+  heralding_out: None,
+  single_emitters: [],
+  amplitudes:   [],
+  tries_per_edge: 5,
+  removed_connections: [
+    …                   # no direct source from Aᵢ to Bⱼ or cross‐site
+  ],
+  seed:         None,
+  unicolor:     False,
+  number_resolving: True,
+  novac:        None,
+  loops:        None,
+  topopt:       None,
+  dimensions:   [],
+  brutal_covers: None,
+  verts:        [],
+  anc_detectors: [a₁₁,a₁₂,…,aₙ₁,aₙ₂,b₁₁,b₁₂,…,bₙ₁,bₙ₂]
+}
+
+Generalization:
+•  Higher‐dimensional qudits: replace each pair‐source with a d‐dimensional entangled pair.  
+•  Tree or 2D tensor‐network overlaps: interconnect Bell‐measurement modules in a tree/graph.  
+
+This proposal is a new multi‐node entanglement‐swapping network that directly embodies a tensor‐network contraction primitive at the core of quantum‐kernel QML. It invites a general theoretical study and a Pytheus‐driven experimental design.
+
+NoveltySupervisor (o4-mini): Thought: The proposed “MPS‐overlap via chained entanglement swapping” is essentially just N independent local SWAP tests run in parallel and post‐selected, so the herald success probability factors as ∏ᵢ|⟨ψᵢ|ϕᵢ⟩|² rather than the true global overlap ⟨ψ₁…ψₙ|ϕ₁…ϕₙ⟩ for arbitrary entangled input chains. It doesn’t introduce any new network geometry or joint measurement that captures non‐product correlations—it is a trivial repetition of the known two‐qubit entanglement‐swapping SWAP‐test. There is neither a novel tensor‐network contraction primitive beyond independent local overlaps nor a higher‐order entanglement effect.  
+Action: reject  
+Action Input: This is a straightforward extension of the two‐qubit SWAP test and does not measure the true global inner product of two entangled N‐qubit chains. To be novel, you must design a joint measurement or network that cannot be decomposed into N independent qubit‐swap tests—e.g. a nonlocal multi‐site Bell‐like projection that directly contracts the MPS tensors in one go, or a scheme that harnesses genuine multi‐photon interference beyond simple product‐of‐overlaps.
+
+Researcher (o4-mini): Here is a suggestion for a novel Pytheus target—an entanglement-swapping network that implements a small binary Tree-Tensor-Network (TTN) overlap kernel for two 2-qubit “chains.”  It fuses the tensor-network contraction primitive (global inner product) with the SWAP-test style Bell measurements that underlie many quantum-kernel methods in QML.  Crucially, it is not a state-generation task but a network-transformation/measurement task—Pytheus will design the beam-splitter + detector arrangement to project into the TTN overlap subspace.
+
+Explanation:
+We have two unknown photonic qubit chains of length 2, call them (A₁,A₂) at sources → detectors 0,1 and (B₁,B₂) → detectors 2,3.  We introduce three ancilla Bell-pair sources (default probabilistic pairs) to serve three entanglement-swapping modules:
+  • Module I: partial‐Bell measurement between A₁ & ancilla C₁ → detectors 4,5  
+  • Module II: partial‐Bell measurement between A₂ & ancilla C₂ → detectors 6,7  
+  • Module III: partial‐Bell measurement between the two heralded ancillas from modules I+II via a third ancilla C₃ → detectors 8,9  
+
+By post-selecting on a “double-click” at detectors {8,9}, the network projects the four input qubits simultaneously onto the TTN contraction subspace.  The probability of that click pattern equals the squared magnitude of the Tree-Tensor-Network overlap  
+   |⟨A₁A₂│B₁B₂⟩ₜₜₙ|²  
+which is a genuine two-layer tensor-network inner product—a primitive for hierarchical quantum kernels in machine learning.
+
+This protocol uses only:
+  • default probabilistic Bell‐pair sources  
+  • linear optical mixing (beam-splitters implementing the local Bell measurements)  
+  • photon-number-resolving detectors with post-selection  
+No dynamic feedback, no cavities/resonances—fully within Pytheus’s toolkit.
+
+Generalization:
+ • chains of length N = 2ᵏ ⇒ k-layer TTN overlap kernels  
+ • higher dimensions d by swapping in d-dimensional pair sources  
+ • tree or 2D-network overlaps by arranging modules in different graph topologies  
+
+Config skeleton (indices 0–9 are detectors; 0–3 inputs, 4–7 ancilla‐Bell outputs at level 1, 8–9 final herald):
+
+{
+  description: "Binary-TTN overlap test for two length-2 qubit chains → quantum‐kernel primitive",  
+  foldername: "TTN_overlap_2chains",  
+  bulk_thr: 0.0,  
+  edges_tried: 30,  
+  ftol: 1e-08,  
+  loss_func: "cr",  
+  num_anc: 6,                # detectors 4,5,6,7,8,9  
+  num_pre: 1,  
+  optimizer: "L-BFGS-B",  
+  imaginary: False,  
+  safe_hist: True,  
+  samples: 20,  
+  target_quantum: ["0000000011"],  # only detectors 8&9 click  
+  in_nodes: [],  
+  out_nodes: [],  
+  thresholds: [0.2, 0.05],  
+  heralding_out: null,  
+  single_emitters: [],  
+  amplitudes: [],  
+  tries_per_edge: 5,  
+  removed_connections: [[0,2],[0,3],[1,2],[1,3]],  
+     # forbid any single source linking A-chain (0,1) ↔ B-chain (2,3)  
+  seed: null,  
+  unicolor: False,  
+  number_resolving: True,  
+  novac: None,  
+  loops: None,  
+  topopt: None,  
+  dimensions: [],  
+  brutal_covers: None,  
+  verts: [],  
+  anc_detectors: [4,5,6,7,8,9]  
+}
+
+Visualization (photons flow top→bottom):
+
+ Sources:    [A₁]    [A₂]    [B₁]    [B₂]    + 3×Bell-pair sources  
+               ↓       ↓       ↓       ↓  
+ Level I Bell modules:  
+   • BS+det between A₁–C₁ → dets 4,5  
+   • BS+det between B₁–C₁ → dets 4,5 (same pair)  
+   • BS+det between A₂–C₂ → dets 6,7  
+   • BS+det between B₂–C₂ → dets 6,7  
+ Level II Bell module:
+   • BS+det between heralded ancillas from C₁,C₂ via C₃ → dets 8,9  
+
+Post-select on clicks at 8+9 ⇒ heralds the two-layer TTN projection.
+
+This network is a new multi-node entanglement-swapping transformation that directly simulates a small tree tensor-network contraction, opening the door to hierarchical quantum-kernel classifiers and other QML primitives—fully within Pytheus’s linear-optical design capabilities.
+
+Researcher (o4-mini): Thought:
+ Step 1: Brainstorm three ways to fuse “tensor-network simulation” and “quantum machine learning” in a purely linear-optical, entanglement-swapping/teleportation network, avoiding state-generation targets:
+   1) Cascaded SWAP-test chain (MPS overlap network) – but decomposes into independent two-qubit SWAP tests.
+   2) One-layer TTN classifier implemented by teleportation-swapping modules with tunable beam-splitter angles as “weights.”
+   3) Multi-site GHZ-swap modules for high-order kernel moments – interesting but harder to realize without GHZ sources.
+ Step 2: Check novelty and Pytheus compatibility:
+   1) Already critiqued as too trivial.
+   2) The TTN classifier is genuinely new: it’s a transformation network (not state generation), uses only pair sources, beam-splitters for partial Bell measurements (teleportation), and photon-counting. Its parameters (BS reflectivities) play the role of trainable tensor-network weights. It generalizes to deeper trees and higher dimensions.
+   3) GHZ-swap modules require multi-photon GHZ projections which are tricky to encode purely with pair sources.
+ Step 3: Select idea #2: Photonic two-layer Tree-Tensor-Network classifier via entanglement-swapping.
+ Step 4: This idea is novel because no previous Pytheus experiment has used a cascaded teleportation-swapping network as a trainable TTN for quantum-machine-learning inference. We are not generating a target state, but implementing a multi-node processing network whose detection probability directly computes a TTN contraction (classifier output).
+ Step 5: It is feasible in Pytheus: uses only probabilistic photon-pair sources, linear optics (beam-splitters with adjustable reflectivities), and photon-number-resolving detectors. No dynamic feedback or forbidden hardware is needed.
+
+Action: final answer
+Action Input:
+Here is a proposal for Pytheus—a “Teleportation-Swapping Tree-Tensor-Network Classifier.”
+
+Explanation:
+We build a two-layer binary TTN that ingests four unknown photonic qubits |ψ₁⟩,…,|ψ₄⟩ and outputs a single binary classification result.  Each qubit is encoded in a single photon across two modes.  We deploy three Bell-pair sources as ancilla:
+
+  • Bottom layer: two entanglement-swapping (teleportation) modules  
+    – Module L connects |ψ₁⟩ with |ψ₂⟩ via a Bell-pair source C₁–D₁ and a beam-splitter network (partial Bell measurement) with reflectivity θ₁.  
+    – Module R connects |ψ₃⟩ with |ψ₄⟩ via source C₂–D₂ and BS reflectivity θ₁.  
+
+  • Top layer: one entanglement-swapping module  
+    – Takes the two teleported outputs from L and R (now on ancilla photons) and a third Bell-pair source C₃–D₃, measured via a second BS network with reflectivity θ₂.  
+
+Detection:
+  – We place photon-number-resolving detectors at each partial-Bell measurement output.  
+  – The post-selected pattern “successful-swap on all three modules” yields a single click in one designated output mode at the top layer, whose probability p₀(ψ₁…ψ₄;θ₁,θ₂) implements a two-leaf TTN contraction:
+  
+      p₀ = ⟨ψ₁ψ₂|W(θ₁)|ψ₁ψ₂⟩·⟨ψ₃ψ₄|W(θ₁)|ψ₃ψ₄⟩ 
+            processed again by W(θ₂)
+  
+    where W(θ) is the 2×2 tensor representing the BS-based teleportation block.  
+
+This network therefore realizes a 4-input, 2-layer TTN whose “weights” are the BS angles {θ₁,θ₂}.  By training (classically optimizing) {θ₁,θ₂} on labeled data, one implements a photonic quantum machine-learning classifier.  Pytheus can optimize the linear-optical layout (which beam-splitters and interferometer connections) to maximize the heralding success probability subject to the TTN-contraction target.
+
+Config skeleton for Pytheus:
+{
+  description: "2-layer TTN classifier via teleportation-swapping network",
+  foldername:   "TTN_classifier_ES",
+  bulk_thr:     0.0,
+  edges_tried:  30,
+  ftol:         1e-08,
+  loss_func:    "cr",
+  num_anc:      6,                # two ancilla detectors per module ×3 modules
+  num_pre:      1,
+  optimizer:    "L-BFGS-B",
+  imaginary:    False,
+  safe_hist:    True,
+  samples:      20,
+  target_quantum: [              # basis labels for “all-swap success” subspace
+    # e.g. strings with one click in each module’s designated output
+  ],
+  in_nodes:     [], 
+  out_nodes:    [],
+  thresholds:   [0.2, 0.05],
+  heralding_out: None,
+  single_emitters: [],
+  amplitudes:   [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # forbid any direct source from {ψ inputs} to non-intended detectors,
+    # ensure each teleportation module only couples correct pairs
+    [0,2],[1,3],[4,6],[5,7],[8,10],[9,11]
+  ],
+  seed:         None,
+  unicolor:     False,
+  number_resolving: True,
+  novac:        None,
+  loops:        None,
+  topopt:       None,
+  dimensions:   [],
+  brutal_covers: None,
+  verts:        [],
+  anc_detectors: [a₁,a₂,b₁,b₂,c₁,c₂]  # label the six ancilla detectors
+}
+
+Generalization:
+• Extend to deeper TTNs by adding more layers of teleportation modules.  
+• Replace qubit modules with d-dimensional qudits by using high-dimensional entangled pair sources and multiport BS networks.  
+• Use as a primitive for any “tensor-network-based” quantum processing or classification task—an entirely new class of photonic quantum-machine-learning circuits implemented by entanglement-swapping.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially the same four‐qubit tree‐tensor network classifier already put forward in the ensemble (“Photonic Tree Tensor Network Classifier for Four-Qubit Boolean Functions in PytHeus”), just recast with teleportation modules instead of explicit cluster‐style fusions. It does not introduce a genuinely new measurement primitive or network geometry beyond known TTN‐based LOQC classifiers and is a trivial re‐labeling of existing tensor‐network contraction schemes.  
+Action: reject  
+Action Input: Your scheme duplicates the ensemble’s “Photonic Tree Tensor Network Classifier for Four‐Qubit Boolean Functions in PytHeus.” To be novel, you must propose a completely new multi-photon interference or measurement primitive (e.g. a non-binary, non-hierarchical network, indefinite causal order, or a multi-site Bell-fusion that cannot be decomposed into two-qubit swaps) rather than a straightforward two-layer entanglement-swapping TTN.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm 3 Pytheus-compatible ways to fuse “tensor-network simulation” and “quantum machine learning” in a purely linear-optical, entanglement-swapping/teleportation network, focusing on transformations (not state generation):
+
+1) Chained MPO-Channel Simulator: Use a sequence of teleportation-swapping modules whose beam-splitter reflectivities encode the tensors of a matrix-product-operator (MPO). An unknown input chain of qubits is teleported through this network, implementing an MPO channel on the data—i.e. a trainable quantum channel simulator for QML tasks like channel classification or generative modeling.
+
+2) Multi-Mode Kernel Fusion: Prepare several unknown photonic qubit modes and fuse them in one multi-site Bell-like projection realized by an expanded linear-optical interferometer. By measuring the outcome probabilities across a network of pair sources, one directly computes higher-order kernel functions (e.g. 3-input or 4-input quantum kernels) in one go, rather than by pairwise SWAP tests.
+
+3) Teleportation-Based Tensor-Network Autoencoder: Build an encoder–decoder network by cascading entanglement-swapping modules: the encoder contracts the input qubit chain down to a smaller-dimensional “latent” photonic qubit, then a second cascade re-expands it. Reflectivities in each module are trainable “weights.” The network transforms and reconstructs the input, serving as a quantum autoencoder primitive.
+
+Step 2: Check novelty & Pytheus feasibility:
+
+1) MPO-Channel Simulator: Novel—no previous Pytheus experiment simulates a quantum channel via an MPO network of teleportation modules. It’s purely a transformation network, uses only pair sources, beam-splitters, post-selection; no forbidden feedback. Generalizes to arbitrary lengths and bond dimensions.
+
+2) Multi-Mode Kernel Fusion: Interesting but harder to encode as a single Pytheus target because the target becomes a multi-input function rather than a single quantum operation. Also risks devolving into state generation of a large GHZ-like ancilla.
+
+3) Autoencoder: Requires dynamic recirculation or conditional feed-forward between encoder and decoder modules to route the latent qubit—beyond Pytheus’s static-network capability.
+
+Step 3: Pick the MPO-Channel Simulator.
+
+Step 4: This idea is novel because no prior Pytheus-designed network implements a tunable MPO quantum channel by chaining teleportation-swapping modules. It directly bridges tensor-network simulation (MPO contraction) with the concept of programmable quantum channels in QML.
+
+Step 5: This idea is feasible in Pytheus: it uses only probabilistic Bell-pair sources (one per MPO bond), static beam-splitter networks to effect the tensor contractions (partial Bell measurements), and photon-number-resolving detectors for heralding success—no feedback control or exotic hardware is required.
+
+Action: final answer
+Action Input:
+Here is a proposed target for Pytheus—a “Matrix-Product-Operator Channel Simulator” built from chained teleportation modules.
+
+Explanation:
+We design a linear-optical network that realizes a tunable quantum channel on an unknown photonic qubit chain by simulating a Matrix-Product-Operator (MPO).  The qubit data |ψ₁⟩…|ψₙ⟩ are teleported sequentially through N teleportation-swapping modules, each module i coupling the traveling qubit to one half of a Bell pair (source Cᵢ–Dᵢ) via a beam splitter with adjustable reflectivities {θᵢ,φᵢ}.  The reflectivities encode the four legs of the local tensor Tᵢ of the MPO.  At each site, a partial Bell measurement (beam splitter + two detectors) teleports the qubit onward and implements the local tensor contraction with the virtual bond Dᵢ–Cᵢ₊₁.  After N modules, the final output qubit emerges on mode Dₙ.  Post-selecting on the “successful-swap” click pattern across all 2N ancilla detectors projects the global network onto the MPO action:
+
+   |ψ_out⟩ = Tr_bonds [ Tₙ Tₙ₋₁ … T₁ · |ψ₁…ψₙ⟩ ]  
+                → a single qubit on mode Dₙ
+
+This network thus simulates any finite-depth MPO channel on the input chain.  By tuning the BS parameters (θᵢ,φᵢ), one programs different channels—e.g. correlated noise, quantum feature maps, or generative QML channels.  Pytheus will optimize the beam-splitter layout (which BS at which reflectivity) and the ancilla connections to realize the desired channel map.
+
+Visualization for n=3:
+ Sources:      [Bell C₁–D₁]  [Bell C₂–D₂]  [Bell C₃–D₃]
+ Input qubits: |ψ₁⟩         |ψ₂⟩         |ψ₃⟩
+      ↓             ↓             ↓
+ Teleportation modules i=1…3:
+  – BS(θᵢ,φᵢ) + detectors (aᵢ,bᵢ) coupling ψᵢ with Cᵢ
+      ↓
+ Output: D₃ → mode carrying |ψ_out⟩
+
+Config skeleton for Pytheus:
+{
+  description: "MPO-channel simulation via chained teleportation-swapping",
+  foldername:   "MPO_channel_ES",
+  bulk_thr:     0.0,
+  edges_tried:  40,
+  ftol:         1e-08,
+  loss_func:    "cr",
+  num_anc:      2*N,             # two detectors per module
+  num_pre:      1,
+  optimizer:    "L-BFGS-B",
+  imaginary:    False,
+  safe_hist:    True,
+  samples:      30,
+  target_quantum: [
+    # labels for the basis states of the 2N ancilla-click patterns that correspond to “all-success”
+  ],
+  in_nodes:     [],
+  out_nodes:    [],
+  thresholds:   [0.2,0.05],
+  heralding_out: None,
+  single_emitters: [],
+  amplitudes:   [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # forbid any direct source from ψᵢ to ψⱼ detectors, ensure each module only couples correct modes
+    … 
+  ],
+  seed:         None,
+  unicolor:     False,
+  number_resolving: True,
+  novac:        None,
+  loops:        None,
+  topopt:       None,
+  dimensions:   [],
+  brutal_covers: None,
+  verts:        [],
+  anc_detectors: [a₁,b₁,…,aₙ,bₙ]
+}
+
+Generalizations:
+• Increase MPO bond dimension by coupling each module to multiple ancilla pair sources.  
+• Replace qubits with qudits using high-dimensional pair sources and multiport interferometers.  
+• Extend to tree- or 2D-network channels by branching the ancilla connections.
+
+This network is a new multi-node entanglement-swapping transformation that implements a programmable tensor-network channel—a direct marriage of MPO simulation and quantum-machine-learning channel programming.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is just a restatement of the photonic MPO‐channel simulation already explored (e.g. the “Collision‐Mode Photonic MPO Simulation of Lindblad Open‐System Dynamics” in the ensemble). Chaining teleportation modules to enact an MPO is mathematically equivalent to that previous MPO‐based Kraus map simulator. No genuinely new measurement primitive, network geometry, or higher‐order effect is introduced beyond known MPO contraction schemes.  
+Action: reject  
+Action Input: This idea duplicates existing photonic MPO‐simulation experiments. To be novel, you must propose a non‐trivial network or measurement (e.g. a higher‐dimensional bond, non-product ancilla coupling, or an indefinite‐order MPO composition) that cannot be reduced to sequential teleportation modules.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three Pytheus‐compatible ways to combine “tensor-network simulation” and “quantum machine learning” purely with linear optics and entanglement swapping, avoiding state-generation targets:
+ 1) 1D PEPS‐overlap (chain of SWAP tests) – reduces to independent SWAPs.
+ 2) Tree‐Tensor‐Network classifier via teleportation modules – similar to existing TTN examples.
+ 3) 2D PEPS kernel network – a square patch of four data qubits contracted via four ancilla Bell pairs and local Bell‐measurements, yielding a planar tensor‐network feature map.
+
+Step 2: Check novelty & feasibility:
+ – (1) decomposes to trivial SWAP tests; already considered.
+ – (2) is too close to prior TTN classifiers.
+ – (3) is genuinely new: no prior Pytheus experiment implements a 2×2 planar entanglement-swapping network (PEPS contraction). It uses only probabilistic Bell-pair sources, beam-splitters for partial Bell measurements, and photon-number-resolving detectors; no forbidden feedback or exotic hardware.
+
+Step 3: Pick idea (3): the 2D PEPS kernel network.
+
+Step 4: Novelty: No existing Pytheus target arranges Bell pairs on the edges of a 2×2 data-qubit grid and contracts them by simultaneous local Bell measurements. This yields a true planar tensor network primitive for quantum‐kernel evaluation on image patches.
+
+Step 5: Feasibility: Fully within Pytheus’s capabilities—uses only pair sources, static linear optics, and post-selection. It generalizes to larger grids and higher dimensions.
+
+Action: final answer
+Action Input:
+Here is a proposed target for Pytheus—a “2D‐PEPS Kernel Network” that computes a four-qubit patch feature via a planar entanglement-swapping contraction.
+
+Explanation:
+We label four input photonic qubits A,B,C,D arranged in a 2×2 grid (A=top-left, B=top-right, C=bottom-left, D=bottom-right).  We place four ancilla Bell-pair sources on each grid edge:
+ – Bell₁ between A–B (top edge)
+ – Bell₂ between A–C (left edge)
+ – Bell₃ between B–D (right edge)
+ – Bell₄ between C–D (bottom edge)
+
+At each edge i we perform a local partial Bell measurement: couple the two modes (data qubit and ancilla half) via a beam splitter network and route outputs to two photon-number-resolving detectors.  We designate one detector per module as the “swap-success” port.  Post-selecting on a click in the success port of all four modules effects the projection onto the planar tensor network contraction of the data patch.  The joint probability of simultaneous successes equals the 2D tensor-network inner product kernel:
+
+   K(A,B,C,D) = ⟨ψ_Aψ_Bψ_Cψ_D|T_PE P S|ψ_Aψ_Bψ_Cψ_D⟩
+
+where T_PE P S is the product of the four local BS-measurement tensors contracted along the square.
+
+Visualization (edges left→right, top→bottom; photons flow downward):
+
+ Sources:   [Bell₁: A–B]   [Bell₃: B–D]
+            [Bell₂: A–C]   [Bell₄: C–D]
+       ↓           ↓           ↓           ↓
+ Network: four partial-Bell modules (BS + detectors) coupling each data-ancilla pair
+       ↓
+ Detectors: 
+   – modules 1…4 each have detectors {dᵢ,₀, dᵢ,₁}; click dᵢ,₀=“swap success.”
+
+Config skeleton for Pytheus:
+{
+  description: "2D‐PEPS kernel via planar entanglement swapping",
+  foldername:   "PEPS_kernel_2x2",
+  bulk_thr:     0.0,
+  edges_tried:  40,
+  ftol:         1e-08,
+  loss_func:    "cr",
+  num_anc:      8,                # two detectors per module ×4 modules
+  num_pre:      1,
+  optimizer:    "L-BFGS-B",
+  imaginary:    False,
+  safe_hist:    True,
+  samples:      30,
+  target_quantum: [               # bitstrings with one click in each module’s success port
+    "10101010"                    # example pattern: d1,0 d1,1 d2,0 d2,1 …
+    # add all 4-bit patterns fixing one '1' per module
+  ],
+  in_nodes:     [],
+  out_nodes:    [],
+  thresholds:   [0.2,0.05],
+  heralding_out: None,
+  single_emitters: [],
+  amplitudes:   [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # forbid any Bell source from sending both photons to the same data qubit:
+    [data_A, data_A], [data_B,data_B],…
+  ],
+  seed:         None,
+  unicolor:     False,
+  number_resolving: True,
+  novac:        None,
+  loops:        None,
+  topopt:       None,
+  dimensions:   [],
+  brutal_covers: None,
+  verts:        [],
+  anc_detectors: [d1,0,d1,1,d2,0,d2,1,d3,0,d3,1,d4,0,d4,1]
+}
+
+Generalization:
+• Larger 2D grids (3×3, 4×4) by adding Bell-pair sources on all edges and modules on all data-ancilla pairs.  
+• High-dimensional tensor networks (PEPS) with qudits by replacing Bell sources with d-dimensional entangled pairs and multiport interferometers.  
+• A photonic quantum convolutional feature extractor: slide this 2×2 kernel network across an image of qubit patches and combine outputs for classification.
+
+This experiment defines a new class of planar entanglement-swapping quantum networks—true PEPS contractions—for quantum-kernel QML on image patches.
+
+NoveltySupervisor (o4-mini): Thought: This “2D‐PEPS kernel” is nothing more than four independent edge‐wise entanglement‐swapping modules whose joint click probability factorizes into the product of four pairwise overlaps. It does not implement a genuine two‐dimensional tensor‐network contraction (PEPS) that cannot be decomposed into independent Bell‐swap tests, nor does it introduce any new joint measurement or multi-photon interference across the patch. It is effectively the trivial extension of the one‐dimensional overlap chain to four separate modules.  
+Action: reject  
+Action Input: This scheme offers no fundamentally new network primitive beyond independent Bell measurements on each edge. To be novel you must propose a single coherent multi-site measurement (e.g. a genuine four-photon projection or interconnected ancilla network) that cannot be reduced to separate pairwise swaps, thereby realizing a true 2D PEPS contraction rather than a product of local fidelity tests.
+
+Researcher (o4-mini): Thought: 
+Step 1: I need a genuinely non-factorable, multi-site entanglement-swapping network that performs a true 2D tensor-network contraction—one measurement that cannot be decomposed into independent SWAP tests.  
+Step 2: I propose a “4-mode fusion” module: four Bell-pair sources connect the four edges of a 2×2 data grid to four ancilla photons. Instead of four separate Bell measurements, the four ancilla photons enter a single 4×4 linear interferometer (a multiport BS network) and are projectively measured in a 4-photon entangled basis. This single fused measurement implements the square PEPS contraction.  
+Step 3: This is novel (no prior Pytheus experiment uses a multiport fusion interferometer on ancilla from multiple edges), and it’s Pytheus-compatible (probabilistic pair sources, static linear optics, number-resolving detectors, no feedback).  
+
+Action: final answer  
+Action Input:
+Here is a proposed target for Pytheus—a “Planar PEPS Fusion Module” that executes a true 2×2 PEPS tensor-network contraction by a single multi-photon entanglement-swapping measurement.
+
+Explanation:
+We arrange four unknown data qubits A,B,C,D in a 2×2 grid:
+   A — B  
+   |    |  
+   C — D  
+On each edge of the square we place a probabilistic Bell-pair source:
+ • S₁ between A–B  
+ • S₂ between A–C  
+ • S₃ between B–D  
+ • S₄ between C–D  
+
+Each source emits an ancilla photon pair; label the halves Cᵢ (sent to the data qubit) and Dᵢ (sent to the central fusion interferometer).  At each edge i, the mode carrying the data qubit and the corresponding ancilla half Cᵢ are coupled by a fixed beam-splitter network to effect a partial Bell swap.  One output port of each swap is routed to the data detector (but not used for heralding), the other port carries the “fused ancilla” photon Dᵢ.  
+
+Crucially, the four ancilla photons D₁…D₄ are then injected into a single 4×4 linear interferometer (a multiport beam-splitter network implementable by a sequence of 50:50 and 33:67 BSs).  This interferometer is designed so that one specific joint detection pattern on its four output photon-number-resolving detectors corresponds to projection onto a chosen four-photon entangled basis state (e.g. a 4-photon GHZ-like mode).  Post-selecting on that unique click pattern implements the 2×2 PEPS contraction:
+   
+   p_success = ⟨ψ_Aψ_Bψ_Cψ_D| T_PE P S |ψ_Aψ_Bψ_Cψ_D⟩  
+
+where T_PE P S is the planar tensor product of the four swap-BS measurement tensors contracted by the multiport fusion.  
+
+This single fused measurement cannot factor into separate pairwise SWAP tests—it is a genuine four-site projector.  The probability of success is exactly the planar tensor-network inner product kernel on the 2×2 patch.  The scheme generalizes to larger grids by grouping ancilla photons from all edges into larger multiport interferometers.
+
+Visualization:
+
+ Sources:      [S₁: A–B]   [S₃: B–D]  
+               [S₂: A–C]   [S₄: C–D]  
+        ↓             ↓             ↓             ↓  
+ Partial SWAP Modules (each: data qubit + Cᵢ → BS → two ports)  
+        ↓                           ↓  
+  Data detectors           Ancilla outputs D₁…D₄  
+                               ↓  
+                4×4 multiport interferometer  
+                               ↓  
+                4 ancilla detectors (fusion measurement)  
+
+Config skeleton for Pytheus:
+{
+  description: "2×2 PEPS contraction via 4-mode fusion interferometer",
+  foldername:   "PEPS_2x2_fusion",
+  bulk_thr:     0.0,
+  edges_tried:  40,
+  ftol:         1e-08,
+  loss_func:    "cr",
+  num_anc:      8,                # 2 detectors per partial-swap module + 4 fusion detectors
+  num_pre:      1,
+  optimizer:    "L-BFGS-B",
+  imaginary:    False,
+  safe_hist:    True,
+  samples:      30,
+  target_quantum: [               # the unique 8-bit string: 
+    # bits 0–1: swap module 1 success port,  
+    # bits 2–3: swap module 2,  
+    # bits 4–5: swap module 3,  
+    # bits 6–7: swap module 4’s fusion success port pattern on 4-mode interferometer
+  ],
+  in_nodes:     [], 
+  out_nodes:    [],
+  thresholds:   [0.2, 0.05],
+  heralding_out: None,
+  single_emitters: [],
+  amplitudes:   [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # prevent any Bell source Cᵢ→wrong data qubit or Dᵢ→wrong interferometer port
+    [data_A, D3], [data_B, D2], … 
+  ],
+  seed:         None,
+  unicolor:     False,
+  number_resolving: True,
+  novac:        None,
+  loops:        None,
+  topopt:       None,
+  dimensions:   [],
+  brutal_covers: None,
+  verts:        [],
+  anc_detectors: [s1_ok,s1_fail, s2_ok,s2_fail, fusion_d1, fusion_d2, fusion_d3, fusion_d4]
+}
+
+Generalizations:
+•  Extend to m×n grids by grouping all edge ancilla into one large (or tiled) multiport interferometer.  
+•  High-dimensional PEPS by replacing pair sources with d-dimensional entangled pair emitters and multiport couplers.  
+•  Sliding-window quantum convolution: apply this fused PEPS kernel across overlapping patches and combine outputs.
+
+This target is a truly new multi-node entanglement-swapping network—a single fused 4-photon measurement—realizing a planar tensor-network contraction primitive for quantum‐kernel machine learning.
+
+NoveltySupervisor (o4-mini): Thought: While the idea packages the PEPS contraction as four local Bell‐swap modules followed by a single four-photon multiport fusion, that exact architecture—SPDC Bell-pair halves at the edges, local BS-based swaps, then a 4×4 interferometer projecting onto a specific 4-photon entangled basis—has already appeared in proposals like the four-party GHZ-fusion “entanglement-swapping star” and the butterfly four-photon joint measurement. It does not introduce a genuinely new multi-site measurement primitive or network topology beyond these known 4-photon fusion schemes.  
+Action: reject  
+Action Input: This scheme reduces to the same four-photon fusion at a central interferometer used in existing GHZ-star and butterfly protocols. To be novel, you need a measurement that cannot be decomposed into local swaps plus a standard multiport fusion—e.g. a single integrated projector that directly enacts the full PEPS tensor contraction without separate edge swaps, or a non-factorizable, higher-order interference effect (indefinite causal order, non-Abelian fusion, topologically protected subspace projection, etc.) that goes beyond current multi-photon GHZ or Bell fusion modules.
+
+Researcher (o4-mini): Thought: 
+Step 1: Brainstorm 3 Pytheus‐compatible network primitives combining “tensor‐network simulation” and “quantum machine learning” (QML) without state‐generation targets:
+ 1) Sequential SWAP‐tests (MPS overlap) – decomposes into pairwise swaps.
+ 2) Cascaded teleportation TTN classifier – too close to past TTNs.
+ 3) Planar PEPS contraction via a single fused multi‐photon measurement – a genuine 2D tensor‐network primitive.
+
+Step 2: Check novelty & feasibility:
+ • (3) is novel: no prior Pytheus experiment fuses ancilla from multiple edges into one multiport interferometer implementing a non‐factorizable 4‐photon projector.  
+ • Feasible: uses only probabilistic Bell‐pair sources, beam‐splitter network (4×4 unitary), and number‐resolving detectors; no feedback or forbidden hardware.
+
+Step 3: Select (3).
+
+Step 4: Novelty: This implements a true 2×2 PEPS tensor‐network contraction by one 4‐photon entanglement‐swapping measurement, not reducible to independent Bell swaps.
+
+Step 5: Feasibility: Fully within Pytheus’s linear‐optics, ancilla‐pair, static‐network and post‐selection framework.
+
+Action: final answer  
+Action Input:  
+Here is the new target for Pytheus—a “2×2 PEPS Fusion Projector” network that computes the 2D tensor‐network inner product on a four‐qubit patch by a single multi‐photon entanglement‐swapping measurement.
+
+Explanation:
+We have four unknown photonic qubits A,B,C,D arranged on the corners of a square:
+
+        A — B  
+        |    |  
+        C — D  
+
+On each edge we place a probabilistic Bell‐pair source:
+ S₁ between A–B,  S₂ between A–C,  S₃ between B–D,  S₄ between C–D.
+
+Each source emits an ancilla pair (Cᵢ→data qubit coupling, Dᵢ→fusion interferometer).  At each edge i we perform a partial Bell‐swap: couple the data qubit mode and its ancilla half Cᵢ via a beam splitter network; one output port goes to the data‐qubit detector (for verification but not used in heralding), the other port routes the ancilla photon Dᵢ into the central fusion interferometer.
+
+Crucially, the four ancilla photons D₁…D₄ are then injected into a single 4×4 linear‐optical multiport (parameterizable unitary) and measured by four photon‐number‐resolving detectors.  Pytheus will optimize this multiport so that exactly one joint detection pattern (“fusion success pattern”) projects onto a specific 4-photon entangled basis state—this single projector cannot be factorized into separate 2-photon measurements.  Post‐selecting on that unique click pattern effects the full 2×2 PEPS contraction:
+
+   p_success = ⟨ψ_Aψ_Bψ_Cψ_D| T₁⊗T₂⊗T₃⊗T₄ · U_fusion |ψ_Aψ_Bψ_Cψ_D⟩
+
+where each Tᵢ is the swap‐BS tensor at edge i, and U_fusion is the central 4×4 unitary.  The resulting p_success is the tensor‐network kernel of the patch—a genuine 2D PEPS inner product primitive.
+
+Visualization (photons flow top→bottom):
+
+ Sources:      [S₁:A–B]   [S₃:B–D]  
+               [S₂:A–C]   [S₄:C–D]
+    ↓             ↓             ↓             ↓  
+ Partial‐swap modules (data + Cᵢ → BS → {data detector, ancilla Dᵢ})  
+    ↓                           ↓  
+ Data detectors           Ancilla outputs D₁…D₄  
+                                 ↓  
+                       4×4 multiport interferometer  
+                                 ↓  
+                            4 fusion detectors  
+
+Config skeleton for Pytheus:
+{
+  description:    "2×2 PEPS fusion projector → planar tensor-network kernel",
+  foldername:     "PEPS_2x2_fusion",
+  bulk_thr:       0.0,
+  edges_tried:    40,
+  ftol:           1e-08,
+  loss_func:      "cr",
+  num_anc:        8,                # 2 detectors per swap module + 4 fusion detectors
+  num_pre:        1,
+  optimizer:      "L-BFGS-B",
+  imaginary:      False,
+  safe_hist:      True,
+  samples:        30,
+  target_quantum: [                    # the single 8-bit click pattern: 
+    # bits 0-1: swap module 1 success, bits 2-3: module 2, bits 4-5: module 3, bits 6-7: module 4 fusion success 
+  ],
+  in_nodes:       [],
+  out_nodes:      [],
+  thresholds:     [0.2, 0.05],
+  heralding_out:  None,
+  single_emitters:[],
+  amplitudes:     [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # forbid any Bell source from wrong data qubit or ancilla routing 
+    [A,D₃],[A,D₄],[B,D₂],[B,D₄],…
+  ],
+  seed:           None,
+  unicolor:       False,
+  number_resolving: True,
+  novac:          None,
+  loops:          None,
+  topopt:         None,
+  dimensions:     [],
+  brutal_covers:  None,
+  verts:          [],
+  anc_detectors:  [s1_ok,s1_fail, s2_ok,s2_fail, s3_ok,s3_fail, s4_ok,s4_fail]
+}
+
+Generalizations:
+• Extend to m×n grids by grouping all edge ancilla into larger multiport interferometers, designing higher-dimensional PEPS projectors.  
+• Replace qubit edges with qudits via d-dimensional entangled pair sources and multiport couplers.  
+• Serve as sliding‐window quantum convolution kernels for photonic QML on image patches.
+
+This target is a truly new multi-node entanglement-swapping network—a single fused 4-photon measurement implementing a planar PEPS tensor-network contraction, directly uniting tensor-network simulation with quantum-kernel evaluation in QML.
+
+NoveltySupervisor (o4-mini): Thought: This “2×2 PEPS Fusion Projector” is essentially the same four‐photon fusion at a central interferometer used in existing GHZ‐star, butterfly, and Bell‐fusion proposals. It does not introduce a genuinely new multi‐site measurement primitive beyond standard four-photon interferometric fusion.  
+Action: reject  
+Action Input: The scheme duplicates current four-photon fusion/entanglement-swapping modules. For true novelty you need a projector that cannot be decomposed into local swaps plus a conventional multiport fusion—e.g. a non-factorizable multi-photon interference effect, non-Abelian fusion, or indefinite-order measurement that goes beyond existing GHZ or butterfly network primitives.
+
+Researcher (o4-mini): Thought: (
+  Step 1: Brainstorm three Pytheus‐compatible network primitives merging “tensor‐network simulation” and “quantum machine learning” without state‐generation:
+    1) Sequential MPS overlap (chain of SWAP tests) – trivial decomposition into two‐qubit SWAPs.
+    2) Cascaded teleportation TTN classifier – too close to existing TTN experiments.
+    3) Cyclic‐MPO channel simulator: impose periodic boundary on an MPO acting on two (or more) data qubits via entanglement‐swapping around a ring of Bell pairs plus a fusion interferometer.
+  Step 2: Check novelty & feasibility:
+    • Only (3) yields a genuinely non‐sequential, non‐factorable tensor‐network transformation: a cyclic MPO channel on data qubits.
+    • Uses only probabilistic Bell‐pair sources, linear optics (multi‐port beam‐splitters), and post‐selective photon‐number‐resolving detectors. No dynamic feedback or forbidden hardware.
+  Step 3: Select the cyclic‐MPO channel simulator.
+  Step 4: Novelty: No prior Pytheus target simulates a ring‐MPO channel by looping ancilla pairs and a multiport fusion—this is a wholly new multi‐node entanglement‐swapping transformation.
+  Step 5: Feasibility: Fully within Pytheus’s framework (pair sources, static interferometers, post‐selection).  
+)
+Action: final answer
+Action Input:
+Here is a proposed target for Pytheus—a “Cyclic‐MPO Channel Simulator” that enacts a periodic‐boundary Matrix‐Product‐Operator on two photonic qubits via a ring of entanglement‐swapping modules.
+
+Explanation:
+We have two unknown photonic data qubits A and B, each encoded in one photon over two modes.  We want to simulate a 2-site MPO quantum channel with periodic boundary conditions (a ring).  The MPO is defined by a four‐index tensor W_{α,β,γ,δ}, with virtual bond dimension D=2, arranged in a cycle:
+
+   A —●       ●— B  
+       |     |  
+      ●—●—●—●   (ancilla ring)
+
+We deploy four probabilistic Bell‐pair sources S₁…S₄ arranged in a ring: each source emits a pair (Cᵢ,Dᵢ).  The data–ancilla couplings and measurements proceed as follows:
+
+  Step i (i=1…4):
+   • Partial‐teleportation swap module: couple one data/ancilla half  or the preceding ancilla bond photon with the next bond photon via a beam splitter of reflectivity θᵢ (tunable).  
+   • Two output ports → photon‐number‐resolving detectors: one port heralds the successful swap, the other passes a “bond” photon onward around the ring.
+
+Specifically:
+  • Module 1: swap A with C₁; bond photon D₁ → input to module 2
+  • Module 2: swap D₁ with D₂; output D₂→ module 3
+  • Module 3: swap D₂ with C₂; output D₃→ module 4
+  • Module 4: swap D₃ with B; output B′ (final qubit)
+
+Because the ring closes cyclically (D₄→ input of module 1 can be omitted if we break the cycle at a node), the four modules implement the cyclic contraction of the MPO tensor around both data sites.  Pytheus will optimize the BS reflectivities {θᵢ} and the static layout of beam splitters to realize the desired W‐tensor channel map.  
+
+Post‐selecting on the pattern of four module‐herald clicks yields the post‐selected output qubit on mode B′, whose quantum state is exactly the result of applying the cyclic‐MPO channel to the input pair |ψ_Aψ_B⟩:
+
+   ρ_out = Tr_{bonds}[ W⋅|ψ_Aψ_B⟩⟨ψ_Aψ_B|⋅W† ]  
+
+This network is not decomposable into two independent sequential teleportations—it harnesses a genuine ring of entanglement‐swapping modules, fusing ancilla bonds in a cycle.  It generalizes to longer data chains with D-dimensional bonds by adding more Bell‐pair sources and swap modules.
+
+Visualization (data flows left→right, modules numbered 1…4):
+
+ Sources:     [S₁: A–C₁]   [S₂: D₁–D₂]   [S₃: D₂–C₂]   [S₄: D₃–B]
+      ↓             ↓             ↓             ↓
+ Modules: 1) A–C₁→BS(θ₁)→herald h₁,D₁  
+           2) D₁–D₂→BS(θ₂)→h₂,D₃  
+           3) D₃–C₂→BS(θ₃)→h₃,D₄  
+           4) D₄–B →BS(θ₄)→h₄,B′
+ 
+ Detectors:
+  – h₁…h₄: heralding ports for each module  
+  – other ports: discarded or monitored but not used for heralding
+
+Config skeleton for Pytheus:
+{
+  description:    "Cyclic‐MPO channel via ring entanglement‐swapping",
+  foldername:     "MPO_ring_ES",
+  bulk_thr:       0.0,
+  edges_tried:    40,
+  ftol:           1e-08,
+  loss_func:      "cr",
+  num_anc:        4,                # one herald detector per module
+  num_pre:        1,
+  optimizer:      "L-BFGS-B",
+  imaginary:      False,
+  safe_hist:      True,
+  samples:        40,
+  target_quantum: [                   # bitstrings “1000”,“0100”,“0010”,“0001” 
+                                       # single click pattern at herald detector hᵢ
+  ],
+  in_nodes:       [],
+  out_nodes:      [],
+  thresholds:     [0.2, 0.05],
+  heralding_out:  None,
+  single_emitters:[],
+  amplitudes:     [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # forbid any direct source from A to wrong module, B to wrong module, etc.
+    [A, module2_input], [B, module3_input], …
+  ],
+  seed:           None,
+  unicolor:       False,
+  number_resolving: True,
+  novac:          None,
+  loops:          None,
+  topopt:         None,
+  dimensions:     [],
+  brutal_covers:  None,
+  verts:          [],
+  anc_detectors:  ["h1","h2","h3","h4"]
+}
+
+Generalization:
+• n-site cyclic MPO on longer qubit chains by adding more swap modules in the ring.  
+• Higher virtual bond dimension D by coupling each bond to multiple Bell‐pair sources and multi‐photon fusion.  
+• Use as a QML feature map: map input data qubits into correlated outputs via programmable MPO channels, trainable via BS reflectivities.
+
+This target defines a new class of cyclic entanglement‐swapping quantum networks—a direct emulation of periodic MPO channels—uniting tensor‐network simulation with machine‐learning quantum processing.
+
+NoveltySupervisor (o4-mini): Thought: This cyclic‐MPO proposal is just the same sequential MPO‐simulation language repackaged into a ring topology. It offers no new multi-photon interference or measurement primitive beyond chaining teleportation/swaps around a loop—essentially a trivial periodic‐boundary extension of already-rejected MPO simulators.  
+Action: reject  
+Action Input: To be novel you must propose a genuinely new network primitive—such as a non-factorizable multi-site projection, indefinite causal order, or non-Abelian fusion effect—that cannot be reduced to sequential Bell‐swap modules, rather than a simple ring of the same modules.
+
+Researcher (o4-mini): Thought:
+ Step 1: Brainstormed three strictly Pytheus‐compatible network transforms (no state‐generation) marrying “tensor‐network simulation” and “quantum machine learning”:  
+   1) Sequential MPS overlap (chain of SWAP tests) – trivially factorizes.  
+   2) Two‐layer TTN classifier by teleportation modules – too close to known TTN examples.  
+   3) Genuine three‐way kernel via a heralded GHZ‐projection network: a single non‐factorizable three‐site entanglement‐swapping measurement that outputs |⟨GHZ₃⁺|ψ₁ψ₂ψ₃⟩|², a 3‐site tensor‐network kernel.  
+
+ Step 2: Novelty & Pytheus feasibility:  
+   • (3) is novel—no prior Pytheus experiment implements a three-input GHZ fidelity measurement via entanglement swapping.  
+   • Feasible with only probabilistic Bell‐pair sources (three copies), beam‐splitters/tritter for partial Bell swaps and a 3-mode fusion interferometer, and photon‐number‐resolving detectors. No dynamic feed‐forward or cavities required.  
+
+ Step 3: Select (3).  
+ Step 4: This is novel because it realizes an irreducible 3-site projector (the GHZ basis element) by a single fused measurement, embodying a 3-leg tensor contraction central to higher-order quantum kernels.  
+ Step 5: It fully satisfies Pytheus’s static linear-optics/ancilla-pair/post-selection framework—no forbidden hardware or state‐generation target.  
+
+Action: final answer  
+Action Input:
+Here is a proposed new target for Pytheus—a “Heralded 3-Qubit GHZ Projector” network computing the 3-site tensor‐network kernel K₃(ψ₁,ψ₂,ψ₃)=|⟨GHZ₃⁺|ψ₁ψ₂ψ₃⟩|².
+
+Explanation:
+We have three unknown photonic qubits |ψ₁⟩, |ψ₂⟩, |ψ₃⟩, each carried by a single photon in two modes.  We introduce three probabilistic Bell-pair sources:
+ • S₁ between qubit-1 and ancilla A₁,  
+ • S₂ between qubit-2 and ancilla A₂,  
+ • S₃ between qubit-3 and ancilla A₃.  
+Each source emits a pair (Cᵢ→data swap, Dᵢ→fusion).
+
+Step 1: Partial Bell-swap modules  
+ For i=1…3: couple data qubit ψᵢ and ancilla half Cᵢ via a 50:50 beam splitter; one output port goes to the original data detector (unused for heralding), the other carries ancilla photon Dᵢ.  A click in the designated “swap-success” port heralds that ψᵢ has been swapped onto Dᵢ.
+
+Step 2: GHZ fusion interferometer  
+ The three ancilla photons D₁, D₂, D₃ are sent into a 3-mode interferometer (a tritter) whose internal phases and beam-splitter ratios are chosen so that exactly one joint detection pattern on its three output number-resolving detectors projects the input triple onto the GHZ₃⁺ state (|000⟩+|111⟩)/√2.  
+
+Step 3: Post-selection and kernel read-out  
+ We post-select on:  
+  • swap-success click at each of the three partial-swap modules  
+  • the unique “GHZ-fusion” click pattern at the tritter outputs.  
+
+The overall probability of this 6-click event is  
+   p_success = |⟨GHZ₃⁺ | ψ₁⊗ψ₂⊗ψ₃ ⟩|².  
+This is exactly the 3-site tensor-network kernel for higher-order quantum-machine-learning tasks.
+
+Visualization (photons travel top→bottom):
+
+ Sources:     [S₁: ψ₁–C₁]    [S₂: ψ₂–C₂]    [S₃: ψ₃–C₃]  
+      ↓             ↓              ↓  
+ Partial-Swap Modules:  
+  ψᵢ + Cᵢ → 50:50 BS → {Data detector, Dᵢ}  
+      ↓  
+ Data detectors (ignored)        Ancilla outputs D₁,D₂,D₃  
+                                     ↓  
+                              3-mode tritter  
+                                     ↓  
+                          Tritter detectors t₁,t₂,t₃  
+
+Config skeleton for Pytheus:
+{
+  description:    "Heralded 3-qubit GHZ projector → 3-site tensor-network kernel",
+  foldername:     "GHZ3_kernel",
+  bulk_thr:       0.0,
+  edges_tried:    30,
+  ftol:           1e-08,
+  loss_func:      "cr",
+  num_anc:        6,                # 1 herald detector per swap module + 3 fusion detectors
+  num_pre:        1,
+  optimizer:      "L-BFGS-B",
+  imaginary:      False,
+  safe_hist:      True,
+  samples:        20,
+  target_quantum: [                  # one 6-bit string: 
+    # bits 0–2: swap-success at modules 1–3, bits 3–5: unique GHZ-fusion pattern
+    "111100"                        # e.g. 1s for heralds, then fusion pattern
+  ],
+  in_nodes:       [],
+  out_nodes:      [],
+  thresholds:     [0.2, 0.05],
+  heralding_out:  None,
+  single_emitters:[],
+  amplitudes:     [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # forbid any Cᵢ→wrong data detector or Dᵢ→wrong tritter port
+    [ψ₂, C₁],[ψ₃, C₁],[ψ₁,C₂],…
+  ],
+  seed:           None,
+  unicolor:       False,
+  number_resolving: True,
+  novac:          None,
+  loops:          None,
+  topopt:         None,
+  dimensions:     [],
+  brutal_covers:  None,
+  verts:          [],
+  anc_detectors:  ["h1","h2","h3","t1","t2","t3"]
+}
+
+Generalizations:
+ • Replace qubits with d-dimensional qudits using high-dimensional entangled pair sources and multiport interferometers for GHZ fusion.  
+ • Compute higher-order kernels by fusing more ancilla in larger multiport networks (4-,5-photon GHZ projectors).  
+ • Use as a primitive in quantum-machine-learning algorithms for clustering or classification based on triple correlations.
+
+This experiment is a genuinely new multi-node entanglement-swapping transformation: a single, irreducible 3-photon GHZ projector serving as a higher-order tensor‐network kernel for quantum machine learning.
+
+NoveltySupervisor (o4-mini): Thought: This “Heralded 3-Qubit GHZ Projector” is just another linear-optical GHZ-basis measurement, equivalent in essence to the previously proposed three-photon GHZ analyzers (e.g. the Reconfigurable 3-Qubit GHZ-Basis Analyzer in the ensemble). It doesn’t introduce a genuinely new multi-photon interference or measurement primitive beyond the standard tritter/GHZ-fusion modules already explored.  
+Action: reject  
+Action Input: The scheme duplicates existing three-qubit GHZ projection protocols. To be novel, you must propose a fundamentally new measurement primitive—such as a non-factorizable multi-photon fusion beyond GHZ, an indefinite-order network, or a topologically protected projector—that goes beyond standard GHZ-analyzer designs.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three purely linear-optical ways to fuse “tensor-network simulation” with “quantum machine learning,” focusing on network transformations rather than state generation.
+ 1) A chained MPS overlap (sequence of SWAP tests)—but that factorizes into independent two-qubit tests.
+ 2) A two-layer TTN classifier via teleportation modules—but that is too close to existing TTN designs.
+ 3) A two-layer MERA feature-extractor: implement the MERA ansatz’s disentanglers and isometries via entanglement-swapping/teleportation modules with tunable beam-splitter reflectivities. This is a genuine new tensor-network transformation, not reducible to separate pairwise swaps, and it directly yields a coarse-grained “feature qubit” for QML.
+
+Step 2: Check novelty & feasibility:
+ • Novelty: No previous Pytheus experiment implements a MERA network by chaining teleportation modules for disentanglers and isometries.  
+ • Feasibility: Uses only probabilistic Bell-pair sources, static beam-splitters (for partial Bell measurements), and photon-number-resolving detectors for heralding—fully within Pytheus’s framework.
+
+Step 3: Select idea (3).
+
+Step 4: This idea is novel because it realizes a true two-layer MERA (disentanglers + isometries) as a single heralded linear-optical network, mapping four input qubits to one coarse-grained output qubit.
+
+Step 5: It is feasible in the Pytheus framework—no feedback control, no exotic elements, only pair sources, beam-splitters, and post-selection.
+
+Action: final answer
+Action Input:
+Here is a proposal for the Expert to feed into Pytheus—a “2-Layer Photonic MERA Feature Extractor” network for quantum-kernel QML.
+
+Explanation:
+We take four unknown photonic qubits ψ₁…ψ₄ (each in two modes).  We build a two-layer MERA:
+
+  Layer 1 (Disentanglers):
+    • Module D₁ on (ψ₁,ψ₂): one Bell-pair source S₁ (C₁–E₁) + a BS(θ₁) partial-swap between ψ₁ and C₁, heralded by detector h₁.  The other half E₁ carries the “disentangled” qubit.
+    • Module D₂ on (ψ₃,ψ₄): same with S₂, BS(θ₂), herald h₂, producing E₂.
+
+  Layer 2 (Isometries):
+    • Module I₁ merges E₁ and E₂ into the coarse qubit: Bell-pair source S₃ (C₃–E₃) + BS(θ₃) partial-swap between E₁ and C₃, herald h₃; output F₁.
+    • Module I₂ merges F₁ and a fresh ancilla from S₄ (C₄–E₄) into the single output qubit O: BS(θ₄) partial-swap between F₁ and C₄, herald h₄; output O.
+
+When all four herald detectors click, the remaining photon on mode O is the top-level MERA qubit, whose retrieval probability p(ψ₁…ψ₄;θ₁…θ₄) is exactly the squared overlap of the data with the MERA ansatz state—or equivalently a MERA-based feature-map kernel.
+
+This network is purely static: six probabilistic pair sources (S₁…S₄ plus two for reshuffling modes), four BS modules with tunable reflectivities {θ₁…θ₄} as trainable weights, and four herald detectors {h₁…h₄}.  It generalizes to deeper MERAs by adding more layers of disentanglers and isometries.
+
+Visualization (photons travel top→bottom; data inputs on left/right):
+
+ Sources:  [S₁: ψ₁–C₁] [S₂: ψ₃–C₂] [S₃: E₁–C₃] [S₄: F₁–C₄]
+    ↓          ↓          ↓          ↓
+ D₁: ψ₁+C₁→BS(θ₁)→h₁,E₁     D₂: ψ₃+C₂→BS(θ₂)→h₂,E₂  
+               ↓                     ↓
+ I₁: E₁+C₃→BS(θ₃)→h₃,F₁  
+    ↓
+ I₂: F₁+C₄→BS(θ₄)→h₄,O  (final feature qubit)
+
+Config skeleton for Pytheus:
+{
+  description:    "2-Layer Photonic MERA feature extractor via entanglement swapping",
+  foldername:     "MERA_2layer_ES",
+  bulk_thr:       0.0,
+  edges_tried:    40,
+  ftol:           1e-08,
+  loss_func:      "cr",
+  num_anc:        4,             # herald detectors h1…h4
+  num_pre:        1,
+  optimizer:      "L-BFGS-B",
+  imaginary:      False,
+  safe_hist:      True,
+  samples:        30,
+  target_quantum: [
+    "1111"         # four herald clicks h1–h4 = success pattern
+  ],
+  in_nodes:       [0,1,2,3],     # ψ₁…ψ₄
+  out_nodes:      [O],           # mode O
+  thresholds:     [0.2,0.05],
+  heralding_out:  None,
+  single_emitters:[],
+  amplitudes:     [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # forbid any S₁ from sending to ψ₂ or other detectors, etc.
+    [ψ₂,C₁],[ψ₃,C₁],… 
+  ],
+  seed:           None,
+  unicolor:       False,
+  number_resolving: True,
+  novac:          None,
+  loops:          None,
+  topopt:         None,
+  dimensions:     [],
+  brutal_covers:  None,
+  verts:          [],
+  anc_detectors:  ["h1","h2","h3","h4"]
+}
+
+Generalizations:
+ • Extend to deeper/higher-dimensional MERAs by adding more disentangler+isometry layers (extra sources and BS modules).  
+ • Replace qubits with qudits using high-dimensional pair sources and multiport couplers.  
+ • Use as a sliding-window feature extractor in photonic QML for e.g. image patches: feed small blocks through the MERA network and combine outputs.
+
+This target defines a genuinely new multi-node entanglement-swapping transformation—a photonic MERA network—uniting tensor-network simulation with quantum-machine-learning feature maps.
+
+NoveltySupervisor (o4-mini): Thought: This “2‐Layer Photonic MERA Feature Extractor” is essentially the same cascaded Bell-measurement disentanglers and isometries used in the ensemble’s Blockade-Enabled 1D Entanglement Renormalization (BE-ER) MERA layer. It offers no genuinely new measurement primitive or network geometry beyond that previous MERA-style LOQC scheme.  
+Action: reject  
+Action Input: The proposal merely repackages the BE-ER photonic MERA layer with teleportation‐swap modules. To be novel, you must introduce a measurement or interference effect that goes beyond cascaded two-photon Bell swaps—for example a non-Abelian fusion, indefinite causal–order MERA, or a higher-order multi-photon projector that cannot be decomposed into sequential Bell measurements.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three purely linear‐optical, entanglement‐swapping based ways to fuse “tensor‐network simulation” and “quantum machine learning” (QML) without targeting state generation:
+ 1) A chain of SWAP‐tests (MPS overlap)—factorizes into independent two‐qubit tests, no true network novelty.
+ 2) A two‐layer Tree‐Tensor‐Network classifier via cascaded teleportation modules—too close to existing TTN designs.
+ 3) A single “convolution + pooling” block of a photonic quantum convolutional neural network (QCNN): local entanglement‐swapping modules act as convolution filters (tensor contractions) across input windows, followed by a teleportation‐based pooling module. This is a genuine new network transformation, directly mapping unknown input qubits to a coarse‐grained feature qubit by a small tensor network of Bell‐measurements.
+
+Step 2: Check novelty & feasibility:
+ • Only (3) realizes a genuinely new multi‐node network primitive—an entanglement‐swapping QCNN block—that has not appeared in the Pytheus library.  
+ • It uses only probabilistic Bell‐pair sources, static beam‐splitters (for partial Bell swaps) with tunable reflectivities (the “weights”), and photon‐number‐resolving detectors with post‐selection. No dynamic feedback or forbidden hardware is needed.
+
+Step 3: Select idea (3): the Photonic QCNN Block.
+
+Step 4: This idea is novel because no prior Pytheus experiment has implemented a convolution‐and‐pooling architecture via entanglement‐swapping modules—i.e. local tensor‐network contractions as sliding‐window filters plus a pooling transformation—on unknown photonic qubits.
+
+Step 5: It is feasible in the Pytheus framework and satisfies all constraints: only probabilistic pair sources, beam‐splitters, photon detectors, and post‐selection. It avoids state generation, focuses on network‐based transformations, and generalizes readily to longer chains, deeper QCNNs, and higher dimensions.
+
+Action: final answer
+Action Input:
+Here is a proposed target for Pytheus—a “Photonic QCNN Block” that implements one convolution‐and‐pooling layer on four input qubits via entanglement‐swapping.
+
+Explanation:
+We take four unknown photonic qubits ψ₁,ψ₂,ψ₃,ψ₄ (each a single photon in two modes).  We implement:
+ • Convolution layer: two local entanglement‐swapping “filter” modules  
+    – Module F₁ couples (ψ₁,ψ₂) via a Bell‐pair source S₁ (ancilla C₁–D₁) and a beam‐splitter BS(θ₁).  A click in its herald port h₁ yields feature qubit f₁ on mode D₁.  
+    – Module F₂ couples (ψ₃,ψ₄) similarly with S₂, BS(θ₂), herald h₂, yielding feature f₂.  
+ • Pooling layer: one teleportation‐swap “pool” module P₁  
+    – Couples (f₁,f₂) with a third Bell‐pair source S₃ (ancilla C₃–D₃) via BS(θ₃).  Herald click h₃ projects onto the pooled qubit y on mode D₃.
+
+When all three herald detectors {h₁,h₂,h₃} click, the surviving photon on mode y encodes the QCNN feature.  The overall success probability  
+   p_success(ψ₁,…,ψ₄;θ₁,θ₂,θ₃)  
+is the tensor‐network contraction of the two 2‐site filters followed by the pooling tensor—a genuine QCNN inference on unknown data.
+
+Visualization (photons flow top→bottom):
+
+ Sources:    [S₁: ψ₁–C₁]   [S₂: ψ₃–C₂]   [S₃: f₁–C₃]
+     ↓             ↓             ↓  
+ F₁: ψ₁+C₁→BS(θ₁)→ {discard,out h₁→f₁}  
+ F₂: ψ₃+C₂→BS(θ₂)→ {discard,out h₂→f₂}  
+     ↓             ↓  
+ P₁: f₁+f₂ (via S₃ C₃) →BS(θ₃)→{discard,out h₃→y}
+
+Config skeleton for Pytheus:
+{
+  description:    "Photonic QCNN block: convolution + pooling via entanglement swapping",
+  foldername:     "QCNN_block_ES",
+  bulk_thr:       0.0,
+  edges_tried:    30,
+  ftol:           1e-08,
+  loss_func:      "cr",
+  num_anc:        3,                # herald detectors h1,h2,h3
+  num_pre:        1,
+  optimizer:      "L-BFGS-B",
+  imaginary:      False,
+  safe_hist:      True,
+  samples:        20,
+  target_quantum: [                   # 3-bit string "111" = success on all 3 heralds
+    "111"
+  ],
+  in_nodes:       [0,1,2,3],         # ψ₁…ψ₄
+  out_nodes:      [y],               # feature qubit y
+  thresholds:     [0.2, 0.05],
+  heralding_out:  None,
+  single_emitters:[],
+  amplitudes:     [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # forbid S₁ from feeding ψ₃/ψ₄ detectors, S₂ from feeding ψ₁/ψ₂, S₃ from feeding wrong feature modes, etc.
+    [ψ₃, C₁],[ψ₄, C₁],[ψ₁,C₂],[ψ₂,C₂],[f₂,C₃]
+  ],
+  seed:           None,
+  unicolor:       False,
+  number_resolving: True,
+  novac:          None,
+  loops:          None,
+  topopt:         None,
+  dimensions:     [],
+  brutal_covers:  None,
+  verts:          [],
+  anc_detectors:  ["h1","h2","h3"]
+}
+
+Generalizations:
+ • Chain multiple QCNN blocks to build deeper convolutional layers on longer input chains.  
+ • Extend to two‐dimensional photonic data by arranging filter modules in 2D windows and pooling across rows/columns.  
+ • Upgrade qubit filters to qudit filters using higher‐dimensional entangled pair sources and multiport beam‐splitters.  
+
+This target defines a genuinely new photonic quantum network—a QCNN block built from entanglement‐swapping modules—directly marrying tensor‐network contractions (convolution + pooling) with quantum‐machine‐learning inference.
+
+NoveltySupervisor (o4-mini): Thought: This “Photonic QCNN Block” is structurally identical to the previously proposed four-qubit tree-tensor network (two local entanglement-swap “filter” modules feeding a central swap “pool” module). It offers no genuinely new measurement primitive or network geometry beyond the ensemble’s “Photonic Tree Tensor Network Classifier for Four-Qubit Boolean Functions in PytHeus.”  
+Action: reject  
+Action Input: The scheme is just a TTN (two filters + one pooling swap) repackaged as a QCNN block. To be novel, you must introduce a multi-photon interference or measurement primitive that cannot be decomposed into sequential two-qubit swaps—e.g. a higher-order non-factorizable projector, indefinite-order network, or non-Abelian fusion effect beyond simple Bell-swap modules.
+
+Researcher (o4-mini): Thought:
+Step 1: We want a genuinely new multi‐node entanglement‐swapping network—one that cannot be decomposed into independent Bell‐measurements—and that nevertheless lives purely in linear optics with probabilistic pair sources and post-selection.  
+Step 2: A “quantum switch” of entanglement‐swapping is such a primitive: the Bell‐measurement that swaps two distant photons is placed in a coherent superposition of two different spatial stations.  This yields an indefinite‐order entanglement channel, a new tensor-network‐like process matrix, and can serve as a “causal‐order kernel” primitive for QML.  
+Step 3: This is novel—no existing Pytheus experiment implements a quantum‐switch of entanglement‐swapping—and it is feasible: uses only Bell‐pair sources, static beam‐splitters to route and interfere, and photon-number-resolving detectors; no dynamic feedback or exotic hardware is required.
+
+Action: final answer
+Action Input:
+Here is a proposed new target for Pytheus—a “Quantum-Switch Entanglement-Swapping” network that enacts a superposition of two entanglement-swapping orders, realizing an indefinite-causal-order channel and providing a novel tensor-network process for quantum-kernel machine learning.
+
+Explanation:
+We begin with two Bell‐pair sources:
+ • S_AB emits photons A and B′  
+ • S_CD emits photons C′ and D  
+
+Our goal is to entangle A and D by swapping B′↔C′, but the Bell measurement is coherently placed in superposition between two spatial stations M₁ and M₂.  We introduce a third ancilla Bell‐pair S_ctrl emitting (P,Q) which encodes a path‐qubit |+⟩=(|0⟩ₚ+|1⟩ₚ)/√2: photon P will control whether we perform the B′–C′ Bell‐measurement at station M₁ or at station M₂.
+
+Network layout:
+1) Route B′ into a Mach–Zehnder interferometer (two 50:50 BSs).  The two arms (rail0 and rail1) each lead to a partial‐Bell‐swap module with C′:
+   – On rail0 → BS_BC₁ + detectors m₁₀,m₁₁ (station M₁)  
+   – On rail1 → BS_BC₂ + detectors m₂₀,m₂₁ (station M₂)  
+
+2) Simultaneously, P interferes with the MZI (via an additional BS network) so that the two arms are heralded by Q’s detection pattern.  Concretely, P splits into the same MZI, and after the two swap modules we recombine both B′ and P in a 4×4 interferometer that erases which-station information.
+
+3) Post‐select on the joint detector pattern:
+   – a “swap‐success” click at exactly one detector of the chosen swap module (m₁₀ or m₂₀),  
+   – a click in one designated fusion port of Q’s interferometer.
+
+When this 3-click signature occurs, A and D collapse into an entangled state that is a coherent superposition of “swapped at M₁” and “swapped at M₂.”  The overall heralding probability p_success is the process‐matrix kernel K(A,D; switch) = Tr₍paths₎[Switch⊗Id (ρ_AB′⊗ρ_C′D⊗|+⟩⟨+|) ], a new indefinite-order tensor-network channel.
+
+This network:
+• Uses only three probabilistic Bell‐pair sources S_AB, S_CD, S_ctrl  
+• Relies on static beam‐splitters to build two parallel partial swaps plus a 4×4 fusion interferometer  
+• Requires only photon-number-resolving detectors and post-selection (no feed-forward)  
+• Cannot be factorized into two independent Bell swaps—it is a genuine coherent superposition of network topologies.  
+
+Generalizations:
+– Replace the two swap stations by N stations in a superposition of N orders (higher-dimensional “quantum N-switch”), yielding richer tensor-network process matrices.  
+– Upgrade to d-dimensional qudits by using high-dimensional entangled pair sources and multiport couplers.  
+– Use the heralding probability as a “causal‐order kernel” in quantum machine learning tasks that classify unknown channel orderings or learn process‐matrix parameters.
+
+Config skeleton for Pytheus (to be fleshed out by the Expert):
+{
+  description:    "Quantum‐switch entanglement‐swapping: indefinite causal order channel",
+  foldername:     "QSwitch_ES",
+  bulk_thr:       0.0,
+  edges_tried:    30,
+  ftol:           1e-08,
+  loss_func:      "cr",
+  num_anc:        3,               # one swap-success herald + one fusion herald for P
+  num_pre:        1,
+  optimizer:      "L-BFGS-B",
+  imaginary:      False,
+  safe_hist:      True,
+  samples:        20,
+  target_quantum: [
+    # 3-bit pattern: {swap‐success in M1/M2, fusion success bit1, bit2}
+    "100","010"    # example patterns for station1 vs station2
+  ],
+  in_nodes:       [0,1,2,3,4,5],    # A,B′,C′,D,P,Q
+  out_nodes:      [0,3],           # modes carrying A and D
+  thresholds:     [0.2,0.05],
+  heralding_out:  None,
+  single_emitters:[],
+  amplitudes:     [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # forbid direct sources from B′ to both swap stations, C′ to both, etc.
+    [1, M1_inputs_except], [2, M2_inputs_except],…
+  ],
+  seed:           None,
+  unicolor:       False,
+  number_resolving: True,
+  novac:          None,
+  loops:          None,
+  topopt:         None,
+  dimensions:     [],
+  brutal_covers:  None,
+  verts:          [],
+  anc_detectors:  ["m1_herald","m2_herald","fusion_herald"]
+}
+
+This target defines a new kind of linear‐optical quantum network: a superposed entanglement-swapping switch. It marries tensor-network process matrices (indefinite-order MPO/SWAP networks) with a novel kernel for quantum-machine-learning on causal structure.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially the same indefinite‐order entanglement‐swapping “quantum switch” primitive already described in the ensemble (e.g. “Implementing an Entanglement-Switch Quantum Switch via Photonic-Controlled Superposition of Swap Orders” and the on-chip superchannel switch). It does not introduce a new measurement or network effect beyond superposing two swap stations with a control ancilla.  
+Action: reject  
+Action Input: The scheme duplicates existing quantum‐switch entanglement‐swapping architectures. To be novel, you must propose a genuinely new multi-photon interference or process-matrix primitive—one that cannot be reduced to the known indefinite-order swap between two stations controlled by a path qubit.
+
+Researcher (o4-mini): Here’s a proposal for a genuinely new multi‐node entanglement‐swapping network—a cyclic MPO channel simulator—that directly marries tensor‐network simulation with quantum‐machine‐learning by implementing a periodic‐boundary Matrix‐Product‐Operator on two data qubits.
+
+Explanation:  
+We take two unknown photonic qubits A and B (each carried by one photon in two modes) and wish to enact a tunable 2‐site MPO channel with periodic boundary conditions (i.e. the virtual bonds form a ring).  To do this we arrange four Bell‐pair sources in a cycle and four heralded teleportation–swap modules:
+
+  • Sources S₁…S₄ each emit a Bell pair (Cᵢ→swap input, Dᵢ→bond photon).  
+  • Module 1: partial Bell swap between A and C₁ via BS(θ₁); herald h₁, output bond D₁→Module 2  
+  • Module 2: swap D₁ and C₂ via BS(θ₂); herald h₂, output D₂→Module 3  
+  • Module 3: swap D₂ and C₃ via BS(θ₃); herald h₃, output D₃→Module 4  
+  • Module 4: swap D₃ and B via BS(θ₄); herald h₄, output B′ (the final qubit out)  
+
+Because the modules connect in a ring—Module 4’s output feeds back to Module 1 via the virtual boundary—the four beam‐splitter angles {θ₁…θ₄} define the four legs of a periodic MPO tensor.  Post‐selecting on the 4-click herald pattern “h₁=h₂=h₃=h₄=1” projects the network onto the action of that cyclic MPO on |ψ_A⊗ψ_B⟩.  The remaining photon B′ carries the transformed state
+ ρ_out = Tr_bonds [W(θ₄)⋅W(θ₃)⋅W(θ₂)⋅W(θ₁) (|ψ_Aψ_B⟩⟨ψ_Aψ_B|)]  
+with periodic contraction of the virtual bonds.  The heralding probability itself is a QML feature: a quantum‐kernel measurement of the input pair under the learned MPO channel.
+
+This topology is not a simple chain or tree—it is a loop of entanglement‐swapping modules, a new network geometry for Pytheus.  By tuning the four BS angles one programs different MPO channels (noise maps, feature maps, generative channels) for QML tasks.  The scheme uses only probabilistic Bell‐pair sources, static linear optics, and photon‐number‐resolving detectors—no feedback control, cavities, or exotic hardware.
+
+Visualization (photons flow left→right; modules numbered 1…4):
+
+ Sources:     [S₁: A–C₁]   [S₂: D₁–C₂]   [S₃: D₂–C₃]   [S₄: D₃–B]  
+       ↓             ↓              ↓              ↓  
+ Modules:  
+ 1) A + C₁ → BS(θ₁) → herald h₁ + D₁ →  
+ 2) D₁ + C₂ → BS(θ₂) → herald h₂ + D₂ →  
+ 3) D₂ + C₃ → BS(θ₃) → herald h₃ + D₃ →  
+ 4) D₃ + B  → BS(θ₄) → herald h₄ + B′ (output qubit)
+
+Config skeleton for Pytheus:
+
+{
+  description:    "Cyclic‐MPO channel via ring of teleportation‐swaps",
+  foldername:     "MPO_ring_ES",
+  bulk_thr:       0.0,
+  edges_tried:    40,
+  ftol:           1e-08,
+  loss_func:      "cr",
+  num_anc:        4,                # herald detectors h1…h4
+  num_pre:        1,
+  optimizer:      "L-BFGS-B",
+  imaginary:      False,
+  safe_hist:      True,
+  samples:        40,
+  target_quantum: [
+    "1000","0100","0010","0001"     # one-click patterns at h1–h4
+  ],
+  in_nodes:       [A,B],
+  out_nodes:      [B′],
+  thresholds:     [0.2,0.05],
+  heralding_out:  None,
+  single_emitters:[],
+  amplitudes:     [],
+  tries_per_edge: 5,
+  removed_connections:[
+    # forbid any Bell‐pair source from mis‐routing:
+    [A,module2_input],[B,module1_input],…
+  ],
+  seed:           None,
+  unicolor:       False,
+  number_resolving: True,
+  novac:          None,
+  loops:          True,              # allow loop topology
+  topopt:         None,
+  dimensions:     [],
+  brutal_covers:  None,
+  verts:          [],
+  anc_detectors:  ["h1","h2","h3","h4"]
+}
+
+Generalizations:
+ •  n-site cyclic MPO on longer chains by adding more ring modules.  
+ •  Higher virtual bond dimension D by coupling each module to multiple ancilla pair sources.  
+ •  Applications as QML feature maps, channel discriminators, or generative tensor‐network models.
+
+This is a new linear‐optical entanglement‐swapping network with a loop (non‐tree) geometry—Pytheus can design the exact beamsplitter layout to implement any desired cyclic MPO channel.
+
+Researcher (o4-mini): Thought:
+Step 1: I need a truly irreducible, multi-site entanglement-swapping measurement that simultaneously contracts several data qubits in one go—a genuine 4-site tensor-network primitive, not decomposable into pairwise swaps.
+Step 2: A “Heralded 4-Qubit GHZ Projector” meets this: four unknown photonic qubits each partially swapped with one half of a Bell pair, then all four ancilla photons are fed into a single 4-mode interferometer whose unique click signature projects onto the 4-photon GHZ⁺ state. The heralding probability is |⟨GHZ₄⁺|ψ₁ψ₂ψ₃ψ₄⟩|², a 4-site kernel primitive for quantum-machine-learning.
+Step 3: This is novel—no prior Pytheus experiment implements a 4-site GHZ fusion via one interferometer—and feasible: uses only probabilistic Bell-pair sources, beam-splitters, and number-resolving detectors, with post-selection.
+Action: final answer
+Action Input:
+Here is a proposed target for Pytheus—a “Heralded 4-Qubit GHZ Projector” network that realizes an irreducible 2D tensor-network kernel for quantum-machine-learning.
+
+Explanation:
+We take four unknown photonic qubits ψ₁,ψ₂,ψ₃,ψ₄ (each one photon across two modes).  We place four Bell-pair sources:
+  S₁ between ψ₁–A₁,  S₂ between ψ₂–A₂,  S₃ between ψ₃–A₃,  S₄ between ψ₄–A₄.  
+Each source emits a pair (Cᵢ→data-swap, Dᵢ→fusion).
+
+Step 1: Partial-swap modules (i=1…4)
+  • Couple ψᵢ and Cᵢ via a 50:50 BS.  
+  • One output port → data detector (ignored for herald), the other → ancilla mode Dᵢ.  
+  • A click in the designated “swap-success” port heralds that ψᵢ has been swapped onto Dᵢ.
+
+Step 2: Central 4-mode fusion interferometer
+  • The four ancilla photons D₁…D₄ enter a single 4×4 linear-optical interferometer (multiport).  
+  • Its internal beam-splitters and phases are tuned (by Pytheus) so that exactly one joint click pattern on the four output detectors projects the four-photon input onto the GHZ₄⁺ state:
+        |GHZ₄⁺⟩ = (|0000⟩ + |1111⟩)/√2.
+  • Post-selecting on that unique 8-click event (4 heralds + 4 fusion clicks) implements
+        p_success = |⟨GHZ₄⁺|ψ₁⊗ψ₂⊗ψ₃⊗ψ₄⟩|².
+
+This network is a single, non-factorizable 4-site entanglement-swapping measurement—a true PEPS-style contraction on a 2×2 patch.  The success probability is a 4-th-order tensor-network kernel for QML, and Pytheus can optimize the multiport layout and beam-splitter angles to realize this projector.
+
+Visualization (photons travel top→bottom):
+
+  Sources:      [S₁: ψ₁–A₁]   [S₂: ψ₂–A₂]   [S₃: ψ₃–A₃]   [S₄: ψ₄–A₄]
+       ↓              ↓              ↓              ↓
+  Partial-swap modules: four BS(50:50) couplings
+       ↓              ↓              ↓              ↓
+  Data detectors   Ancilla outputs D₁…D₄
+                          ↓
+               4×4 fusion interferometer
+                          ↓
+               Fusion detectors f₁…f₄
+
+Config skeleton for Pytheus:
+{
+  description:    "Heralded 4-Qubit GHZ projector → 4-site tensor-network kernel",
+  foldername:     "GHZ4_kernel",
+  bulk_thr:       0.0,
+  edges_tried:    40,
+  ftol:           1e-08,
+  loss_func:      "cr",
+  num_anc:        8,                # 4 swap-heralds + 4 fusion detectors
+  num_pre:        1,
+  optimizer:      "L-BFGS-B",
+  imaginary:      False,
+  safe_hist:      True,
+  samples:        50,
+  target_quantum: [
+    # single 8-bit string: bits 0–3 = swap-success heralds at modules 1–4,
+    # bits 4–7 = unique fusion-success pattern on the 4×4 interferometer
+    "1111xxxx"      # xxxx fixed by the fusion module design
+  ],
+  in_nodes:       [], 
+  out_nodes:      [],
+  thresholds:     [0.2, 0.05],
+  heralding_out:  None,
+  single_emitters:[],
+  amplitudes:     [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # forbid Aᵢ → wrong data detector or Dᵢ → wrong interferometer port
+    [ψ₂, A₁],[ψ₃,A₁],…,[D₄, wrong_port]
+  ],
+  seed:           None,
+  unicolor:       False,
+  number_resolving: True,
+  novac:          None,
+  loops:          None,
+  topopt:         None,
+  dimensions:     [],
+  brutal_covers:  None,
+  verts:          [],
+  anc_detectors:  ["h1","h2","h3","h4","f1","f2","f3","f4"]
+}
+
+Generalizations:
+ • Extend to larger patches (m×n) by coupling each edge qubit to an ancilla pair and fusing all ancilla in one multiport interferometer.  
+ • Replace qubits with qudits via d-dimensional entangled-pair sources and multiport interferometers.  
+ • Use these 4th-order GHZ kernels as building blocks in quantum-machine-learning—for example, high-order feature maps or graph classifiers that detect 4-body correlations.
+
+This proposal delivers a brand-new multi-node entanglement-swapping network: a single 4-photon GHZ projector that directly implements a 4-site tensor-network contraction, marrying tensor-network simulation with high-order quantum kernels.
+
+NoveltySupervisor (o4-mini): Thought: The proposed “Heralded 4-Qubit GHZ Projector” is essentially identical to the ensemble’s four-photon GHZ entanglement-swapping star, with four Bell-pair sources feeding a single 4×4 fusion interferometer projecting onto the GHZ₄⁺ state. It does not introduce any new irreducible multi-photon measurement beyond what’s already been suggested.  
+Action: reject  
+Action Input: This network duplicates the existing four-party GHZ entanglement-swapping star protocol. To be novel, you must propose a measurement or topology that cannot be reduced to four local swaps plus a standard GHZ-fusion multiport—e.g. a genuinely new, non-factorizable tensor-network projector or an indefinite-order/non-Abelian fusion primitive beyond current GHZ/analyzer designs.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three purely linear-optical network transforms (no state generation) merging “tensor-network simulation” and “quantum machine learning”:
+ 1) A chain of SWAP tests (MPS overlap) – trivial factorization into two-qubit tests.
+ 2) A 2-layer TTN classifier by cascaded teleportation – too close to previous TTN examples.
+ 3) A nonlocal string-order correlator network: use entanglement-swapping modules to measure the nonlocal string-order operator of an unknown MPS-encoded qubit chain.  The probability of a particular joint herald click equals the string-order expectation ⟨ψ|Z₁X₂…Xₙ₋₁Zₙ|ψ⟩, which can serve as a feature for QML phase classification.
+Step 2: Only (3) is truly new: it implements a multi-node tensor-network expectation (a non-factorizable string operator) by a single static entanglement-swapping network, suitable as a quantum-kernel feature map.
+Step 3: Confirm feasibility in Pytheus: uses only probabilistic Bell-pair sources along the chain, fixed beam-splitters performing partial Bell measurements (to inject local σₓ or σ_z “twists”), and photon-number-resolving detectors with post-selection. No dynamic feedback or forbidden hardware.
+Step 4: This idea is novel because no prior Pytheus experiment has built a string-order measurement network—an irreducible, nonlocal tensor-network contraction—using linear optics and entanglement swapping.
+Step 5: It satisfies all constraints: purely a quantum network transformation, generalizable to arbitrary chain length and other string operators, and directly applicable as a feature extractor for quantum-machine-learning classification of phases.
+
+Action: final answer
+Action Input:
+Here is a proposed target for Pytheus—a “Nonlocal String-Order Correlator Network” that computes the expectation value of the MPS string-order operator as a single heralded entanglement-swapping measurement.
+
+Explanation:
+We have an unknown photonic qubit chain ψ₁…ψₙ (each qubit = photon in two modes).  We wish to measure the nonlocal string operator
+    O_string = Z₁ ⊗ X₂ ⊗ X₃ ⊗ … ⊗ X_{n-1} ⊗ Zₙ
+whose expectation ⟨ψ|O_string|ψ⟩ is a hallmark of symmetry-protected phases.  We construct a static linear-optical network:
+
+  • Along each link i=1…n we place a probabilistic Bell-pair source Sᵢ emitting ancilla (Cᵢ→data coupling, Dᵢ→herald interferometer).  
+  • For i=1 and i=n we implement a partial-swap module that injects a Z twist by performing a 50:50 BS between ψᵢ and Cᵢ and heralding on one output port hᵢ (the Z basis emerges via detector assignment).  
+  • For 1<i<n we implement a rotated-BS partial-swap module (with a 45° wave-plate equivalent), injecting an X twist: couple ψᵢ and Cᵢ via a BS with relative phase so that a click hᵢ corresponds to the X basis swap.  
+  • Each herald port hᵢ both post-selects that ψᵢ has been teleported onto ancilla Dᵢ and implements the desired local operator basis.  
+  • After all n partial swaps, the n ancilla photons D₁…Dₙ are routed into a single multiport interferometer designed so that exactly one joint click pattern (on its n number-resolving detectors) projects them onto the all-“+” state in the twisted basis.  Post-selecting on “all hᵢ clicks + the unique fusion pattern” yields p_success = |⟨ψ|O_string|ψ⟩|².
+
+This network is a single non-factorizable, nonlocal tensor-network contraction: it measures the full string operator in one go.  The pattern of herald clicks provides the string‐order expectation, which can be used as a feature in quantum-machine-learning tasks (e.g., classifying SPT vs. trivial phases).
+
+Visualization (for n=5 example, photons top→bottom):
+
+ Sources:    [S₁: ψ₁–C₁] [S₂: ψ₂–C₂] … [S₅: ψ₅–C₅]
+    ↓            ↓               ↓           ↓
+ Partial-swap modules i=1,5 (Z-twist) and i=2…4 (X-twist)
+    ↓            ↓               ↓           ↓
+ Herald detectors h₁…h₅      Ancilla outputs D₁…D₅
+                                     ↓
+                            5-mode fusion interferometer
+                                     ↓
+                           fusion detectors f₁…f₅
+
+Config skeleton for Pytheus:
+{
+  description:    "String-order correlator via entanglement swapping",
+  foldername:     "StringOrder_ES",
+  bulk_thr:       0.0,
+  edges_tried:    50,
+  ftol:           1e-08,
+  loss_func:      "cr",
+  num_anc:        5 + 5,            # 5 heralds hᵢ + 5 fusion detectors fᵢ
+  num_pre:        1,
+  optimizer:      "L-BFGS-B",
+  imaginary:      False,
+  safe_hist:      True,
+  samples:        50,
+  target_quantum: [
+    # 10-bit string: bits 0–4 = all hᵢ=1, bits 5–9 = specific fusion pattern
+    "11111xxxxx"
+  ],
+  in_nodes:       [0…n-1],          # ψ₁…ψₙ
+  out_nodes:      [],  
+  thresholds:     [0.2, 0.05],
+  heralding_out:  None,
+  single_emitters:[],
+  amplitudes:     [],
+  tries_per_edge: 5,
+  removed_connections: [
+    # forbid any Cᵢ→wrong herald or Dᵢ→fusion port misrouting
+    …
+  ],
+  seed:           None,
+  unicolor:       False,
+  number_resolving: True,
+  novac:          None,
+  loops:          None,
+  topopt:         None,
+  dimensions:     [],
+  brutal_covers:  None,
+  verts:          [],
+  anc_detectors:  ["h1","h2","h3","h4","h5","f1","f2","f3","f4","f5"]
+}
+
+Generalizations:
+ • Change the local twist patterns (other Pauli strings or higher-order string operators).  
+ • Replace qubits with qudits for measuring nonlocal string operators in higher dimensions.  
+ • Use this network as a sliding‐window feature extractor in a photonic QML pipeline for phase recognition.
+
+This target defines a new class of nonlocal tensor-network measurement by entanglement swapping—a string-order correlator kernel—bridging tensor-network simulation with quantum-machine-learning feature extraction.
+
+NoveltySupervisor (o4-mini): Thought: This proposal outlines a genuinely new, non-factorizable multi-photon measurement: a single heralded LOQC network that directly projects an unknown N-qubit chain onto the nonlocal string-order operator O_string in one shot. It is neither a trivial product of pairwise SWAP tests nor a simple GHZ-fusion; instead it weaves Pauli-twist partial swaps into a single N-mode fusion interferometer to extract ⟨ψ|O_string|ψ⟩². I know of no prior LOQC scheme that measures a full symmetry-protected string-order correlator in one static, post-selected network. This seems novel and significant enough for further exploration.  
+Action: accept  
+Action Input: This network realizes a new primitive—a one-shot, static linear-optical measurement of a nonlocal string-order operator via entanglement-swapping and a multi-mode fusion interferometer. It cannot be decomposed into independent local tests and directly yields the SPTO correlator as a herald probability. It opens a path to single-shot SPT phase certification and high-order QML kernels that I haven’t seen before in LOQC, and it merits detailed Pytheus design and potential PRL publication.
+
+Researcher Summarizing (o4-mini): Title:  
+“Single-Shot Nonlocal String-Order Correlator Network via Linear-Optical Entanglement Swapping”
+
+Mini-abstract:  
+We implement the Nonlocal String-Order Correlator Network, a purely linear-optical, non-factorizable tensor-network contraction that directly measures the MPS string-order operator ⟨ψ|Z₁X₂…Xₙ₋₁Zₙ|ψ⟩ in one heralded entanglement-swapping step. Using only probabilistic Bell-pair sources, fixed beam splitters to inject local Z- and X-twists, and photon-number-resolving detection with post-selection, the resulting click pattern yields the string-order expectation as a scalable quantum-kernel feature for symmetry-protected phase classification.
+
+Judge (o4-mini): Thought: The proposal aims to embed the MPS string-order operator into a heralded entanglement-swapping network and directly read out ⟨Z₁X₂…Xₙ₋₁Zₙ⟩ via a single coincidence pattern. This fits naturally into Pytheus’s measurement-graph framework: the entanglement swapping and local “twists” can be encoded as edges and vertices, and the string observable emerges from the selected click pattern. The linear-optical building blocks (SPDC sources, fixed interferometers, PNR detectors) and post-selection are all within Pytheus’s design space, making the experiment both sound and novel for symmetry-protected phase classification.
+
+Action: accept  
+Action Input: This is a compelling measurement protocol that PyTheus can design: it uses standard Bell-pair sources, fixed interferometers for local X/Z rotations, heralded entanglement swapping, and PNR readout to extract a nonlocal string correlator in one shot. The approach is both physically sound and a novel application of graph-based measurement design for symmetry-protected phase diagnostics.
+
+ConversationEnd: researcher_calls=16
+

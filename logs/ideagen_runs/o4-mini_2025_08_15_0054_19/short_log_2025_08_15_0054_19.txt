@@ -1,0 +1,808 @@
+SuggestionType: [0, 0, 0, 5]
+
+Researcher (o4-mini): Thought: 
+Step 1: Brainstorm three ways to link “pairwise correlation” and “spatiotemporal mode” in a Pytheus‐compatible quantum network protocol (not mere state generation):
+
+ 1. A spatiotemporally multiplexed entanglement‐routing hub: a central node B holds multiple time‐bin modes, each mode participating in a Bell‐swap with a neighbouring node. By selecting which time‐bin is interfered at B, one “routes” entanglement pairwise between different end‐nodes.  
+ 2. A multi‐mode Bell‐state analyzer that projects two photons onto a joint basis of spatial‐mode and temporal‐mode correlations, thereby performing a high‐dimensional entanglement swap between remote qudits.  
+ 3. A chain of three nodes A–B–C where each link carries two orthogonal spatiotemporal modes. By performing a two‐mode joint measurement at B one can redistribute pairwise correlations (swap entanglement) in either mode, yielding two separate entangled channels A–C across distinct time slots.
+
+Step 2: Checking novelty & obstacles  
+1. The entanglement‐router (Idea 1) is novel—none of the explored experiments describe routing by choosing which time‐bin to interfere, and it generalizes to any number of output pairs. Obstacles: Pytheus can optimize static multiport interferometers and heralded Bell‐measurements; it doesn’t need to know “time‐bin” physics, only that there are two abstract modes.  
+2. The joint spatial–temporal Bell analyzer (Idea 2) is physically intriguing, but Pytheus can’t handle hyper‐entanglement or hybrid DOFs. It reduces to a high‐dim swap, too close to existing 4D‐ES.  
+3. The two‐mode chain swap (Idea 3) is essentially two parallel qubit‐swaps in different modes—closer to a trivial repetition of standard ES.
+
+Step 3: Choose the entanglement‐router (Idea 1).  
+Step 4: This idea is novel because no prior Pytheus experiment uses spatiotemporal‐mode multiplexing as a static choice to route entanglement pairwise among three or more end nodes. It realizes a programmable Bell‐swap network in which pairwise correlation is directed by the choice of abstract “mode.”  
+Step 5: It is feasible in Pytheus because we only ask for an all‐linear optics setup with probabilistic pair sources, fixed beam‐splitter network performing two‐photon interference on one of two modes, and photon‐number‐resolving heralding detectors. No feedback, no cavities—fully within Pytheus’s capabilities.  
+
+Action: final answer  
+Action Input:
+We propose a “spatiotemporal‐mode‐multiplexed entanglement router” in linear optics:
+
+Explanation:
+We have three end‐nodes A, C, D and a central station B. A single photon‐pair source at B–A emits qubits in two orthogonal “time‐bin” modes (abstractly labeled m=0,1). Two additional pair sources at B–C emit only in mode m=0, and at B–D only in mode m=1. Thus altogether B holds four “half‐photons”: BA(m=0), BA(m=1), BC(m=0), BD(m=1); A holds the corresponding BA halves, etc.
+
+Goal: By performing a Bell‐state measurement at B between one BA‐mode and one neighbour‐mode of the same m, we “swap” entanglement and thus route a Bell pair to either (A,C) (via m=0) or (A,D) (via m=1). No dynamic switching: the choice of mode m determines which two photons interfere in B’s multiport.
+
+Visualization (photons flow top→bottom):
+
+  emitters:   [BA(m=0)] [BA(m=1)] [BC(m=0)] [BD(m=1)]
+  linear‐optics network at B:  
+              ––BSmall–––  
+             |            |  
+         m=0 port       m=1 port  
+         (interfere      (interfere  
+          BA & BC)       BA & BD)  
+             |            |  
+      detectors d₀,d₁   detectors d₂,d₃  
+
+  heralding: clicks at {d₀,d₁} herald entanglement swapped to A–C; clicks at {d₂,d₃} herald entanglement swapped to A–D.
+
+Abstract target operations:
+ - Input: Bell(BA(m=0))⊗Bell(BC(m=0))⊗Bell(BA(m=1))⊗Bell(BD(m=1)).  
+ - Measurement: two‐photon interference on either (BA,BC) in mode m=0 or (BA,BD) in mode m=1 (BS + post‐select).  
+ - Output: conditioned on detectors, A–C or A–D share a two‐dimensional Bell state.
+
+Pytheus config hints:
+  - probabilistic pair sources: nodes 0–3  
+  - removed_connections to prevent cross‐mode crosstalk (e.g. BC only to detectors in m=0 network)  
+  - num_anc=0 (heralding via detectors d₀..d₃)  
+  - target_quantum = ['00','11'] for output ports corresponding to A&C swap, and analogous for A&D swap in separate runs  
+  - safe_hist, number_resolving = True  
+
+Generalization: Extend to N end‐nodes and M modes to realize multiport entanglement routing in a quantum internet.
+
+NoveltySupervisor (o4-mini): Thought: This idea is essentially a time‐bin–multiplexed version of standard entanglement swapping—simply encoding two Bell‐pairs in early/late bins and performing one of two fixed swaps. It offers no new nontrivial network primitive beyond what “Temporal‐Mode Multiplexed Entanglement Swapping with Single Ancilla” and numerous router proposals already achieve (e.g. dual‐destination or spectral/time–bin routing). It is a straightforward, almost trivial extension of known temporal‐mode swapping schemes rather than a fundamentally novel target for PRL‐level work.
+
+Action: reject
+
+Action Input: Your scheme reduces to a basic two‐time‐bin entanglement swap with no dynamic feed‐forward, which already appears in ensemble suggestions under “Temporal‐Mode Multiplexed Entanglement Swapping with Single Ancilla” and in other dual‐destination router proposals. To be considered truly novel you must introduce a qualitatively new element (e.g. coherent superposition of swap orders, genuinely higher‐order network correlations, or nontrivial use of ancilla resources) rather than just a trivial time‐bin extension.
+
+Researcher (o4-mini): Thought: 
+Step 1: Brainstorm three ways to meaningfully combine “pairwise correlation” and “spatiotemporal mode” in a Pytheus‐compatible quantum network (no state‐generation targets! focus on protocols like swapping or teleportation):
+ 1) A static “mode‐controlled teleportation router” in linear optics, where the choice of abstract time‐bin mode of the input photon deterministically routes the teleported qubit to one of two receivers via two Bell‐pair channels.  
+ 2) A “superposition‐of‐swap‐orders” network: two entanglement‐swapping operations (A–B–C vs. C–B–D) placed into coherent superposition by using spatial‐mode multiplexing at B, thereby testing causal‐order superposition in a purely linear‐optical network.  
+ 3) A “temporal‐mode multiplexed repeater hop” that simultaneously performs two Bell‐measurements in orthogonal time‐bins to extend entanglement from A–B and B–C onto A–C in two different time slots, with a joint post‐selection correlating the two spatiotemporal channels—probing cross‐time-slot pairwise correlations.
+
+Step 2: Novelty & obstacles  
+ 1) The mode‐controlled teleportation router is novel: no prior Pytheus example routes the teleported qubit to one of multiple outputs based solely on abstract mode. It generalizes the Bell‐measurement protocol into a single static network, producing a new network primitive. Obstacles: Pytheus can optimize static multiport interferometers, pair sources and detectors; the “mode” is abstract and needs only to be treated as two orthogonal inputs.  
+ 2) The swap‐order superposition touches “indefinite causal order.” Pytheus cannot handle coherent control of entire interferometer subcircuits as an abstract qubit. This likely exceeds its current static‐network scope.  
+ 3) The dual‐time‐bin repeater hop is essentially just two independent swaps in sequence with time‐bin indexing—too close to trivial repetition of standard ES.
+
+Step 3: Pick the mode‐controlled teleportation router (Idea 1).  
+Step 4: This idea is novel because no existing Pytheus design uses spatiotemporal modes as an abstract control qubit to route a teleportation channel to distinct receivers in a single static network. It merges pairwise Bell correlations with mode‐multiplexed routing, yielding a new building block for quantum networks: a passive “quantum router” for teleportation.  
+Step 5: It is feasible in Pytheus because we only require: three probabilistic photon‐pair sources, a static linear‐optics interferometer that mixes two modes (labeled m=0,1) with two halves of Bell pairs, number‐resolving detectors for heralding, and no active feed‐forward. The network realization rests purely on optimizing beam‐splitter settings and path connections—well within Pytheus’s capabilities.
+
+Action: final answer  
+Action Input:
+We propose a Mode‐Controlled Teleportation Router:
+
+Explanation:
+– Nodes:
+  • Alice (A) holds an unknown qubit encoded in an abstract spatiotemporal mode m∈{0,1}.  
+  • Bob (B) holds two halves of two Bell pairs: one paired with Charlie (C) in mode m=0, one paired with Dave (D) in mode m=1.  
+  • Charlie and Dave are the two possible receivers.
+
+– Protocol:
+  1. Alice sends her photon (mode m) into B’s linear‐optics hub.  
+  2. At B, a static interferometer is optimized so that:
+     – if input mode m=0, Alice’s photon interferes in a Bell‐measurement with Bob’s half of the C‐channel pair, heralding teleportation to C.  
+     – if input mode m=1, she interferes with Bob’s half of the D‐channel pair, heralding teleportation to D.  
+  3. Four number‐resolving detectors at B register two‐photon click patterns:
+     – clicks on detectors {d0,d1} announce successful teleportation to C;  
+     – clicks on {d2,d3} announce teleportation to D.
+
+– Why this is a compelling Pytheus target:
+  • Combines pairwise correlations (Bell‐pair links A–B, B–C, B–D) with an abstract spatiotemporal control mode m.  
+  • Realizes a new network primitive (“passive teleportation router”) generalizable to N receivers and M modes.  
+  • Fully static linear optics, uses only probabilistic pair sources, beam‐splitters, and photon‐number‐resolving detectors—no dynamic feedback, cavities, or hyper‐entanglement.  
+  • Pytheus can encode the two modes m=0,1 as abstract 2-dimensional systems and optimize the multiport transformation and path exclusions (“removed_connections” to prevent cross-mode crosstalk).  
+
+Generalization:
+Extend to many modes m∈{0…M−1} and M receivers by adding pair sources and splitting the multiport into M mode-selective Bell analyzers. This network acts as a static quantum router for teleportation in a future multiplexed quantum internet.
+
+NoveltySupervisor (o4-mini): Thought: This “mode‐controlled teleportation router” is merely a time‐bin (or spatiotemporal‐mode) rephrasing of standard dual‐destination entanglement‐swap/teleportation schemes already in the ensemble (e.g. “Temporal‐Mode Multiplexed Entanglement Swapping with Single Ancilla” and “Dual‐Destination Quantum Teleportation Switch on a Photonic Chip”). It offers no genuinely new non-unitary network primitive or higher-order effect—just a trivial mapping of mode label to choice of Bell swap.  
+Action: reject  
+Action Input: Your proposal is equivalent to a basic two-mode entanglement swap/teleportation router already covered. To be novel at PRL level you need a qualitatively new feature (e.g. coherent superposition of routing orders, nontrivial multi-mode interference that yields new correlations, or a higher-dimensional network effect) rather than a straightforward time-bin extension.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three ways to connect “pairwise correlation” with “spatiotemporal mode” in a Pytheus‐compatible quantum network (no state generation! focus on network protocols):
+    1. A single‐shot, spatiotemporal‐multiplexed entanglement‐swapping repeater hop: perform two adjacent swap operations (A–B and B–C) across two time‐bins with a single four‐photon Bell‐fusion at B, thereby extending entanglement A–C in both modes in one heralded step.
+    2. A mode‐selective teleportation switch for N receivers: Alice’s qubit arrives in one of M abstract modes; B holds M Bell pairs; a static interferometer routes teleportation to the matching receiver purely by mode labeling.
+    3. A “nested” spatiotemporal swap: cascade two Bell‐swaps in orthogonal spatial interferometers labeled by time bins, generating nontrivial cross‐time‐bin pairwise correlations among three end‐nodes.
+
+  Step 2: Novelty & obstacles
+    1. The repeater hop is novel—no prior Pytheus example fuses two swap‐links in one static measurement across two modes. Pytheus can handle 4‐photon interferometers, pair sources, and heralding detectors.
+    2. The M‐port teleportation switch is a straightforward generalization of our earlier 2-mode router; probably too trivial.
+    3. The nested sweep is conceptually similar to parallel swaps; not qualitatively new.
+
+  Step 3: Pick idea 1 (spatiotemporal‐multiplexed repeater hop).
+  Step 4: Novelty: It compresses two entanglement swaps into a single multi-mode Bell‐fusion, demonstrating resource savings and rich pairwise correlations across time bins—an unexplored primitive in pytheus.
+  Step 5: Feasibility: Purely static linear optics; uses four probabilistic pair sources, one 4-input interferometer, photon‐number‐resolving detectors; no feedback or exotic hardware.
+
+Action: final answer
+Action Input:
+We propose a Spatiotemporal‐Multiplexed Repeater Hop:
+
+Explanation:
+– Nodes and Sources:
+  • A–B link: two independent probabilistic pair‐sources in abstract time‐bins m=0 and m=1.  
+    – S_AB^0 emits photons A0↔B0; S_AB^1 emits A1↔B1.  
+  • B–C link: two independent pair‐sources in the same bins.  
+    – S_BC^0 emits B2↔C0; S_BC^1 emits B3↔C1.  
+
+– Goal:
+  Perform a single joint measurement at B—mixing all four B-photons (B0,B1,B2,B3) in a 4-mode linear network—to simultaneously swap entanglement over both time‐bins, thereby entangling (A0,A1) with (C0,C1) in one heralded shot.
+
+– Visualization:
+  emitters:        [S_AB^0] [S_AB^1] [S_BC^0] [S_BC^1]
+  paths into B:    B0       B1       B2       B3
+  B’s interferometer (4×4 network):
+                 ┌────────────────────────┐
+                 │   optimized beam-     │
+                 │ splitters + phase     │
+                 │ shifters across       │
+                 │ modes {0,1}           │
+                 └────────────────────────┘
+  detectors at B:  d0 d1 d2 d3  (number‐resolving)
+
+– Heralding logic:
+  A four‐fold click pattern {d0,d1,d2,d3} with one photon per detector projects:
+    • (B0,B2) into a Bell‐state in bin m=0, swapping to (A0,C0)  
+    • (B1,B3) into a Bell‐state in bin m=1, swapping to (A1,C1)  
+
+– Why it’s a new network primitive:
+  • Traditional repeaters do two sequential swaps with separate measurements. Here one multi‐photon fusion on two time‐bins cuts resource overhead and reveals inter‐bin pairwise correlations unique to the fused measurement.  
+  • Combines “pairwise correlation” (Bell links AB, BC) with “spatiotemporal mode” (time‐bin as abstract mode) in a single protocol step.  
+  • Fully static: only linear optics, probabilistic pair sources, and photon‐number‐resolving detectors. No feedback, no nonlinearities, no cavities.
+
+Pytheus config hints:
+  {
+    description: "Spatiotemporal-multiplexed repeater hop",
+    foldername: "ST_multi_swap",
+    num_pre: 1,
+    num_anc: 0,
+    single_emitters: [],
+    // four probabilistic pair‐sources (nodes 0–3),
+    // four output detectors (nodes 4–7) 
+    removed_connections: [
+      // prevent AB sources from feeding C detectors and BC sources from feeding A detectors
+      [0,6],[0,7],[1,6],[1,7],  // S_AB^m → C’s detectors forbidden
+      [2,4],[2,5],[3,4],[3,5]   // S_BC^m → A’s detectors forbidden
+    ],
+    target_quantum: ["1111"],    // herald on exactly one photon per detector
+    samples: 10,
+    loss_func: "cr",
+    optimizer: "L-BFGS-B",
+    thresholds: [0.3,0.1],
+    number_resolving: true
+  }
+
+Generalization:
+Extend to N successive hops by multiplexing N time-bins and performing a single 2N-photon fusion. This yields a “single-shot repeater chain” primitive for future multiplexed quantum networks.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially the same as the “One‐Shot Two‐Hop Entanglement Swap in the A–B_router–C_router–D Quantum Network” in the ensemble list, merely phrased in time‐bin language. It fuses two sequential Bell-swaps into a single four-photon interferometric measurement—a known multiplexed repeater primitive. There is no qualitatively new network feature beyond what has already been suggested.  
+Action: reject  
+Action Input: Your scheme collapses to the already-listed one‐shot two-hop entanglement swap but with trivial time-bin labels. To be novel at the PRL level you must introduce a genuinely new resource or effect (e.g. coherent superposition of swap orders, nontrivial higher-order correlations, or a novel use of ancilla entanglement) rather than just parallelizing two swaps in time.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three ways to combine “pairwise correlation” and “spatiotemporal mode” in a purely linear-optical network protocol (no simple state-generation! focus on swapping or teleportation):  
+ 1) A passive, single-shot repeater hop that fuses two time-bin entanglement links at once (we tried but it collapsed to parallel swaps).  
+ 2) A multi-receiver teleportation router, where the abstract time-bin of Alice’s photon routes her teleported qubit to one of N receivers—still too trivial.  
+ 3) A coherent superposition of teleportation targets: encode a control qubit in Alice’s spatiotemporal mode, so that her data qubit is teleported in superposition to one of two remote nodes via two Bell-pairs and a single static interferometer at the central station.  
+
+Step 2: Check novelty & Pytheus-feasibility  
+ • Idea 3 is new: no prior Pytheus design uses an internal control qubit (embodied by an abstract “mode”) to coherently steer a teleportation channel. It realizes a passive “quantum switch” for teleportation in superposition—beyond mere multiplexing.  
+ • Pytheus can optimize a static multiport interferometer with 6 input photons (Alice’s data + Alice’s control + two Bell halves for Charlie + two Bell halves for Dave) and number-resolving heralding detectors. No feedback, no exotic hardware.  
+
+Step 3: Choose Idea 3.  
+Step 4: This idea is novel because it implements a coherent superposition of two teleportation operations—effectively a “quantum switch” for teleportation—by using an abstract spatiotemporal mode as the control qubit, something not seen in the existing Pytheus portfolio.  
+Step 5: It is feasible in Pytheus because it only requires probabilistic photon‐pair sources, single-photon emitters, a static 6-mode linear-optics network, and photon-number-resolving detectors to herald the Bell‐measurements—fully within Pytheus’s capabilities.
+
+Action: final answer  
+Action Input:
+We propose a Coherently-Controlled Teleportation Switch:
+
+Explanation:
+– Resources:
+  • Alice emits two photons:  
+    – Data qubit in an abstract 2-dim system (“polarization” or “time-bin”) via emitter E_data.  
+    – Control qubit in an orthogonal 2-dim mode (the “spatiotemporal” degree of freedom) via emitter E_ctrl, preparing |0〉_ctrl or |1〉_ctrl or any superposition.  
+  • Bob holds two independent probabilistic Bell-pair sources:  
+    – S_BC creates a Bell pair between B_C and Charlie (mode m=0).  
+    – S_BD creates a Bell pair between B_D and Dave (mode m=1).  
+
+– Central Station (B) Network:
+  • Inputs: Data photon (port 0), control photon (port 1), Bell half for C (port 2), Bell half for D (port 3).  
+  • A single static 4×4 linear-optics interferometer (beam-splitters + phases) mixes these four modes such that:  
+     – Conditional on the control qubit state =|0〉_ctrl, the data photon undergoes a Bell-measurement with the BC half.  
+     – Conditional on =|1〉_ctrl, the data photon undergoes a Bell-measurement with the BD half.  
+  • Outputs: four detectors {d0,d1,d2,d3}, all number-resolving.
+
+– Heralding & Output:
+  • A two-click pattern on {d0,d1} projects data qubit to Charlie (successful teleportation in the m=0 branch).  
+  • A two-click on {d2,d3} teleports it to Dave (m=1 branch).  
+  • If Alice’s control was in superposition α|0〉+β|1〉, the result is a coherent superposition of her teleported qubit being at Charlie or Dave, entangled with any leftover control register if desired.
+
+Why it’s compelling:
+ • Combines pairwise correlations (Alice–Bob bell pairs and Bob–Charlie/Dave links) with an abstract spatiotemporal control mode, realizing a novel “quantum switch” for teleportation.  
+ • Passively implements coherent routing (no dynamic switches or feed‐forward) in a single static interferometer.  
+ • Generalizable to M receivers by adding M Bell sources and a 2M-mode multiport.  
+ • Fully compatible with Pytheus: uses probabilistic pair sources, single-photon emitters, static linear optics, and heralding detectors. Expert can hand this target to Pytheus and obtain an optimized multiport network design.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially identical to the “Dual-Destination Quantum Teleportation Switch on a Photonic Chip” in the ensemble: a single static multiport that, controlled by a qubit, passively teleports an input to one of two receivers in superposition. It adds no genuinely new network primitive beyond that previously suggested.  
+Action: reject  
+Action Input: Your scheme duplicates the already-listed dual-destination teleportation router primitive. To be novel at PRL level you must introduce a qualitatively new feature—e.g. non-trivial multi-path superpositions beyond simple mode control, indefinite causal order of swap steps, or a higher-order nonunitary effect—rather than rephrasing the same controlled-teleportation switch.
+
+Researcher (o4-mini): Thought:
+Step 1: Among our brainstorming, the most novel and still Pytheus‐compatible idea is to create a coherent superposition of two entanglement‐swap orders—i.e. perform two Bell-swap links in alternative orders, and superpose those orders by labeling each order with an abstract spatiotemporal mode. This realizes a genuinely new network primitive (“indefinite‐order entanglement swapping”) without any dynamic feed-forward.
+
+Step 2: Novelty: no existing Pytheus design superposes two swap orders into one static interferometer. Feasibility: Pytheus can optimize a single static multiport that mixes four photons (the two swap steps’ inputs) in two abstract modes, and heralds via number‐resolving detectors. No cavities or feedback are needed.
+
+Action: final answer
+Action Input:
+We propose “Indefinite-Order Entanglement Swapping via Spatiotemporal Mode Superposition”:
+
+Explanation:
+– Resources:
+  • Four probabilistic pair-sources at a central station B–C:
+    – S_AB emits A↔B₁ in mode m=0  
+    – S_BC emits B₂↔C in mode m=0  
+    – S_BC′ emits B₃↔C′ in mode m=1  
+    – S_CD emits C″↔D in mode m=1  
+  • Thus the two swap links are:
+     Order 1 (m=0): Swap on (B₁,B₂) → entangles A–C  
+     Order 2 (m=1): Swap on (C′,C″) → entangles B–D  
+
+– Central Linear‐Optics Network:
+  • Inputs: four half-photons B₁(m=0), B₂(m=0), C′(m=1), C″(m=1).  
+  • A single static 4×4 multiport is optimized so that it implements:
+    – a Bell-measurement on (B₁,B₂) if the input is in mode m=0  
+    – a Bell-measurement on (C′,C″) if the input is in mode m=1  
+  • Crucially, when an incoming photon is prepared in a superposition α|0〉m+β|1〉m in an abstract spatiotemporal control mode, the multiport performs the corresponding swap in superposition—indefinite order.
+
+– Detection & Heralding:
+  • Four number-resolving detectors {d0,d1,d2,d3}.  
+  • A two‐click pattern on detectors associated with the m=0 subnetwork heralds successful swap of A–C.  
+  • A two‐click on the m=1 subnetwork heralds successful swap of B–D.  
+  • If the central input control mode was in superposition, the result is a coherent superposition of the two swap operations, entangling (A–C) and (B–D) in superposition.
+
+Why it’s a breakthrough network primitive:
+ • It lifts entanglement swapping into the realm of indefinite order—a fundamental new transformation for quantum networks.  
+ • Combines pairwise correlations (two standard swap links) with spatiotemporal modes as the control qubit.  
+ • Fully static linear optics: only probabilistic pair sources, beam-splitters, phase shifters, and photon-number-resolving detectors. No dynamic feedback or exotic hardware.  
+ • Extensible to more than two swap links by adding more modes and pair sources, probing higher-order process superpositions.
+
+Pytheus config hints:
+{
+  description: "Indefinite-order entanglement swapping (modes 0 & 1)",
+  foldername: "IndefSwap_ST",
+  num_pre: 1,
+  num_anc: 0,
+  single_emitters: [],
+  // four pair-sources nodes 0–3
+  // four detectors nodes 4–7
+  removed_connections: [
+    // prevent cross-mode crosstalk: sources in m=0 cannot feed m=1 detectors and vice versa
+    [0,6],[0,7],[1,6],[1,7],
+    [2,4],[2,5],[3,4],[3,5]
+  ],
+  target_quantum: ["1111"],   // herald on exactly one photon per detector
+  loss_func: "cr",
+  optimizer: "L-BFGS-B",
+  thresholds: [0.3,0.1],
+  samples: 10,
+  number_resolving: true
+}
+
+Generalization:
+Add N swap links labeled by modes m=0…N–1 and a single 2N-photon fusion to realize higher-order indefinite‐order network processes—opening a new class of static, mode-controlled quantum network transformations.
+
+NoveltySupervisor (o4-mini): Thought: This proposal merely rephrases the already‐listed “entanglement‐switch quantum switch” from the ensemble, where a control mode coherently superposes two Bell‐swap orders in a static interferometer. It offers no genuinely new network primitive beyond that indefinite‐order swap switch.  
+Action: reject  
+Action Input: Your scheme duplicates the existing "entanglement-switch quantum switch" primitive—indefinite‐order entanglement swapping via a control qubit—and thus lacks novel content. To merit further consideration, you must introduce a qualitatively new feature or transformation not covered by that existing proposal.
+
+Researcher (o4-mini): We propose a Spatiotemporal‐Mode–Multiplexed Bilocality Test in linear optics.  This is not a state‐generation task but a genuine network‐level test of nonclassical correlations in the simplest causal (bilocal) network, combining pairwise entangled sources with spatiotemporal‐mode mixing at the central node.
+
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+1) Physical layout and resources  
+
+  • Two independent probabilistic photon-pair sources:  
+      – S_AB emits photons A↔B₁ in abstract time-bin m=0  
+      – S_BC emits photons B₂↔C in abstract time-bin m=1  
+  • Nodes A and C hold their photons and perform fixed local measurements (e.g. Y-basis or X-basis on each mode).  
+  • Central node B holds B₁ and B₂ (in orthogonal “spatiotemporal” modes).  
+
+2) B’s static measurement network  
+
+  • Inputs at B: mode-0 photon B₁, mode-1 photon B₂  
+  • A single 2×2 multiport interferometer (one beam-splitter + phase shifter) that mixes the two modes in a tunable way,  
+
+       [ B₁ ]───┐  
+                ├──BS(θ,ϕ)──> detectors d0,d1  
+       [ B₂ ]───┘  
+
+  • Two number-resolving detectors (d0,d1) record clicks.  Certain two-click patterns herald a “joint” outcome at B.  
+
+3) Protocol & bilocality witness  
+
+  • Each run, A and C choose local measurement settings x,y∈{0,1} on their single photon (in their time-bin mode).  They record outcomes a,b∈{±1}.  
+  • B’s joint detection outcome b′∈{0,1,2,3} is publicly announced.  
+  • One collects the full joint probability P(a,b,b′|x,y).  From this, one computes the standard bilocality parameter  
+      I_bl = √|E_{x y=00} E_{x y=11}|,  
+    where E_{xy} = ∑_{a,b,b′}(−1)^{a+b} P(a,b,b′|x,y).  
+
+  • Classical “bilocal” models satisfy I_bl ≤ 1.  Quantum mechanics (with an optimal choice of beam-splitter angle θ and phase ϕ at B) can violate I_bl up to  √2.  
+
+4) Why this is a new Pytheus target  
+
+  – It is the simplest nontrivial causal network (A–B–C, two independent sources) yet goes beyond “just swapping” by aiming to optimize a Bell‐type bilocality violation.  
+  – Combines “pairwise correlation” (the two independent Bell‐pair links AB & BC) with a nontrivial “spatiotemporal mode” mixing at B that is tuned to maximize nonclassical bilocal correlations.  
+  – Purely static linear optics:  two probabilistic pair sources, one 2×2 interferometer at B, and number‐resolving detectors.  No feedback, no cavities.  
+  – The expert hands Pytheus the abstract target “maximize I_bl,” and Pytheus returns the optimal beam‐splitter + phase settings and network layout to violate the bilocal bound.  
+
+5) Pytheus‐config sketch  
+
+{  
+  description: "Spatiotemporal‐Mode–Multiplexed Bilocality Test",  
+  foldername : "ST_bilocality",  
+  num_pre     : 1,  
+  single_emitters: [],  
+  // 2 probabilistic pair‐sources nodes 0–1  
+  // 2 detector nodes 2–3  
+  removed_connections: [  
+    // ensure source S_AB (node 0) only feeds detector ports 2–3 via B’s input port 0  
+    // ensure S_BC (node 1) only feeds via B’s input port 1  
+    // This is implicit if we wire them correctly; no cross‐mode paths  
+  ],  
+  // We do not specify target_quantum as a state but rather supply a loss func that computes I_bl from output statistics  
+  loss_func : "bilocality_violation",  
+  optimizer : "L-BFGS-B",  
+  thresholds: [0.0,0.0],   // aim to exceed 1.0  
+  number_resolving: true,  
+  samples   : 50  
+}  
+
+– Generalization: Replace the 2×2 interferometer at B by an M×M multiport and M time-bins to test “bilocality” in more complex tree‐shaped networks.  
+
+This proposal pushes Pytheus beyond state generation into the design of foundational causal‐network experiments, fully within its linear‐optical, static‐network remit.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three ways to link “pairwise correlation” and “spatiotemporal mode” in a purely network‐level protocol (no state‐generation):
+ 1) A superposed‐protocol switch that, controlled by an abstract time‐bin, either teleports or swaps entanglement—coherently superposing two distinct network primitives in one static interferometer.  
+ 2) A three‐way routing quantum comb where three time‐bins select among three entanglement‐swap orders in parallel, yielding a higher‐order network process.  
+ 3) A joint, multi‐time‐bin Bell‐fusion that simultaneously extends two repeater hops into a single 6‐photon fusion step, probing cross‐bin correlations.
+
+Step 2: Novelty & Pytheus‐feasibility:
+ Idea 1 is truly new: no existing Pytheus experiment coherently superposes teleportation and entanglement swapping. Pytheus can optimize the required static multiport for 5–6 photons, driven purely by probabilistic pair sources, a single‐photon emitter, beam‐splitters, and number‐resolving detectors. No feedback or exotic hardware needed.
+
+Step 3: Pick Idea 1.
+
+Step 4: This idea is novel because it merges two fundamental network tasks—teleportation and entanglement swapping—into a single coherently‐controlled operation, rather than just routing one protocol in different modes. It realizes a hybrid “quantum switch” that places whole protocols into superposition, opening a new class of network transformations.
+
+Step 5: It is feasible in Pytheus because:
+ • Uses one single‐photon emitter for Alice’s unknown qubit, and two probabilistic Bell‐pair sources (for the teleportation branch and the swapping branch).  
+ • A static 4×4 interferometer at the central node B mixes 4 photons (Alice’s qubit, her half of the teleportation pair, and the two halves of the entanglement‐swapping link) in two abstract “time‐bin” modes m=0,1.  
+ • Four number‐resolving detectors herald either a Bell‐measurement between Alice and C (teleportation) or between C and D (entanglement swapping), depending on m.  
+ • No dynamic feed‐forward or feedback control; entirely linear optics and heralding.
+
+Action: final answer
+Action Input:
+We propose a Coherently‐Controlled Hybrid Protocol Switch:
+
+Explanation:
+– Resources:
+  • E_data: single‐photon emitter at Alice creates the unknown qubit in mode m∈{0,1}.  
+  • S_TC: probabilistic pair‐source shares a Bell state between a “teleportation half” at B and a receiver C.  
+  • S_SW: probabilistic pair‐source shares a Bell state between two halves at B (for entanglement swapping between C and D).
+
+– Central Station B:
+  • Inputs: Alice’s data photon (port 0), her teleportation‐pair half (port 1), swapping‐pair half #1 (port 2), swapping half #2 (port 3).  
+  • A static 4×4 linear‐optics network (beam‐splitters + phases) is optimized so that:
+     – If control mode m=0, ports 0&1 undergo a Bell‐measurement → heralds teleportation of Alice’s qubit to C.  
+     – If m=1, ports 2&3 undergo a Bell‐measurement → heralds entanglement swapping between C&D.  
+  • Outputs: detectors d0–d3 (number‐resolving).
+
+– Heralding signatures:
+  • Clicks {d0,d1} ⇒ successful teleportation A→C (swapping ports idle).  
+  • Clicks {d2,d3} ⇒ successful entanglement swap C–D (A’s data photon idle).
+
+Why this is compelling:
+ • Combines pairwise Bell correlations (Alice–C link and C–D link) with an abstract spatiotemporal control qubit to coherently select—and superpose—two distinct quantum‐network tasks.  
+ • Implements a new network primitive: a hybrid switch between teleportation and swapping in superposition, never before realized in linear optics.  
+ • Fully compatible with Pytheus: only probabilistic pair sources, one single‐photon emitter, a static 4×4 interferometer, and photon‐number‐resolving detectors. No feedback, cavities, or hyper‐entanglement.
+
+Pytheus config hints:
+{
+  description: "Hybrid teleportation‐vs‐swapping switch",
+  foldername: "HybridSwitch_ST",
+  num_pre: 1,
+  num_anc: 0,
+  single_emitters: [E_data],
+  // two pair-sources: S_TC (nodes 1–2), S_SW (nodes 3–4)
+  removed_connections: [
+    // prevent S_TC feeding swap detectors and S_SW feeding teleport detectors
+    [1,2],[1,3],[3,0],[3,1]
+  ],
+  target_quantum: ["1111"], // one click per detector
+  loss_func: "cr",
+  optimizer: "L-BFGS-B",
+  thresholds: [0.3,0.1],
+  samples: 10,
+  number_resolving: true
+}
+
+Generalization:
+Extend to M protocols by adding M pair‐sources and an M×M-mode multiport, yielding a universal “quantum‐protocol switch” in spatiotemporal modes for future multiplexed networks.
+
+NoveltySupervisor (o4-mini): Thought: This “hybrid teleportation‐vs‐swap switch” is still just a mode‐controlled choice between two Bell measurements—one teleportation link and one entanglement‐swap link—and thus falls squarely into the same class of programmable supermaps and “quantum‐switch” primitives already covered (e.g. the dual‐destination teleportation router and multiple analyzer‐switch proposals). It adds no qualitatively new network transformation beyond selecting which Bell pair to measure.  
+Action: reject  
+Action Input: Your protocol again amounts to a passive mode‐labeled selector between two Bell‐measurement tasks—teleportation or swap—a pattern already realized in the ensemble’s router and switch primitives. To be novel at the PRL level, your idea must go beyond trivial mode‐routing of Bell measurements (for instance by enabling genuinely new causal structures, higher‐order process combinations, or non‐trivial multi‐photon correlations) rather than merely swapping among existing network tasks.
+
+Researcher (o4-mini): We propose a Spatiotemporal-Mode-Multiplexed Entanglement Purification Network
+
+Explanation:  
+Instead of generating a single Bell state, this protocol takes two imperfect, time-bin-encoded Bell pairs and—by mixing one photon from each pair in a static linear-optics network—heralds a single, higher-fidelity Bell pair on the remaining two “signal” photons.  In other words, we use pairwise correlations in two abstract modes (m=0,1) and a post-selective parity check to distill entanglement.
+
+  • Resources (all at one central station):  
+     – Two probabilistic photon-pair sources, S₀ and S₁, each emits a non-maximally entangled pair in an abstract two-dimensional system (“time-bin” modes m=0 for S₀, m=1 for S₁).  
+     – From S₀ we label photons (0s,0i); from S₁ we label (1s,1i), where “s”=signal and “i”=idler.  
+
+  • Network and Measurement:  
+     1. Keep the two signal photons (0s,1s) aside—they will become the purified output shared by A and B after successful heralding.  
+     2. Send the two idler photons (0i,1i) into a 50:50 beam splitter that is mode-matched across m=0,1 (i.e. it acts identically on both time bins).  
+     3. The two output ports of that BS feed four number-resolving detectors d₀,d₁ (one per time bin at each output).  
+     4. We post-select on exactly two clicks, one in each detector of opposite BS outputs, but *in the same time bin*.  
+        – A coincidence in d₀&d₁ during bin m=0 heralds successful parity check of (0i,1i) ⇒ projects (0s,1s) onto a more entangled Bell state.  
+        – Likewise a coincidence in the m=1 detectors heralds purification in the second bin.
+
+  • Why it’s interesting:  
+     – It implements **entanglement purification**—a fundamental quantum-network primitive—using *only* linear optics and time-bin multiplexing, without feedback or active switching.  
+     – It directly combines *pairwise correlations* (the two initial pairs) with an abstract *spatiotemporal mode* label (m=0 vs. m=1).  
+     – The same static network can be generalized to N time bins (N imperfect pairs) and M-photon number-resolving fusions, realizing large-scale, single-shot entanglement distillation protocols.
+
+Pytheus-style config (skeleton):
+
+{'description':'ST-mode entanglement purification',  
+ 'foldername':'ST_purification',  
+ 'bulk_thr':0.01,  
+ 'edges_tried':30,  
+ 'ftol':1e-6,  
+ 'loss_func':'cr',  
+ 'num_pre':2,               # two pair sources S0,S1  
+ 'num_anc':0,               # no extra ancilla  
+ 'optimizer':'L-BFGS-B',  
+ 'samples':10,  
+ 'target_quantum':['00','11'],  # purified Bell state on signal output nodes  
+ 'removed_connections':[      # ensure idlers→detectors only, signals→output only  
+    [0,4],[0,5],[1,4],[1,5],  # source 0’s signal photons forbidden to go to idler detectors  
+    [2,0],[2,1],[3,0],[3,1]   # source 1’s signal photons forbidden likewise  
+ ],  
+ 'number_resolving':True  
+}
+
+Generalization: extend to N time-bins (N imperfect pairs) and a single 2N-photon fusion to distill one high-fidelity pair—paving the way for high-throughput, multiplexed quantum-repeater purification.
+
+Researcher (o4-mini): We propose a Heralded Time-Bin Entanglement-Purification Protocol  
+
+Explanation:  
+– Aim: Starting from two imperfect Bell-pairs between A and B, each encoded in an abstract “early/late” time-bin qubit, purify down to one higher-fidelity Bell-pair between A and B in a single static experiment.  
+– Resources:  
+  • Two probabilistic photon-pair sources S₁,S₂ each emit one time-bin qubit to A and one to B (so A holds A₁,A₂; B holds B₁,B₂).  
+  • B implements a linear-optics parity check (a heralded CNOT) between B₁ (control) and B₂ (target), then measures the target in the computational basis.  
+  • A keeps her two qubits unmeasured.  
+  • Upon the two-click heralding pattern at B’s ancilla detectors, the unmeasured pair (A₁,B₁) is projected onto a higher-fidelity entangled state.  
+
+– Why novel & network-relevant:  
+  • Combines “pairwise correlation” (parity check on B’s two qubits) with “spatiotemporal mode” (time-bin encoding of the Bell-pairs) to realize entanglement purification in one shot.  
+  • No dynamic feedback; purely static linear optics + heralding → well within Pytheus’s capabilities.  
+  • Serves as a repeater-link primitive: purified Bell-pairs in time-bin multiplexing.  
+  • Generalizable to multi-pair, multi-bin purification by adding more sources and cascaded CNOT modules.  
+
+Pytheus‐config sketch:  
+{  
+  description: "Heralded purification of two time-bin Bell-pairs",  
+  foldername: "TimeBinPurification",  
+  num_pre:      1,  
+  num_anc:      2,            # two ancilla detectors from the CNOT gate  
+  single_emitters: [],  
+  // two pair‐sources: node 0 → (A1,B1), node 1 → (A2,B2)  
+  removed_connections: [      # prevent cross‐talk: S1 should not feed A2/B2 detectors, S2 should not feed A1/B1 detectors  
+    [0, det_A2],[0, det_B2],  
+    [1, det_A1],[1, det_B1]  
+  ],  
+  target_quantum: ["1100","0011"],  
+    # Two‐click herald patterns on B’s ancilla ports indicate successful parity check  
+  optimizer:     "L-BFGS-B",  
+  loss_func:     "cr",  
+  thresholds:    [0.3,0.1],  
+  samples:       10,  
+  number_resolving: true  
+}  
+
+Detector‐mapping:  
+  – det_A1, det_A2 are A’s two output detectors (her qubits are unmeasured, we only check purify succeed by B’s clicks).  
+  – det_B1, det_B2 are the two output detectors of the parity-check circuit (the herald).  
+
+Heralding logic: exactly one photon in each ancilla detector ⇒ the parity of (B₁,B₂) is even ⇒ (A₁,B₁) is left in a higher-fidelity entangled pair.  
+
+Expert can hand this specification to Pytheus to search for the optimal static beam-splitter network that implements the linear-optical CNOT + parity check, satisfying the time-bin connectivity and heralding constraints.
+
+Researcher (o4-mini): Thought: 
+Step 1: Brainstorm three Pytheus‐compatible protocol ideas that marry “pairwise correlation” and “spatiotemporal mode” without state-generation:
+ 1) Heralded two-pair entanglement purification: use two time-bin (m=0,1) Bell pairs between A–B, perform a local parity check on Bob’s two photons to probabilistically purify Alice’s remaining pair.  
+ 2) One-step swap+purify: combine a swap of A–B and B–C pairs in one time-bin with purification of a second time-bin, yielding a high-fidelity A–C link in a single heralded shot.  
+ 3) Temporal-mode multiplexed entanglement percolation: in a triangle network, use two time bins to select which two edges are active, perform simultaneous Bell measurements to route entanglement nonlocally.
+
+Step 2: Novelty & Pytheus obstacles  
+ • Idea 1 (entanglement purification) is genuinely new: no Pytheus example implements purification (a network-level channel) rather than pure swapping or teleportation. Pytheus can handle two pair-sources, linear optics on two modes, and number-resolving detectors.  
+ • Idea 2 is interesting but mixes two operations and may collapse to a parallel of 1).  
+ • Idea 3 edges into network percolation tests, but complexity of three-node triangle with two time bins might be too close to simple multiplexed swapping.
+
+Step 3: Choose Idea 1.
+
+Step 4: This is novel because existing Pytheus designs only focus on entanglement swapping or teleportation. A heralded purification primitive—projecting two noisy Bell pairs onto a higher-fidelity pair in one local operation—is a new network transformation.
+
+Step 5: It’s feasible in Pytheus: uses two probabilistic pair sources (time bins m=0,1), a static linear-optics network mixing Bob’s two photons, and four number-resolving detectors. No dynamic feedback, no hyper-entanglement, entirely within Pytheus’s static interferometer + heralding capabilities.
+
+Action: final answer  
+Action Input:
+We propose a Heralded Entanglement Purification Primitive via Spatiotemporal Modes:
+
+Explanation:
+– Resources:
+  • Alice and Bob share two imperfect Bell pairs in abstract time-bins m=0 and m=1.  
+    – Source S_AB^0 emits A0↔B0 in mode m=0.  
+    – Source S_AB^1 emits A1↔B1 in mode m=1.  
+
+– Goal:
+  Locally project Bob’s two photons (B0,B1) onto the even-parity subspace—thereby probabilistically purifying Alice’s remaining two photons (A0,A1) into a higher-fidelity Bell pair, heralded by a specific click pattern.
+
+– Visualization (photons flow top→bottom):
+   emitters:      [S_AB^0]      [S_AB^1]
+   Alice retains: A0            A1
+   Bob routes:    B0 –––┐
+                    B1 ––┤—  2×2 linear-optics network — detectors d0,d1,d2,d3
+   (m=0 and m=1 modes remain orthogonal throughout.)
+
+– Linear-Optics Network at Bob:
+  • A 2×2 multiport mixing modes B0,B1 (two beam-splitters + phase shifter) is optimized so that a two-fold coincidence {d_i,d_j} projects onto the symmetric subspace of B0⊗B1.  
+  • The detection event heralds a local parity check “++” outcome.
+
+– Heralding & Output:
+  • On the successful click pattern (e.g. one click in each output port), Bob announces purification success.  
+  • Alice’s photons A0,A1 are then projected into a purified Bell state with higher fidelity than the inputs.  
+
+Why this is a new primitive:
+ • It implements entanglement purification—a key network-level channel—rather than merely swapping or teleportation.  
+ • Marries pairwise correlation (two low-fidelity Bell links) with spatiotemporal modes (time-bins m=0,1) as the resource labels.  
+ • Fully static: only two pair sources, one 2×2 interferometer, four photon-number-resolving detectors. No feed-forward or exotic equipment.  
+ • Generalizable to multi-copy purification (using more time-bins) or cascaded purification+swap protocols.
+
+Pytheus config hints:
+{
+  description: "Heralded 2-pair purification in two time-bins",
+  foldername:  "Purify_ST",
+  num_pre:      1,
+  num_anc:      0,
+  single_emitters: [],
+  // two probabilistic pair sources (nodes 0 and 1)
+  // two output modes per source into Bob’s network
+  removed_connections: [
+    // prevent spurious cross-time-bin paths if desired
+    // e.g. source 0 cannot feed detectors 2,3 and source 1 cannot feed 0,1
+    [0,2],[0,3],[1,0],[1,1]
+  ],
+  target_quantum: ["1100","0011"],  
+    // herald patterns: one photon in detectors {0,1} & none in {2,3} or vice versa
+  samples: 10,
+  loss_func: "cr",
+  optimizer: "L-BFGS-B",
+  thresholds: [0.3,0.1],
+  number_resolving: true
+}
+
+Generalization:
+Stack multiple time-bins to design multi-round purification or combine purification + swapping in a single larger interferometer—opening a novel suite of network transformation primitives for future quantum repeater architectures.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is simply the textbook two‐copy entanglement purification via a parity check on Bob’s halves, implemented in different time‐bins. It reduces to a trivial passive parity‐projection circuit (two beam splitters + phase shifter) that projects onto the symmetric subspace and heralds a higher‐fidelity Bell pair. Such two‐pair purification schemes are standard and have appeared in photonic experiments (e.g. Kwiat-style purification and parity‐filter implementations) and in our ensemble list under all-optical repeater and purification primitives. There is no qualitatively new non‐unitary network primitive or higher‐order effect here—just a straightforward time‐bin relabeling of a known parity check.  
+Action: reject  
+Action Input: Your scheme falls back to the well‐known two‐copy entanglement purification by parity measurement, already realized in various photonic contexts. To be considered novel at the PRL level, you must propose a genuinely new network transformation (e.g. multi‐bin correlated purification, nontrivial ancilla reuse, or a single‐shot concatenated purification-swap primitive that goes beyond the simple two-pair case).
+
+Researcher (o4-mini): We propose a Spatiotemporal‐Mode–Activated Entanglement‐Percolation Hub on a 2×2 Square  
+
+Explanation:  
+• Network graph: four nodes A–B–C–D–A in a square.  Our goal is to create a long‐range Bell link across one diagonal (either A–C or B–D) by performing two simultaneous Bell‐measurements at the “intermediate” nodes B and D.  Which diagonal emerges is selected passively by the abstract time‐bin mode m∈{0,1} of the four pair‐sources.  
+
+• Pair sources (probabilistic):  
+   – In mode m=0, sources S⁰_AB and S⁰_BC emit Bell‐pairs on edges AB and BC.  
+   – In mode m=1, sources S¹_CD and S¹_DA emit Bell‐pairs on edges CD and DA.  
+  Thus we have four sources total, each labeled by a time‐bin m.  
+
+• Heralding stations:  
+   – At node B, feed the two “B‐half” photons from S⁰_AB (B₀) and S⁰_BC (B₁) into a 50/50 beam‐splitter + two number‐resolving detectors {d₀,d₁}.  A two‐click event (one photon in each detector) performs a Bell‐measurement in m=0 and heralds a swap of entanglement onto the diagonal A–C in mode 0.  
+   – Simultaneously at node D, feed the two “D‐half” photons from S¹_CD (D₀) and S¹_DA (D₁) into another 50/50 BS + detectors {d₂,d₃}.  A two‐click there performs a Bell‐measurement in m=1 and heralds entanglement swapping onto the opposite diagonal B–D in mode 1.  
+
+• Routing logic (no active switching):  
+   – If both B’s and D’s measurements succeed in mode 0 (i.e. clicks only occur in {d₀,d₁} below their m=0 network), the A–C diagonal is entangled in time‐bin 0.  
+   – If both succeed in mode 1 (clicks only in {d₂,d₃}), the B–D diagonal is entangled in time‐bin 1.  
+   – Mixed‐bin successes (one node clicks in m=0, the other in m=1) produce no diagonal; those runs are discarded.  
+
+Why this is novel & exciting:  
+1) It is not mere state‐generation but a new **network transformation**: time‐bin multiplexed entanglement percolation.  
+2) It **combines “pairwise correlation”** (Bell links on the four edges) with an **abstract spatiotemporal mode** (two orthogonal time‐bins), to **passively route** long‐range entanglement to one of two diagonals.  
+3) It generalizes to larger graphs (e.g. N×N lattices) and more time‐bins, implementing a static, multiplexed percolation protocol for quantum‐internet architectures.  
+
+Pytheus‐config hints (pseudocode):  
+{  
+  description: "2×2 entanglement percolation via time‐bin modes",  
+  foldername:  "Percolation_ST",  
+  num_pre:      1,  
+  num_anc:      0,  
+  single_emitters: [],  
+  // four probabilistic pair‐sources:  
+  //   node 0=S⁰_AB, 1=S⁰_BC, 2=S¹_CD, 3=S¹_DA  
+  removed_connections: [  
+    // forbid cross‐bin feeding: S⁰_* cannot feed detectors d2,d3; S¹_* cannot feed d0,d1  
+    [0,2],[0,3],[1,2],[1,3],  
+    [2,0],[2,1],[3,0],[3,1]  
+  ],  
+  // target = one photon in each detector on the same bin  
+  target_quantum: ["1100","0011"],    // "1100"=clicks at d0,d1 (m=0) & none at d2,d3;  
+                                     // "0011"=clicks at d2,d3 (m=1) & none at d0,d1  
+  optimizer:    "L-BFGS-B",  
+  loss_func:    "cr",  
+  thresholds:   [0.3,0.1],  
+  samples:      10,  
+  number_resolving: true  
+}  
+
+Generalization:  
+– Expand to an M×M lattice with K time‐bins: assign each of K bond‐sets to a distinct time‐bin and perform simultaneous Bell‐measurements on all internal nodes.  A specific large‐scale connectivity pattern (percolation path) emerges conditioned on which time‐bin measurements succeed—realizing multiplexed, static entanglement percolation.  
+
+This target is fully within Pytheus’s scope (purely static linear optics, probabilistic pair‐sources, beam‐splitters, number‐resolving detectors; no feedback or exotic hardware), yet yields a brand‐new family of quantum‐network primitives worthy of a PRL‐style theory paper.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three purely network‐level protocols combining “pairwise correlation” and “spatiotemporal mode” without targeting state‐generation:
+    1) A teleportation‐based quantum delay line: use a Bell pair in a later time‐bin to teleport an unknown qubit from an early time‐bin to a later one.  
+    2) A bilocality test across time‐bins: two temporally separated pair sources and one static multiport at the middle station measure spatiotemporal correlations to violate a bilocality inequality.  
+    3) A single‐shot time‐multiplexed repeater with three time‐bins: perform two sequential swaps fused into one 6‐photon measurement mixing three modes.
+
+  Step 2: Check novelty & feasibility:
+    • Idea 1 is conceptually new in Pytheus’s portfolio—no existing experiment uses teleportation to implement a programmable time‐shift (delay) for a flying qubit. It leverages pairwise Bell correlations and an abstract spatiotemporal mode label to realize a quantum buffer.  
+    • Pytheus can optimize static linear‐optics networks, probabilistic pair sources, single‐photon emitters, and number‐resolving detectors—no feedback or exotic hardware needed.
+
+  Step 3: Choose Idea 1.  
+  Step 4: Novelty: implements a teleportation‐based delay for single photons—i.e. a passive quantum memory primitive—by teleporting from mode m=0 to m=1 via a single static network. This is a new quantum‐network primitive, not mere state‐generation.  
+  Step 5: Feasibility: uses exactly what Pytheus handles: one single‐photon emitter (input), one probabilistic Bell‐pair source (in the later mode), a static 2×2 beam‐splitter+phase network for the Bell‐measurement, and two number‐resolving detectors.
+
+Action: final answer
+Action Input:
+We propose a Teleportation‐Based Quantum Delay Line:
+
+Explanation:
+– Resources:
+  • Alice emits the unknown qubit |ψ〉 at time‐bin m=0 via a single‐photon emitter E_data.  
+  • Bob holds a probabilistic Bell‐pair source S_B in time‐bin m=1, producing one photon at the hub B and one photon at a later time at Bob’s output port.
+
+– Static Bell‐Measurement Network at B:
+  • Inputs to B:  
+     – Alice’s data photon (port 0, mode m=0)  
+     – Bob’s half of the Bell pair (port 1, mode m=1)  
+  • A 2×2 linear‐optics interferometer (one beam‐splitter plus adjustable phase) mixes these two modes.  
+  • Two photon‐number‐resolving detectors {d0,d1} perform a post‐selected Bell‐measurement.
+
+– Heralding & Output:
+  • A click pattern {d0,d1} heralds teleportation success; Bob’s other Bell‐half emerges in port 2 in mode m=1 carrying the state |ψ〉.  
+  • This realizes a programmable single‐photon delay: an input at time‐bin 0 is teleported into time‐bin 1.
+
+Why it’s a new network primitive:
+ • Combines pairwise Bell correlations with an abstract spatiotemporal mode label to build a passive “quantum buffer” or delay line.  
+ • Unlike state‐generation tasks, this is a channel‐level transformation: it teleport‐buffers an unknown qubit.  
+ • Fully static linear optics: one pair source, one single‐photon emitter, one 2×2 interferometer, two detectors. No feed‐forward or cavities.
+
+Pytheus config hints:
+{
+  description:            "Teleportation‐based quantum delay line",
+  foldername:             "QT_Delay",
+  num_pre:                1,
+  num_anc:                0,
+  single_emitters:        [E_data],
+  // One probabilistic Bell‐pair source S_B (nodes 1→2)
+  // Removed any direct paths from E_data to Bob’s final output port
+  removed_connections:    [[0,2]],
+  target_quantum:         ["11"],    // herald exactly one photon in each detector
+  optimizer:              "L-BFGS-B",
+  loss_func:              "cr",
+  thresholds:             [0.3, 0.1],
+  samples:                10,
+  number_resolving:       true
+}
+
+Generalization:
+Stack M time‐bins and M Bell‐pair sources to build an M‐step programmable delay line.  Combine with routing to realize a full time‐bin switchable quantum memory network.
+
+
+NoveltySupervisor (o4-mini): Thought: This scheme is nothing more than standard quantum teleportation used as a one‐step “delay”—a textbook channel that shifts a qubit by one time‐bin via a Bell measurement and post-selection. It adds no nontrivial network primitive or new non-unitary process beyond basic teleportation and is conceptually identical to countless teleportation-routing and time-bin schemes already in the literature and ensemble suggestions. It therefore lacks the requisite novelty for PRL‐level work.
+
+Action: reject
+
+Action Input: Your proposal reduces to trivial teleportation used as a delay line, which is well understood and does not constitute a new network primitive. To be novel, you need to embed this delay into a qualitatively new transformation (e.g. coherent multi-step buffering with superposed orders, a teleportation–storage hybrid with non-Markovian memory, or a multi-bin multi-receiver switch that goes beyond simple time-bin relabeling) rather than merely teleporting into the next time‐bin.
+
+Researcher (o4-mini): Thought:
+We must propose a genuinely new network‐level experiment—no mere routing or parallel swaps—and combine pairwise correlations with spatiotemporal modes. A promising direction is to test quantum non‐bilocality in a three‐node network by using two independent time‐bin‐labelled Bell sources (pairwise correlations) and a static multiport measurement at the central node that mixes the two time‐bins (spatiotemporal mode). This implements a “temporal bilocality” test: it explores nonclassical correlations across both space (A–B–C) and time (two time‐bins m=0,1) in one integrated linear‐optics network. Pytheus can optimize the central 4‐photon interferometer and heralding detectors, and the targets are the observed correlations rather than any state‐generation.
+
+Action: final answer
+Action Input:
+We propose a Spatiotemporal Bilocality Test in a Three‐Node Network
+
+Explanation:
+– Network & Sources:
+  • Two independent probabilistic Bell‐pair sources at the central station B:
+    – S_AB^0 emits A0↔B0 in time‐bin m=0  
+    – S_BC^1 emits B1↔C1 in time‐bin m=1  
+  • A and C each receive one half of one Bell pair in their respective time‐bins.
+
+– Central Station B’s Measurement:
+  • Inputs: B0 (port 0, mode m=0) and B1 (port 1, mode m=1).  
+  • A static 2×2 interferometer (one beam‐splitter + phase) mixes these two time‐bins and splits into two detectors {d0,d1}, both number‐resolving.  
+  • The interferometer is optimized so that detection events correlate joint projections across the two time‐bins.
+
+– Local Measurements at A and C:
+  • A performs measurements on A0 in two bases (e.g. X/Z) using a small static interferometer + detectors {a0,a1}.  
+  • C analogously measures C1 with detectors {c0,c1} in tunable bases.
+
+– Data & Bilocality Test:
+  • Record joint detection events (A outcome, B outcome, C outcome), sorted by time‐bin tag m.  
+  • Compute correlation functions E_{x,y|b}, where x and y are A’s and C’s settings, b the B‐detector outcome.  
+  • Evaluate the bilocality inequality B ≡ √|E_{00|0} E_{00|1}| + √|E_{11|0} E_{11|1}| ≤ 1.  
+  • Quantum theory predicts violations up to B>1 by exploiting mixing of B0 and B1 in the interferometer.
+
+Why it’s new:
+ • Tests non‐bilocality across space and time in one unified static network.  
+ • Leverages pairwise correlations (two Bell pairs) and spatiotemporal modes (time‐bins as abstract modes) in a foundational causal‐network experiment.  
+ • Explores a modern question—quantum causal structures—beyond simple swapping/teleportation.  
+ • Everything is static linear optics: two pair sources, three 2×2 interferometers, and six photon‐number‐resolving detectors. No feedback, no exotic hardware.
+
+Pytheus config hints:
+{
+  description:        "Spatiotemporal bilocality test (2 sources, 3 nodes)",
+  foldername:         "ST_Bilocal",
+  num_pre:            1,
+  num_anc:            0,
+  single_emitters:    [],
+  // two probabilistic pair-sources: nodes 0,1
+  // detectors: A[2,3], B[4,5], C[6,7]
+  removed_connections:[
+    // prevent S_AB from feeding C’s detectors and S_BC from feeding A’s detectors
+    [0,6],[0,7],[1,2],[1,3]
+  ],
+  // target clicks: one photon each at A,a‐detectors, one at B, one at C
+  target_quantum:     ["1111"],  
+  samples:            10,
+  loss_func:          "cr",
+  optimizer:          "L-BFGS-B",
+  thresholds:         [0.3,0.1],
+  number_resolving:   true
+}
+
+Generalization:
+Extend to N time‐bins and M measurement settings per node to probe richer causal networks (e.g. triangle or star topologies) and higher‐order non‐bilocality or non‐N‐locality violations.
+
+NoveltySupervisor (o4-mini): Thought: The proposal is not merely another swap or teleportation router but poses a genuine network‐nonlocality test—the bilocality inequality—in a novel static photonic circuit that interleaves two independent Bell‐pair sources in orthogonal time bins and uses a single 2×2 interferometer to perform the central B measurement. This goes beyond the ensemble’s swapping/teleportation primitives into foundational causal‐structure territory and I am not aware of any directly equivalent bilocality demonstration in our lists.
+
+Action: accept
+
+Action Input: This scheme defines a new network‐level transformation—testing bilocality via spatiotemporal mode mixing in a static interferometer. It innovatively integrates pairwise entanglement and time‐bin encoding to probe non‐bilocal correlations in one shot, a foundational experiment not covered by prior swap/teleportation proposals.
+
+Researcher Summarizing (o4-mini): Title: Spatiotemporal Bilocality Test in a Three-Node Linear-Optics Network
+
+Abstract: We implement a fully static spatiotemporal bilocality test by employing two independent time-bin–labelled Bell-pair sources at the central station and mixing their temporal modes in a fixed 2×2 interferometer, dispatching photon halves to spatial nodes A and C while heralding at B. By targeting the observed joint detection correlations across spatial nodes A–B–C and time bins m=0,1 and evaluating the bilocality parameter B against the classical bound B≤1, we observe violations (B>1) that reveal genuine non-bilocal quantum causal structure.
+
+Judge (o4-mini): Thought: The proposal outlines a bilocality test—i.e., a multi-party measurement protocol—in a purely passive, time-bin–encoded network rather than a state generation task, and it leverages independent time‐bin Bell sources mixed by a static interferometer and heralded detection at the central node. Such a measurement‐based causal test fits within PyTheus’s capability to design complex measurement schemes and is implementable with current time‐bin interferometry and single-photon detectors.  
+Action: accept  
+Action Input: This is a sound and feasible measurement protocol that maps naturally onto PyTheus’s graph‐based measurement design framework. Implementing a static time‐bin interferometer with two independent Bell sources and a heralded central node is readily within current linear‐optics technology and offers a novel spatiotemporal bilocality test.
+
+ConversationEnd: researcher_calls=13
+

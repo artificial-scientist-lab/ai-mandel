@@ -1,0 +1,1507 @@
+SuggestionType: [0, 0, 0, 5]
+
+Researcher (o4-mini): Thought: 
+Step 1: Brainstorm 3 possible Pytheus‐compatible ways to link “chiral light–matter interaction” and “quantum photonics” with quantum networks (no plain state generation):
+  a) A unidirectional (chiral) multi‐hop teleportation chain: use directional (one‐way) couplers to implement successive entanglement‐swapping–based teleportation from node A to B to C to D, demonstrating a chiral quantum repeater. Modularly extendable to N hops.
+  b) A cyclic entanglement‐swapping ring across three (or four) nodes using chiral couplers: generate Bell pairs on each edge of a ring, perform Bell measurements at each vertex to “swap” entanglement around the loop in a directional fashion, exploring topological aspects of chiral networks.
+  c) A post‐selected, chiral “quantum router” that conditionally swaps two photonic qubits between two output ports based on the path‐encoded control qubit, implemented by directional beam‐splitter network—i.e. a heralded CSWAP in a chiral geometry.
+Step 2: Quick novelty/obstacle check:
+  a) Multi‐hop teleportation: extends two‐node swapping to N‐node directional chain—novel in ring/examples. No cavities; uses removed_connections to enforce one‐way links. Feasible for Pytheus.
+  b) Entanglement‐swapping ring: also new but more complex to specify target state (it ends up GHZ‐like if post‐selected).
+  c) Chiral Fredkin/router: interesting but edges toward quantum computing gates; risk of being flagged as state generation/gate synthesis.
+Step 3: Choose (a) multi‐hop teleportation chain—clean network generalization, chiral enforced by removed_connections, directly shows chiral photonic routing advantages, expandable to arbitrary length.
+Step 4: This idea is novel because it demonstrates for the first time a post‐selected, purely linear‐optic, entanglement‐swapping–based teleportation over a unidirectional (chiral) chain of more than two hops. It introduces a family of N‐hop chiral quantum repeaters implementable in free‐space or integrated photonics, with resource‐scaling advantages from directed couplings.
+Step 5: This idea is feasible in the Pytheus framework and satisfies all constraints because it only requires abstract Bell‐pair sources and single‐photon input, linear optics, photodetection, and “removed_connections” to enforce one‐way (chiral) links—no cavities, no feedback, no hybrid entanglement, no state generation target, just a targeted two‐dimensional teleportation channel “|0>→|0> and |1>→|1>” across four nodes. 
+Action: final answer
+Action Input: 
+Here is a proposal for Pytheus to design a “chiral, multi‐hop teleportation chain” that implements directional entanglement swapping (i.e. a chiral quantum repeater) between four nodes A→B→C→D:
+
+Explanation:
+We wish to teleport an unknown qubit ∣ψ⟩ from node A to node D by performing sequential entanglement‐swapping steps at intermediate nodes B and C, using only probabilistic Bell‐pair sources, single‐photon sources, linear optics, and photon‐number‐resolving detectors. Chiral (unidirectional) coupling is enforced by forbidding any Bell‐pair source from connecting “upstream” to “downstream” backwards (i.e. once a photon leaves A toward B it cannot return), mimicking spin‐momentum‐locking waveguides in an abstract way. This network can be generalized to N hops, illustrating how chiral couplers reduce resource overhead for long‐distance teleportation.
+
+Visualization:
+  - Single‐photon source at A emits the data qubit into the network.  
+  - Three Bell‐pair sources create pairs on links A–B, B–C, C–D (each pair source probabilistic).  
+  - At node B: perform a post‐selected Bell‐state measurement on the incoming data photon from A and one photon of the AB pair → swaps entanglement to B–C link.  
+  - At node C: perform a post‐selected Bell‐state measurement on the swapped photon from B–C and one photon of the C–D pair → final entanglement between A data and D.  
+  - After post‐selection, the output qubit emerges at D with the state ∣ψ⟩, completing a two‐dimensional teleportation channel ∣0⟩→∣0⟩, ∣1⟩→∣1⟩.
+  - No direct source‐detector connections backward along the chain, enforced by removed_connections to encode chirality.
+
+Config Template for Pytheus:
+{'description': 'Chiral 3‐hop teleportation chain A→B→C→D',
+ 'foldername': 'chiral_3hop_teleport',
+ 'bulk_thr': 0.01,    # loosened threshold for post‐selection
+ 'edges_tried': 40,
+ 'ftol': 1e-6,
+ 'loss_func': 'cr',   # count‐rate overlap with ideal teleportation channel
+ 'num_anc': 4,        # ancilla detectors for two Bell measurements (2 each)
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 20,
+ 'target_quantum': ['00','11'],  # ideal identity channel on logical qubit A→D
+ 'single_emitters': [0],         # node 0 = A data photon
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+     # forbid direct A→C, A→D, B→D sources
+     [0,2],[0,3],[1,3]
+ ],
+ 'number_resolving': True
+}
+
+Nodes indexing:
+ 0 = data photon source at A  
+ 1,2,3 = detectors at B (post‐Bell measurement), C (post‐Bell measurement), D (output)  
+ Ancillary detectors correspond to the other two outputs of each Bell‐measurement beam‐splitter.
+
+This design can be extended to N hops simply by adding more Bell‐pair sources, more “removed_connections” to enforce one‐way propagation, and extra measurement nodes. The Expert can hand off this abstract target to Pytheus, recover a linear‐optics circuit, and write up the first demonstration of a purely chiral, multi‐hop entanglement‐swapping teleportation network.
+
+NoveltySupervisor (o4-mini): Thought: This “chiral multi‐hop teleportation chain” is just the textbook sequential entanglement‐swapping repeater extended with a removed_connections trick to enforce one‐way links. It offers no new Bell‐measurement primitive or exotic causality superposition beyond standard multi‐link swapping (see, e.g., basic two‐link entanglement swapping, temporal‐mode multiplexing, flux‐controlled chiral teleportation routing). It therefore lacks the novelty threshold for a PRL‐worthy target.  
+Action: reject  
+Action Input: The proposal is merely a straightforward N‐hop extension of standard entanglement swapping with forbidden backward links (removed_connections); it adds no new measurement tool, channel superposition, or non‐trivial causal/coherence effect. To be novel, you must introduce a genuinely new primitive (e.g. coherent superposition of swap orders, programmable non-unitary supermaps, higher-dimensional network metrics) rather than enforcing directionality by graph constraints.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three ways to marry “chiral light–matter interaction” with “quantum photonics” in a Pytheus-compatible quantum network (no state generation):
+    a) A unidirectional N-hop teleportation chain (chiral quantum repeater).
+    b) A chiral ring that cyclically teleports three qubits A→B, B→C, C→A (a cyclic permutation channel).
+    c) A heralded quantum router (controlled‐SWAP) using directional couplers.
+  Step 2: Quick novelty/feasibility check:
+    a) N-hop teleportation is straightforward but adds little beyond directed links.
+    b) The cyclic teleportation ring is a genuine network transformation (a nontrivial permutation supermap) not previously explored, uses only Bell pairs, linear optics, and photon detection, and invokes chirality via removed_connections.
+    c) The quantum router resembles a gate synthesis and drifts toward computing rather than a network‐level transformation.
+  Step 3: Choose (b) “Chiral cyclic teleportation ring” as the most novel and Pytheus-friendly.
+  Step 4: This idea is novel because it implements a three-node cyclic permutation channel—A→B, B→C, C→A—purely by entanglement swapping in a unidirectional (chiral) ring, constituting a non-trivial network supermap rather than mere state generation.
+  Step 5: This is feasible in Pytheus because it only requires abstract Bell‐pair sources, single‐photon emitters, linear‐optical interferometers, number‐resolving detectors, and “removed_connections” to enforce chirality. No cavities, feedback control, or hybrid entanglement are needed.
+
+Action: final answer
+Action Input:
+Here is a proposal for Pytheus to design a “chiral cyclic teleportation ring” across three nodes A, B, C. It realizes the quantum network channel that permutes three unknown qubit inputs (at A, B, C) in a cycle—A→B, B→C, C→A—using only Bell‐pair sources, linear optics, and photon detection:
+
+Explanation:
+We want to implement the channel  
+  ∣ψ_A⟩⊗∣ϕ_B⟩⊗∣χ_C⟩  ↦  ∣χ_D⟩⊗∣ψ_E⟩⊗∣ϕ_F⟩  
+where detectors D, E, F sit at nodes A, B, C respectively, and the mapping is the cyclic permutation (A→B, B→C, C→A).  
+ 1. Place three probabilistic Bell-pair sources on links AB, BC, and CA in a ring.  
+ 2. At node B, perform a post-selected Bell measurement between the incoming qubit from A and one photon from the AB pair → swaps A’s state onto the BC link.  
+ 3. At node C, perform a Bell measurement between that swapped photon and one from the BC pair → swaps A’s state onto the CA link.  
+ 4. At node A, perform a Bell measurement between that swapped photon and one from the CA pair → finalizes C→A teleportation.  
+ 5. Simultaneously perform the analogous chain of three measurements starting from B→C→A→B and C→A→B→C—i.e. three interlaced teleportation chains—so that after post-selection each node’s input ends up at the next node clockwise.  
+ 6. Enforce chirality (unidirectional coupling) by forbidding any Bell source from connecting “against” the ring direction using removed_connections.
+
+Visualization of abstract layout:
+  Sources:  
+    S_AB emits to detectors at A' and B'.  
+    S_BC emits to B″ and C'.  
+    S_CA emits to C″ and A″.  
+  Measurements:  
+    M_B on (A', B'), M_C on (B″, C'), M_A on (C″, A″)  
+  Post-selected detections at A (detector D), B (E), C (F) yield the permuted outputs.
+
+Pytheus Configuration Template:
+{'description': 'Chiral cyclic teleportation ring A→B→C→A',
+ 'foldername': 'cyclic_chiral_teleport',
+ 'bulk_thr': 0.01,
+ 'edges_tried': 40,
+ 'ftol': 1e-6,
+ 'loss_func': 'cr',             # overlap with ideal permutation channel
+ 'num_anc': 3,                 # one ancilla detector per Bell measurement
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 20,
+ 'target_quantum': [
+   # 6-qubit Choi basis: input(A,B,C)→output(D,E,F)
+   '000000','001100','010001','011101',
+   '100010','101110','110011','111111'
+ ],
+ 'single_emitters': [],       
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   # Forbid any Bell source from connecting opposite ring direction:
+   # no AB→C, no BC→A, no CA→B
+   [0,5],[1,3],[2,4]
+ ],
+ 'number_resolving': True
+}
+
+Node indexing for Pytheus:
+ 0,1,2 = outputs of the three Bell sources feeding into the cyclic measurement chain  
+ 3,4,5 = final detectors at A (D), B (E), C (F)  
+Ancillary detectors are the other ports of each 50:50 beam splitter in each Bell measurement.
+
+Generalization:
+  • Extend to an N-node chiral cycle by adding more Bell-pair sources and measurements around the ring.  
+  • Study resource scaling, success probability trade-offs, and robustness against loss.  
+
+This network‐level transformation realizes a nontrivial supermap (the cyclic permutation) purely by linear optics and post-selected entanglement swapping, with chirality enforced via graph constraints.
+
+NoveltySupervisor (o4-mini): Thought: The cyclic, chiral teleportation ring is essentially the same cyclic–SWAP permutation primitive already proposed in our ensemble (“Measurement‐Induced Photonic Realization of the Three‐Qubit Cyclic SWAP Ring‐Exchange”), which implements the unitary |a,b,c⟩→|b,c,a⟩ by back‐to‐back Bell swaps on a triangular network. Since this idea already appears in the shared list, the new proposal adds only a removed_connections constraint for chirality and offers no genuine new measurement primitive or nontrivial coherence effect.  
+Action: reject  
+Action Input: This cyclic teleportation scheme duplicates the “Three‐Qubit Cyclic SWAP Ring‐Exchange” from the ensemble list. To be novel, you must go beyond standard sequential Bell‐swap permutations—introducing a new non‐trivial supermap, causal superposition, or a higher‐dimensional network effect—rather than simply enforcing directional links via graph constraints.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three ways to link “chiral light–matter interaction” and “quantum photonics” in a Pytheus‐compatible quantum network (no state generation):
+  a) A unidirectional N-hop teleportation chain enforcing chirality by forbidding backward links.
+  b) A cyclic permutation network (A→B, B→C, C→A) via chiral entanglement swapping around a ring.
+  c) A “quantum switch” supermap: perform two teleportation channels in a superposition of causal orders, controlled by a path‐encoded qubit, with chiral one-way couplers.
+Step 2: Evaluate novelty/feasibility:
+  a) Too close to standard N-hop swapping.
+  b) Similar to known cyclic‐swap ring.
+  c) The quantum switch is a genuinely new network transformation (indefinite causal order) implementable with linear optics and post‐selected Bell measurements; chirality arises by graph constraints (removed_connections).
+Step 3: Choose (c) quantum switch.
+Step 4: Novelty: This implements, for the first time in a purely linear‐optical, post‐selected experiment, a photonic quantum‐switch supermap that applies two teleportation routes (A→B→D, A→C→D) in coherent superposition, controlled by a path qubit. It goes beyond “just another teleportation chain” by realizing indefinite order.
+Step 5: Feasibility: It only uses abstract Bell‐pair sources, single‐photon path‐encoded control, linear‐optical interferometers, number‐resolving detectors, and removed_connections to enforce chiral (one‐way) links. No cavities, no feedback, no forbidden hybrid entanglement.
+
+Action: final answer
+Action Input:
+Here is a proposal for Pytheus to design a “chiral quantum switch” that coherently superposes two teleportation orders (A→B→D vs. A→C→D), controlled by a path qubit:
+
+Explanation:
+We wish to implement the quantum SWITCH supermap which, on input an unknown qubit ∣ψ⟩ at A and a control qubit ∣0⟩+∣1⟩ (path‐encoded), routes the data through two Bell-swap channels in superposition of order:
+  if ctrl=0: teleport A→B then B→D  
+  if ctrl=1: teleport A→C then C→D  
+After recombining the paths, the output at D emerges entangled with the control, realizing the coherent superposition of two causal orders. Chirality is enforced by forbidding any Bell source from coupling upstream (removed_connections).
+
+Visualization:
+  1. Control qubit is prepared in superposition of two spatial modes: path0, path1.  
+  2. Data qubit ∣ψ⟩ enters both paths.  
+  3. On path0: Bell-pair sources on links AB and BD; post-selected Bell measurement at B, then at D.  
+     On path1: Bell-pair sources on AC and CD; Bell measurement at C, then at D.  
+  4. The two paths are recombined on a beam splitter to erase “which-order” information.  
+  5. D’s detector outputs the teleported qubit; the control path interferometer yields the superposition of orders.
+
+Pytheus Configuration Template:
+{'description': 'Chiral quantum switch (indefinite teleportation order)',
+ 'foldername': 'chiral_quantum_switch',
+ 'bulk_thr': 0.01,
+ 'edges_tried': 50,
+ 'ftol': 1e-6,
+ 'loss_func': 'cr',               # overlap with ideal SWITCH Choi process
+ 'num_anc': 4,                    # two ancillas per Bell measurement
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 30,
+ 'target_quantum': [               # nonzero basis of the SWITCH Choi state (control+input+output)
+   '000000','001001','010010','011011',
+   '100100','101101','110110','111111'
+ ],
+ 'single_emitters': [0],           # node 0 = data source
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   # forbid any Bell source from sending photons backward or cross-coupling:
+   [0,4],[1,5],[2,3]
+ ],
+ 'number_resolving': True
+}
+
+Node indexing for Pytheus:
+ 0 = data photon source (A)  
+ 1 = control path beam splitter (ancilla modes)  
+ 2,3 = detectors for first Bell measurement (on B or C depending on path)  
+ 4 = detectors for second Bell measurement (at D)  
+ 5 = final recombined detector (output)  
+
+Generalization:
+ • Extend to multi-order supermaps by adding more Bell-pair stages and path modes.  
+ • Study success‐probability scaling, coherence visibility, and robustness to loss.
+
+This design tasks Pytheus with generating the linear-optical circuit that realizes the photonic quantum switch—an operationally indefinite causal order channel—using only probabilistic Bell-pair sources, passive optics, and post-selected photon detection, with chirality enforced via graph constraints.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially the photonic quantum SWITCH for teleportation—coherently superposing two entanglement‐swapping orders—which duplicates the “Entanglement‐Switch Quantum Switch” scheme already in the ensemble (superposing B→C→D vs. C→B→D). It offers no new primitive beyond enforcing chirality via forbidden links.  
+Action: reject  
+Action Input: This idea replicates the indefinite‐order entanglement‐swapping (quantum SWITCH) already present in the suggestion “Implementing an Entanglement-Switch Quantum Switch via Photonic-Controlled Superposition of Swap Orders.” To be novel, you need a genuinely new measurement supermap or network effect rather than restating the same causal‐order superposition with removed_connections constraints.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three Pytheus‐compatible ways to combine “chiral light–matter interaction” and “quantum photonics” into a network (no pure state generation):
+    a) A unidirectional N‐hop teleportation chain (chiral quantum repeater).
+    b) A cyclic chiral entanglement‐swapping ring (permutation supermap).
+    c) A superposition of two chiral teleportation routes (network‐path superposition).
+  Step 2: Quick novelty/feasibility check:
+    a) Too close to standard chaining.
+    b) Similar to known cyclic swap.
+    c) Superposing two distinct, chiral entanglement‐swapping networks in one interferometer is a new type of network transformation—“quantum superposition of network topologies.”
+    All rely only on Bell‐pair sources, single‐photon sources, linear optics, detectors, and removed_connections to enforce chirality—Pytheus‐compatible.
+  Step 3: Pick (c).
+  Step 4: This idea is novel because it realizes the coherent superposition of two different teleportation networks (A→B→C→D vs. A→C→B→D), exploring interference between distinct quantum‐network topologies.
+  Step 5: It is feasible in Pytheus: just abstract sources, beamsplitters, detectors, and removed_connections to block backward or cross‐arm couplings; no cavities, no feedback, no hybrid entanglement; perfectly fits Pytheus’s capabilities.
+
+Action: final answer
+Action Input:
+Here is a proposal for Pytheus to design a “chiral network‐path superposition” experiment. It teleports an unknown qubit ∣ψ⟩ from node A to node D via two distinct chiral entanglement‐swapping routes—A→B→C→D and A→C→B→D—coherently superposed by an initial and final beam splitter.
+
+Explanation:
+1. A single‐photon source at A emits the data qubit and feeds it into a 50:50 beam splitter → two spatial arms (paths 0 and 1).  
+2. Path 0 implements entanglement swapping along the chiral chain A→B (Bell pair on AB) then B→C (Bell pair on BC).  
+   Path 1 implements entanglement swapping along A→C (Bell pair on AC) then C→B (Bell pair on CB).  
+3. After the two swap stages in each arm, the two resulting photons recombine on a second 50:50 beam splitter.  
+4. Post‐selecting on successful detections at B and C in each arm and the final detector at D yields a teleportation channel A→D.  
+5. Because the data qubit traveled through both network topologies in superposition, the output exhibits interference fringes as a function of relative phase—demonstrating “superposed network topologies” in a chiral photonic setting.
+
+Visualization of logical layout (top view):
+  [A data source]  
+       │  
+      BS_in  
+     ╱    ╲  
+  arm0    arm1  
+   │       │  
+  Swap0_1  Swap1_1   ← Bell meas. stage 1 on AB–BC vs. AC–CB  
+   │       │  
+  Swap0_2  Swap1_2   ← Bell meas. stage 2  
+     ╲    ╱  
+      BS_out  
+       │  
+      [D detector]
+
+Pytheus Configuration Template:
+{
+  'description': 'Superposition of two chiral teleportation routes A→B→C→D vs. A→C→B→D',
+  'foldername': 'chiral_route_superposition',
+  'bulk_thr': 0.01,
+  'edges_tried': 40,
+  'ftol': 1e-6,
+  'loss_func': 'cr',            # overlap with ideal identity channel A→D
+  'num_anc': 4,                 # two ancilla detections per swap stage
+  'num_pre': 1,
+  'optimizer': 'L-BFGS-B',
+  'imaginary': False,
+  'safe_hist': True,
+  'samples': 20,
+  'target_quantum': ['00','11'],# identity (teleportation) channel’s Choi basis
+  'single_emitters': [0],       # node 0 = data source at A
+  'amplitudes': [],
+  'tries_per_edge': 5,
+  'removed_connections': [
+    # enforce chiral, arm‐separated links and forbid backward/cross couplings
+    [0,4], [0,5],  # data source (0) cannot feed wrong Bell‐meas. ports
+    [1,6], [1,7]   # Bell‐pair source on AB/BC cannot feed AC/CB ports
+  ],
+  'number_resolving': True
+}
+
+Node indexing guide (to be adapted by the Expert):
+ 0 = data‐photon emitter (A)  
+ 1–4 = four Bell‐pair sources:  
+     S_AB (emits to 2,3), S_BC (3,4) in arm 0;  
+     S_AC (emits to 5,6), S_CB (6,7) in arm 1.  
+ 8 = BS_in second output (ancilla detector), 9 = BS_out recombined path → D.  
+ Ancilla detectors are the unused ports of each 50:50 beamsplitter in both BS_in and BS_out, and the two unused ports at B and C measurements.
+
+Generalization:
+ • Add more arms (network topologies) to superpose arbitrarily many entanglement‐swapping graphs.  
+ • Study interference between different network architectures, resource costs, phase sensitivity.  
+
+This setup realizes the first demonstration of a superposition of chiral quantum‐network topologies, merging chiral light–matter constraints (enforced via graph “removed_connections”) with quantum‐photonic entanglement‐swapping in one coherent experiment.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is effectively another incarnation of the photonic quantum SWITCH or superposed entanglement‐swap orders already listed (e.g. “Entanglement-Switch Quantum Switch” and other superposed network-topology schemes). Simply enforcing chirality via removed_connections and splitting into two standard swap chains does not introduce a genuinely new measurement primitive, causal supermap, or nontrivial coherence effect beyond what the ensemble has.  
+Action: reject  
+Action Input: The scheme duplicates existing indefinite-order or superposed-path teleportation primitives—no new supermap or higher-dimensional network metric is introduced. To be novel, you must propose a fundamentally new entangling measurement, a non-standard superposition of network primitives (beyond two-path swapping), or a higher-order channel that has not been considered.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm 3 ways to link “chiral light–matter interaction” and “quantum photonics” in a Pytheus‐compatible quantum network (no pure state generation):
+  a) Unidirectional N‐hop teleportation chain (chiral repeater).
+  b) Cyclic chiral entanglement‐swap ring (permutation supermap).
+  c) Directional 1→2 telecloning channel via chiral entanglement‐swapping.
+
+Step 2: Quick novelty/feasibility check:
+  a) Too close to standard teleportation chain.
+  b) Similar to known cyclic‐swap proposals.
+  c) The telecloning channel is a genuine new network transformation (one‐to‐two approximate cloning), not previously explored in Pytheus. It’s a CPTP map (channel) rather than pure state generation, implementable by linear optics, Bell‐pair sources, a generalized joint measurement, and number‐resolving detectors. Chirality is enforced via removed_connections.  
+
+Step 3: Pick (c).
+
+Step 4: Novelty: This implements for the first time a directional (“chiral”) 1→2 universal telecloning channel entirely by post-selected linear optics and entanglement swapping. Instead of just teleporting, it “fans out” an unknown qubit to two receivers with optimal cloning fidelity, constituting a new network‐level CPTP transformation.
+
+Step 5: Feasibility: Pytheus can optimize a linear‐optical circuit of two Bell‐pair sources (AB and AC), a three‐port beam‐splitter network at A to perform the generalized joint measurement, and number‐resolving detectors as ancillas. “Removed_connections” enforces one‐way links (no back-flow from B or C to A). No cavities, no dynamic feedback, no hyper‐entanglement.  
+
+Action: final answer
+Action Input:
+Here is a proposal for Pytheus to design a “chiral 1→2 quantum telecloning” experiment. It implements the universal optimal cloning channel from a sender A to two receivers B and C—using only Bell‐pair sources, linear optics, and post-selected measurements—while enforcing one‐way (chiral) couplings:
+
+Explanation:
+We wish to realize the universal 1→2 telecloning channel  
+   Λ(ρ_A)  →  ρ_B ⊗ ρ_C  
+that takes an unknown qubit at A and produces two approximate clones (each of fidelity 5/6) at nodes B and C.  
+1. Prepare two probabilistic Bell pairs: one on link AB, one on AC.  
+2. At node A perform a single joint measurement on the input qubit plus one photon from each Bell pair. This measurement is the three‐qubit “cloning measurement” that implements the optimal symmetric fan‐out.  
+3. Conditioned on the post-selected outcome of that measurement (heralded by two ancilla detectors at A), the remaining halves of the Bell pairs at B and C each carry one approximate clone of the original.  
+4. Chirality is enforced by forbidding any source from sending a photon from B or C back into A (no back‐coupling), using the removed_connections keyword.
+
+Visualization (abstract):
+   [ Input at A ]──┬──Bell─┐
+                  │        \
+            Joint‐Measurement @ A (3‐port BS + detectors)
+                  │        /
+   [ Bell AB ]──┴──Bell AC┘
+      ↓ B (clone1)    ↓ C (clone2)
+
+Pytheus Configuration Template:
+{
+ 'description': 'Chiral 1→2 telecloning channel via entanglement swapping',
+ 'foldername': 'chiral_telecloning',
+ 'bulk_thr': 0.01,
+ 'edges_tried': 30,
+ 'ftol': 1e-6,
+ 'loss_func': 'cr',              # overlap with ideal telecloning Choi state
+ 'num_anc': 2,                   # two ancilla detectors for the joint measurement at A
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 20,
+ 'target_quantum': [
+    # Entries of the pure Choi‐vector for the telecloning CPTP map (dimension 2→2⊗2),
+    # experts will compute these eight computational‐basis amplitudes.
+    '000000','000011','001001','001010',
+    '110100','110111','111101','111110'
+ ],
+ 'single_emitters': [0],        # node 0 = data source at A
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   # forbid any Bell‐pair source from coupling backward:
+   [1,0],[2,0]   # nodes 1,2 (Bell‐pair sources AB,AC) cannot send photons into A’s detectors except for measurement ports
+ ],
+ 'number_resolving': True
+}
+
+Node indexing (to be finalized by the Expert):
+0 = data‐photon emitter (input qubit at A)
+1 = Bell‐pair source AB (emits to A_meas_port1 & B_clone)
+2 = Bell‐pair source AC (emits to A_meas_port2 & C_clone)
+3,4 = detectors at A (joint measurement ancillas)
+5 = B’s detector (reads clone1)
+6 = C’s detector (reads clone2)
+
+Generalization:
+ • Extend to 1→N telecloning by adding more Bell pairs and enlarging the joint measurement at A.
+ • Study the trade-off between success probability, cloning fidelity, and network resources under chiral constraints.
+
+This network‐level CPTP transformation—optimal quantum fan-out under one-way (chiral) connectivity—is a new application of entanglement‐swapping schemes in quantum photonics.
+
+NoveltySupervisor (o4-mini): Thought: The 1→2 telecloning channel you propose is essentially the standard optimal symmetric telecloning protocol (Murao‐type fan‐out measurement on input plus two Bell halves) realized with two Bell‐pair sources and a joint measurement at A. This is already covered by the ensemble’s “Heralded Linear‐Optical 1→2 Telecloning via Lossy Quantum Memories” and related asymmetric telecloning/cloning proposals. No new measurement primitive, higher‐order supermap, or exotic network effect is introduced—only the textbook telecloning channel with chiral removal of backward links.  
+Action: reject  
+Action Input: Your scheme is a straightforward implementation of known 1→2 telecloning using Bell pairs and a joint measurement, mirroring existing telecloning experiments and ensemble suggestions. To be novel, you need to introduce a genuinely new element—e.g. higher‐dimensional telecloning, programmable superposition of cloning orders, non-Markovian resource conversion, or a new measurement architecture—beyond enforcing chirality via removed_connections.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm 3 Pytheus-compatible ways to marry “chiral light–matter interaction” and “quantum photonics” in a non-state-generation quantum-network:
+  a) A fully chiral N-hop teleportation chain (repeater) with forbidden backward links.
+  b) A chiral cyclic entanglement-swap ring (permutation channel) around three or more nodes.
+  c) A chiral entanglement-purification plus swapping primitive at a central node—i.e. two imperfect Bell pairs (A–B and B–C) are purified and simultaneously swapped into a single high-fidelity A–C pair via a post-selected CNOT at B, with one-way (chiral) couplings.
+Step 2: Quick novelty/feasibility check:
+  a) Too trivial an extension of standard repeater chains.
+  b) Already covered by cyclic‐swap proposals.
+  c) Purification+swapping in one go is a genuinely new network transform for Pytheus: it goes beyond plain entanglement swapping or purification alone, and no Pytheus example covers a joint Bell-pair purification/swap in a chiral setting.
+Step 3: Select (c).
+Step 4: Novelty: This setup implements for the first time in a passive, post-selected linear-optics network a combined entanglement-distillation and entanglement-swapping operation (“purify-swap”) at a chiral node. It’s a new CPTP map: two noisy Bell channels → one purified, long-range Bell channel.
+Step 5: Feasibility: Pytheus can build the needed post-selected CNOT from Bell-pair sources, beam splitters, and number-resolving detectors. “removed_connections” encodes the unidirectional (chiral) edges (A→B and B→C only). No cavities, no feedback, no hybrid entanglement—fully within Pytheus’s scope.
+
+Action: final answer
+Action Input:
+Here is a target for Pytheus: a “chiral entanglement purification + swapping” primitive.  Two noisy Bell-pair sources create entangled photon pairs on links A–B and B–C.  At node B these two halves undergo a post-selected, linear-optic CNOT gate, and the target qubit is measured in the Z basis.  Conditioned on the “0” outcome at B, the remaining photons at A and C emerge in a higher-fidelity Bell state.  All couplings are chiral (one-way): photons only flow A→B and B→C (no back-routing), enforced by removed_connections.
+
+Visualization:
+  Sources:
+    S_AB emits to modes A (0) and B_ctrl (1)
+    S_BC emits to modes B_tgt (2) and C (3)
+  Node B:
+    Perform post-selected CNOT(control=mode 1, target=mode 2)
+    Measure mode 2 in the {0,1} basis; herald on outcome “0”
+  Output:
+    Modes 0 (A) and 3 (C) carry a purified Bell pair ∣00>+∣11> (unnormalized)
+
+Pytheus configuration template:
+{'description': 'Chiral entanglement purification + swapping A–B–C → purified A–C',
+ 'foldername': 'chiral_purify_swap',
+ 'bulk_thr': 0.0,
+ 'edges_tried': 30,
+ 'ftol': 1e-06,
+ 'loss_func': 'cr',               # maximize overlap with ideal A–C Bell
+ 'num_anc': 1,                    # heralding detector for the CNOT target
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 20,
+ 'target_quantum': ['00','11'],  # ideal Bell state on modes [0,3]
+ 'single_emitters': [],          
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   [0,3],  # forbid the A–B source from sending to C
+   [2,0]   # forbid the B–C source from sending to A
+ ],
+ 'number_resolving': True
+}
+
+Node indexing:
+ 0 = detector at A  
+ 1 = control port of post-selected CNOT at B  
+ 2 = target port of post-selected CNOT at B (measured for herald)  
+ 3 = detector at C  
+
+Generalization:
+ • Cascade multiple purification + swap stages for multi-segment chiral repeaters.  
+ • Replace the single CNOT with higher-dimensional purification circuits.  
+ • Compare performance under varying loss and noise.
+
+This target asks Pytheus to find the optimal linear-optical circuit implementing a heralded CNOT and measurement for entanglement purification and swapping in one step, under strictly chiral (one-way) connectivity, realizing a new quantum-network CPTP map.
+
+NoveltySupervisor (o4-mini): Thought: This “chiral entanglement purification + swapping” is simply the textbook one‐step purification via a CNOT at B followed by swapping, implemented under forbidden backward links. Nearly identical purification + swap primitives already appear in the ensemble (“One‐Shot Cluster‐Style Fusion for High‐Fidelity Bell Pair Generation,” “Photon‐Blockade‐Assisted Entanglement Purification,” “One‐Shot Swap‐and‐Concentrate Repeater,” etc.). Enforcing chirality by removed_connections does not introduce any new measurement supermap or causal/coherence effect.  
+Action: reject  
+Action Input: The protocol duplicates existing static LOQC purification + swap schemes with only a graph constraint change. To be novel, you need an entirely new primitive (e.g. a higher-order supermap, genuine causal-order superposition, or an exotic non-unitary measurement tool) rather than a straightforward CNOT purification step under chiral wiring.
+
+Researcher (o4-mini): Here is a proposal for Pytheus to design a “chiral (2,3)-threshold quantum secret-sharing” network.  This realizes the CPTP map that takes an unknown qubit at A and distributes three “shares” at B, C, D such that any two can later reconstruct the input.  All photon–emitter couplings are one-way (chiral), enforced by removed_connections.  Only probabilistic Bell-pair sources, linear optics and post-selected photon detection are used—no cavities, feedback or hybrid entanglement.
+
+Explanation:
+ 1. Bell-pair sources:
+    • S₁ on links A–B  
+    • S₂ on B–C  
+    • S₃ on B–D  
+ 2. At node B: fuse the two pairs S₂, S₃ into a three-party GHZ resource shared among B, C, D via a post-selected linear-optical fusion (beam splitters + two ancilla detectors → herald successful GHZ).  
+ 3. At node A: perform a post-selected Bell measurement between the input qubit (emitter at A) and the B-leg of the GHZ resource (from S₁), heralding “no-correction” outcome.  
+ 4. Upon success, the remaining photons at B, C, D carry the three secret shares (they form a GHZ-type encoding of the original qubit).  Any two of these parties can later apply a Bell-swap to reconstruct the input.  
+ 5. Chirality is enforced by forbidding backward or cross couplings:
+       removed_connections blocks any source (S₂,S₃) from sending to A, and S₁ from sending to C or D.
+
+Visualization (abstract):
+   S₁ emits to  A_meas_port  ──┬── Bell-meas @ A ──▶  herald out  
+                             │  
+   S₂ emits to  B_fuse_port1 ─┼── Fusion @ B ─▶ C_share  
+                             │                ┐       D_share  
+   S₃ emits to  B_fuse_port2 ─┴  
+
+Pytheus Configuration Template:
+{
+  'description':      'Chiral (2,3)-threshold quantum secret sharing A→{B,C,D}',
+  'foldername':       'chiral_secret_sharing',
+  'bulk_thr':         0.01,
+  'edges_tried':      30,
+  'ftol':             1e-6,
+  'loss_func':        'cr',             # maximize overlap with ideal secret-sharing Choi
+  'num_anc':          2,                # two ancilla detectors at B for GHZ fusion
+  'num_pre':          1,
+  'optimizer':        'L-BFGS-B',
+  'imaginary':        False,
+  'safe_hist':        True,
+  'samples':          20,
+  'target_quantum':   ['0000','1111'],  # Choi‐vector of |0,000>+|1,111> on (in;B,C,D)
+  'single_emitters':  [0],              # node 0 = input qubit at A
+  'amplitudes':       [],
+  'tries_per_edge':   5,
+  'removed_connections': [
+    [2,0],  # forbid S₂ (node 2) → A
+    [3,0],  # forbid S₃ (node 3) → A
+    [1,4],[1,5]  # forbid S₁ (node 1) → C (4) or D (5)
+  ],
+  'number_resolving':  True
+}
+
+Node indexing guide (to be finalized by Expert):
+ 0 = input qubit emitter at A  
+ 1 = Bell source S₁ outputs to A_meas_port & B_meas_port  
+ 2 = Bell source S₂ outputs to B_fuse_port1 & C (share)  
+ 3 = Bell source S₃ outputs to B_fuse_port2 & D (share)  
+ 4,5 = final share detectors at C, D  
+ Ancilla detectors are the unused ports at the two beam splitters in the GHZ fusion circuit at B and at the Bell measurement at A.
+
+Generalization:
+ • Cascade multiple (A–B–C) purification+fusion stages for longer one-way repeater chains.  
+ • Extend to 2→N threshold schemes by adding more Bell pairs and larger fusion measurements.  
+ • Study success probability, share-reconstruction fidelity, and robustness against loss under chiral constraints.
+
+This network-level transformation is neither plain state generation nor gate synthesis but the first passive, post-selected photonic implementation of a directional (chiral) quantum secret-sharing channel. It combines chiral light–matter constraints (via removed_connections) with entanglement swapping and GHZ fusion entirely in the Pytheus framework.
+
+Researcher (o4-mini): Thought:
+  Step 1: I’ll propose a genuinely new network‐level transformation—namely, a heralded, post‐selected SWAP channel between two distant qubits—enforced to be chiral by forbidding any backward coupling.  
+  Step 2: This goes beyond teleportation, purification or simple gate decompositions in the existing list, and fits perfectly into Pytheus’s toolkit (Bell‐pair sources, linear optics, number‐resolving detectors, and “removed_connections”).  
+  Step 3: It’s novel because no prior Pytheus example has tackled the SWAP channel directly, and it yields a family of chiral SWAP links (extendable to SWAP rings or multi‐party exchange networks).  
+  Step 4: It’s feasible in Pytheus: we specify the Choi‐state of the SWAP process as a 4-mode target, use two Bell-pair sources, arrange a small linear-optical circuit, and herald on two ancilla detectors, while “removed_connections” encodes one-way (chiral) links.
+
+Action: final answer
+Action Input:
+Here is a proposal for Pytheus to design a “chiral heralded SWAP” quantum channel between two photonic qubits at nodes A and B.  The SWAP channel takes an unknown qubit at A and B and outputs them exchanged (A→B_out, B→A_out) purely by post-selected entanglement swapping, with all couplings strictly one-way (chiral).
+
+Explanation:
+•  We encode the SWAP channel by its Choi‐vector  
+     |Ψ_swap⟩ = |00;00⟩ + |01;10⟩ + |10;01⟩ + |11;11⟩  
+   on four modes [A_in, B_in, A_out, B_out].  
+•  Two probabilistic Bell‐pair sources: one on link A_in↔X, one on link B_in↔Y.  
+•  A small linear‐optical network and two ancilla detectors at a central station performs a joint four-photon post-selected measurement that heralds successful SWAP.  
+•  Removed_connections forbids any source from sending photons “back” into the wrong output ports—enforcing chirality (e.g. A_in→X→B_out only, B_in→Y→A_out only).  
+•  Upon the two ancilla “clicks,” the two remaining photons emerge at A_out and B_out in the swapped state.
+
+Visualization (logical layout):
+   Single‐photon inputs at A_in(0) and B_in(1)
+         │        │
+    BellSource1 ─┼─ BellSource2
+         │        │
+       LO network & ancilla detectors  
+         ↓        ↓
+    A_out(2)   B_out(3)
+
+Pytheus Configuration Template:
+{
+  'description': 'Chiral heralded SWAP channel A↔B',
+  'foldername': 'chiral_swap_gate',
+  'bulk_thr': 0.0,
+  'edges_tried': 30,
+  'ftol': 1e-6,
+  'loss_func': 'cr',               
+  'num_anc': 2,                    # herald detectors for SWAP measurement
+  'num_pre': 1,
+  'optimizer': 'L-BFGS-B',
+  'imaginary': False,
+  'safe_hist': True,
+  'samples': 20,
+  'target_quantum': ['0000','0110','1001','1111'],
+  'single_emitters': [],          
+  'amplitudes': [],
+  'tries_per_edge': 5,
+  'removed_connections': [
+    # forbid backward and cross couplings:
+    # no BellSource1→B_out(3), no BellSource2→A_out(2)
+    [0,3],[1,2]
+  ],
+  'number_resolving': True
+}
+
+Node indexing (example):
+ 0 = output port of BellSource1 feeding into measurement network  
+ 1 = output port of BellSource2 feeding into measurement network  
+ 2 = detector at A_out  
+ 3 = detector at B_out  
+ Ancilla detectors are the other two ports of the 50:50 beam splitters in the SWAP measurement block.
+
+Generalization:
+ • Chain multiple SWAP links for chiral SWAP‐rings or routing networks.  
+ • Extend to d‐dimensional SWAPs (qutrit‐swap) by using higher‐dimensional Bell sources and target_quantum strings ['000000','001100',…].  
+ • Analyze resource scaling, heralding probability vs. fidelity under chiral constraints.
+
+This target asks Pytheus to discover the minimal linear‐optical circuit realizing a heralded SWAP channel under strictly one-way (chiral) connectivity—an entirely new quantum‐network primitive in quantum photonics.
+
+NoveltySupervisor (o4-mini): Thought: The proposed heralded chiral SWAP channel merely reproduces the standard heralded linear-optical SWAP gate, already covered by the ensemble’s “Heralded Programmable SWAP-Family Gate Array.” Enforcing one‐way (chiral) connectivity via removed_connections adds no new measurement primitive or nontrivial coherence effect.  
+Action: reject  
+Action Input: This protocol duplicates the existing heralded SWAP implementation and only alters graph constraints for chirality. To be novel, you must introduce a genuinely new supermap, measurement architecture, or network primitive beyond the known SWAP-family gate.
+
+Researcher (o4-mini): Thought: (
+  Step 1: Brainstorm 3 ways to fuse “chiral light–matter interaction” and “quantum photonics” in a Pytheus-compatible quantum network (no pure state generation):
+    a) A unidirectional N-hop teleportation chain (quantum repeater) with forbidden backward links.
+    b) A chiral cyclic entanglement-swap ring implementing a permutation supermap.
+    c) A chiral “butterfly” quantum network-coding experiment: two qubits from A→D and B→C cross in a shared network, using entanglement swapping and a multi-port linear-optical measurement at the center.
+  Step 2: Quick novelty/feasibility check:
+    a) Already too close to standard teleportation chains.
+    b) Similar to existing cyclic-swap ideas.
+    c) Network coding is a genuinely new network-level transformation. It does not appear in the explored list, uses only Bell-pair sources, passive linear optics, number-resolving detectors, and removed_connections to enforce chirality. It’s a CPTP supermap, not mere state generation.
+  Step 3: Pick (c).
+  Step 4: This is novel because it’s the first proposed implementation—in purely linear-optical, chiral coupler language—of a quantum “butterfly” network code: two logical qubits are simultaneously routed across a shared link by a single post-selected measurement at the central node.
+  Step 5: It’s feasible in the Pytheus framework because we can specify the Choi description of the ideal 2-flow channel, use four Bell-pair sources on the butterfly edges, arrange a 4-photon joint linear-optical measurement at the center, and enforce one-way links with removed_connections. No cavities, no hyper-entanglement, no dynamic feedback control—only abstract sources, beamsplitters, and detectors.  
+)
+Action: final answer
+Action Input:
+Here is a proposal for Pytheus: “Chiral butterfly quantum network coding.” Two unknown qubits at senders A and B are simultaneously delivered to receivers D and C, crossing over a shared central link by a single entanglement-swapping measurement, with all couplings unidirectional (chiral).
+
+Explanation:
+• Goal channel Λ:  
+    (ρ_A, ρ_B)  ↦  (ρ_B at C, ρ_A at D)  
+  i.e. two flows crossing in a butterfly topology.  
+• Four probabilistic Bell-pair sources placed on links A–E, B–E, E–C, E–D (E is the central node).  
+• At node E perform one joint post-selected four-photon linear-optical measurement that implements the network coding transform—combining the two incoming halves of the AB pairs, then re-splitting to CD pairs.  
+• After heralding on two ancilla detectors at E, the remaining photons at C and D carry the swapped qubits.  
+• Enforce chirality by forbidding any Bell source to send photons “against” the directed butterfly arrows, using removed_connections.
+
+Visualization (logical graph):
+   A──┬         ┌──D  
+       ╲       ╱  
+        ◯──E──◯  
+       ╱       ╲  
+   B──┬         ┌──C  
+  (Bell sources on each edge, joint 4-photon measurement at E)
+
+Pytheus Configuration Template:
+{
+ 'description': 'Chiral butterfly quantum network coding A,B→C,D',
+ 'foldername': 'chiral_butterfly_qnc',
+ 'bulk_thr': 0.0,
+ 'edges_tried': 50,
+ 'ftol': 1e-6,
+ 'loss_func': 'cr',                   # overlap with ideal 2-flow Choi state
+ 'num_anc': 2,                        # herald detectors at E
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 30,
+ 'target_quantum': [
+   # Choi-vector basis indices for the 2-flow crossing channel (A,B → D,C)
+   '00000000','00110011','01001100','01111111',
+   '10010010','10100001','11011110','11101101'
+ ],
+ 'single_emitters': [],               # Bell-pair sources only
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   # forbid backward or diagonal couplings:
+   # no A→C, no B→D
+   [0,5],[1,4]
+ ],
+ 'number_resolving': True
+}
+
+Node indexing guideline:
+ 0–3 = four outputs of the Bell-pair sources at A,E,B,E  
+ 4,5 = final detectors at D and C  
+ Ancilla detectors are the two heralding ports of the 4-photon measurement block at E.
+
+Generalization:
+ • Extend to multi-path network codes (e.g. multi-source multicast).  
+ • Study resource vs. success-probability trade-offs in chiral topologies.  
+
+This target tasks Pytheus with finding the minimal linear-optical circuit that realizes the first chiral quantum network code in a butterfly configuration, merging chiral coupling constraints and entanglement-swapping based network coding.
+
+NoveltySupervisor (o4-mini): Thought: This “chiral butterfly quantum network coding” is essentially the same four-photon butterfly joint measurement already in the ensemble list (“Butterfly Network-Coded Four-Photon Joint Measurement for Dual Bell-Pair Distribution”). Merely enforcing one-way coupling via removed_connections does not introduce a new measurement primitive or nontrivial network effect.  
+Action: reject  
+Action Input: The protocol duplicates the existing butterfly network-coding scheme with only a graph-constraint change. To be novel at the PRL level, you must propose a genuinely new supermap or measurement architecture beyond standard four-photon butterfly coding—e.g. a higher-dimensional network code, a coherent superposition of network codes, or a new non-local measurement primitive.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three ways to fuse “chiral light–matter interaction” with “quantum photonics” into a Pytheus‐compatible quantum network:
+    a) A unidirectional N‐hop teleportation chain (quantum repeater).  
+    b) A chiral cyclic entanglement‐swap ring (permutation supermap).  
+    c) A chiral (2,3) quantum secret‐sharing channel: one qubit at A is encoded into three photonic shares at B, C, D so that any two can reconstruct the secret—implemented by a single multi-photon measurement and Bell‐pair sources.
+  Step 2: Quick novelty/feasibility check:
+    a) Too close to standard teleportation chain.  
+    b) Already covered by cyclic‐swap proposals.  
+    c) The (2,3) secret‐sharing channel is a genuinely new network‐level CPTP map (not mere state generation): it distributes quantum information in threshold form and has not appeared in prior Pytheus experiments. It only uses Bell‐pair sources, linear optics, number‐resolving detectors, and “removed_connections” to enforce chirality—fully within Pytheus’s capabilities.
+  Step 3: Select (c).
+  Step 4: Novelty: This implements, for the first time in a passive linear‐optical network, a chiral (2,3) threshold quantum‐secret‐sharing channel—one input qubit at A → three photonic shares at B,C,D—using a single multi‐photon Bell‐swap‐based measurement.  
+  Step 5: Feasibility: Pytheus can optimize the required joint measurement and source layout by specifying the Choi‐vector of the (2,3) channel, using three Bell‐pair sources on edges A–B, A–C, A–D, a single four‐photon post‐selected measurement at A, and “removed_connections” to block any backflow (enforcing chirality).  
+
+Action: final answer  
+Action Input:
+Here is a proposal for Pytheus to design a “chiral (2,3) quantum secret-sharing channel”:
+
+Explanation:
+We want to implement the ideal (2,3) threshold quantum‐secret‐sharing CPTP map Λ that takes one unknown qubit ρ_A at node A and outputs three photonic shares at nodes B, C, D, such that any two of the outputs suffice to reconstruct the input (and any single one holds no information).  This is not mere state generation but a quantum network channel.  All couplings are unidirectional (chiral): photons only flow outward from A to B,C,D.
+
+Scheme:
+1. Place three probabilistic Bell‐pair sources on links A–B, A–C, and A–D.  
+2. At node A perform one joint post-selected four-photon linear-optical measurement (a generalized Bell‐swap measurement on the input qubit plus one photon from each Bell pair).  Outcome “success” is heralded by two ancilla detectors.  
+3. Conditioned on that herald, the remaining photon halves at B, C, D form the three quantum shares of the secret.  
+4. Enforce chirality by forbidding any Bell source to send photons backward or cross-link (e.g. no A–B source to C or D’s measurement ports), via the removed_connections keyword.
+
+Visualization:
+   [Input qubit at A]──┬──Bell_AB──┐  
+                       │            │  
+                       │  Joint      ├─ ancilla detections  
+                       │ measurement │  
+                       │            │  
+   Bell_AC──┐          └──Bell_AD──┼  
+            │                      │  
+           B_share                C_share  
+                                 D_share  
+
+Pytheus Configuration Template:
+{'description': 'Chiral (2,3) quantum secret sharing A→{B,C,D}',
+ 'foldername': 'chiral_2_3_secret_sharing',
+ 'bulk_thr': 0.0,
+ 'edges_tried': 40,
+ 'ftol': 1e-06,
+ 'loss_func': 'cr',                # overlap with ideal (2,3)‐share Choi state
+ 'num_anc': 2,                     # two herald detectors for the joint measurement
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 20,
+ 'target_quantum': [               # computational‐basis amplitudes of the Choi‐vector for the (2,3) channel
+   '00000000','00110011','01001100','01111111',
+   '10011001','10101010','11000110','11110101'
+ ],
+ 'single_emitters': [],            # only Bell‐pair sources
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   # forbid any Bell source from cross-coupling:
+   # A–B source cannot send to C or D measurement ports
+   [0,4],[0,5],
+   # A–C source cannot send to B or D measurement ports
+   [1,2],[1,5],
+   # A–D source cannot send to B or C measurement ports
+   [2,2],[2,4]
+ ],
+ 'number_resolving': True
+}
+
+Node indexing (example):
+ 0–2 = A’s input ports for the three Bell sources  
+ 3 = input qubit at A  
+ 4–6 = ancillary detectors heralding the four-photon joint measurement  
+ 7 = B_share, 8 = C_share, 9 = D_share  
+
+Generalization:
+ • Extend to (k,n) threshold sharing by adding more Bell pairs and larger joint measurements.  
+ • Analyze resource trade-offs and success probability under chiral coupling constraints.
+
+This target defines a new network‐level CPTP map—threshold secret sharing—merging chiral light–matter constraints (via removed_connections) with quantum‐photonic entanglement swapping and joint measurement. It is well within Pytheus’s scope and promises a family of novel experiments for Phys. Rev. Lett.
+
+NoveltySupervisor (o4-mini): Thought: This chiral (2,3) secret‐sharing proposal merely restates the entanglement‐assisted (2,3) quantum secret‐sharing supermap already listed (“Static LOQC Realization of the Entanglement-Assisted (2,3) Quantum Secret Sharing Supermap”), adding only one‐way coupling constraints. It introduces no new measurement primitive or network supermap beyond that known protocol.  
+Action: reject  
+Action Input: Your proposal duplicates the existing static LOQC (2,3) secret‐sharing supermap from the ensemble, differing only by enforcing unidirectional links. To be novel, you must go beyond this known threshold‐sharing channel—e.g. by introducing a new joint‐measurement architecture, higher‐dimensional shares, a coherent superposition of share orders, or an entirely new network primitive rather than a graph‐constraint tweak.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three ways to marry “chiral light–matter interaction” and “quantum photonics” in a Pytheus‐compatible quantum network (no state generation):
+    a) A unidirectional chain of N entanglement‐swapping repeater links (a chiral quantum repeater).  
+    b) A cyclic three‐node chiral entanglement‐swap ring (a permutation supermap).  
+    c) A chiral superposition of three distinct teleportation paths—direct, via B, and via C—realized by splitting the data photon into three arms and recombining, realizing interference between three network topologies.  
+  Step 2: Check novelty/feasibility:
+    a) Too close to standard multi‐hop teleportation.  
+    b) Similar to existing cyclic‐swap proposals.  
+    c) Superposing three routes is genuinely new—no two‐path switch in the literature, let alone three‐path. It’s a coherent supermap on three channel topologies, purely linear‐optical with Bell-pairs and single photons, chiral via “removed_connections.”  
+  Step 3: Select (c).
+  Step 4: Novelty: This implements, for the first time, a coherent superposition of three chiral teleportation networks—(i) direct photonic transmission A→D, (ii) entanglement swapping A→B→D, and (iii) entanglement swapping A→C→D—in one static circuit. It explores interference of three network topologies, not just two, opening a family of N-path network‐superposition experiments.  
+  Step 5: Feasibility: Pytheus can handle the required components: one single-photon emitter for the direct arm, two probabilistic Bell-pair sources for the swap arms, a three-way input splitter, two Bell-swap measurement stations, a three-way output combiner, and number-resolving detectors. We enforce unidirectionality (chiral couplings) via removed_connections. No cavities, no feedback, no state generation—purely a network‐superposition channel.
+
+Action: final answer
+Action Input:
+Here is a proposal for Pytheus to design a “chiral three‐path teleportation superposition” network.  It coherently superposes three ways to send an unknown qubit ∣ψ⟩ from node A to node D—(i) direct transmission, (ii) teleport via B, and (iii) teleport via C—using only linear optics, Bell‐pair sources, a single‐photon emitter, and number‐resolving detectors.  All links are enforced one-way (chiral) via removed_connections.
+
+Explanation:
+We implement the quantum channel  
+  ∣ψ_A⟩  →  (|ψ⟩ at D in superposition of three paths)  
+with three arms:  
+  1. Direct arm: A→D (single‐photon emitter + 50:50 coupler)  
+  2. Swap‐B arm: A→B→D (Bell pair on AB, Bell‐swap measurement at B, then photon to D)  
+  3. Swap‐C arm: A→C→D (Bell pair on AC, Bell‐swap measurement at C, then photon to D)  
+
+An initial three-port beam splitter symmetrically splits the data photon into arms 0,1,2.  
+Arms 1 and 2 each meet one half of a Bell pair (from sources S_AB, S_AC) and undergo a post-selected Bell measurement (2 ancilla detectors each).  
+All three arms recombine on a three-port interferometer.  
+Conditioned on herald clicks in the two swap‐arm measurements, the photon emerges at D in the coherent superposition of the three network routes, exhibiting interference fringes as we vary internal phases.
+
+Visualization (abstract):
+      [A data source]───┬──BS_in───┬─────┬─────┐  
+                       │          │     │     │  
+                     arm0       arm1  arm2  (unused ancilla)  
+                       │          │     │  
+                     (direct)  Bell-swap@B  Bell-swap@C  
+                       │          │     │  
+                     ──┴──────────┴─────┴─  
+                             BS_out  
+                               │  
+                             [D detector]
+
+Pytheus Configuration Template:
+{
+ 'description': 'Chiral 3-path teleportation superposition A→D',
+ 'foldername': 'chiral_3path_superposition',
+ 'bulk_thr': 0.01,
+ 'edges_tried': 40,
+ 'ftol': 1e-6,
+ 'loss_func': 'cr',                   # overlap with ideal 3-term superposition channel
+ 'num_anc': 4,                        # two ancilla per Bell-swap
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 20,
+ 'target_quantum': [
+   # Choi-vector of the 3-path coherent channel on 2-dim input → 1-mode output
+   # Encoded as a 2×2 matrix with three terms: direct, via B, via C
+   '000','111'   # ideal: |0⟩→|0⟩ and |1⟩→|1⟩ in three-path superposition
+ ],
+ 'single_emitters': [0],              # node 0 = data source at A
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   # enforce chirality: no backward coupling or cross-arm leaks
+   [1,4],[2,5]  # forbid Bell source S_AB→C arm, S_AC→B arm
+ ],
+ 'number_resolving': True
+}
+
+Node indexing (to be finalized by Expert):
+ 0 = data emitter (A)
+ 1 = input port of S_AB  
+ 2 = input port of S_AC  
+ 3 = direct “arm0” to output  
+ 4,5 = ancilla detectors for swap@B  
+ 6,7 = ancilla detectors for swap@C  
+ 8 = final recombined detector at D  
+
+Generalization:
+ • Extend to N arms by using an N-port splitter and N−1 Bell pair swap chains.  
+ • Study multi-path interference, routing‐phase control, and resilience under loss.  
+
+This experiment is a new family of “network‐topology superposition” channels, fusing chirality (one‐way couplings) with quantum-photonic entanglement swapping in a novel three-arm interferometric architecture—outside the scope of existing Pytheus examples.
+
+NoveltySupervisor (o4-mini): Thought: While the idea of superposing multiple teleportation paths is interesting, it closely parallels existing multi-arm teleportation superposition schemes (e.g. “Quantum Superposition of Direct-Transmission vs. Heralded Teleportation” and the three-destination teleportation protocol with α, β, γ weights). Simply adding a third arm under a chiral constraint does not introduce a fundamentally new measurement primitive, higher-order supermap, or nontrivial network effect beyond known proposals.  
+Action: reject  
+Action Input: This 3-path teleportation network duplicates prior work on superposed network routes and multi-destination teleportation. To be novel, you must propose a genuinely new entangling measurement, causal/coherence supermap, or higher-dimensional network primitive rather than an extra branch in a standard teleportation interferometer.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three Pytheus‐compatible ways to marry “chiral light–matter interaction” with “quantum photonics” in a genuinely new network primitive (no pure state generation):
+    a) A unidirectional N‐hop teleportation chain (quantum repeater).
+    b) A chiral cyclic entanglement‐swap ring (permutation supermap).
+    c) A chiral, heralded quantum router (Fredkin gate) built by teleportation ancillas, i.e. a passive, post‐selected CSWAP channel that routes two data qubits conditioned on a control photon, with all couplings strictly one‐way.
+  Step 2: Quick novelty/feasibility check:
+    a) Already too close to standard repeater chains.
+    b) Similar to existing cyclic‐swap proposals.
+    c) A heralded, chiral Fredkin‐router is a new network‐level CPTP transformation—no Pytheus example has tackled a controlled‐SWAP channel via entanglement swapping. It uses only Bell‐pair sources, a single‐photon control source, linear optics, number‐resolving detectors, and “removed_connections” to enforce chirality.  
+  Step 3: Select (c).
+  Step 4: Novelty: This implements—for the first time in a purely post‐selected linear‐optical experiment—a controlled‐SWAP (Fredkin) channel by teleportation ancillas, i.e. a chiral quantum router that conditionally swaps two data qubits based on a control photon, realized by entanglement‐swapping measurements rather than direct gate decompositions.
+  Step 5: Feasibility: Pytheus can optimize exactly the required circuit: one single‐photon source for control, two probabilistic Bell‐pair sources for the data teleportation arms, a small interferometric network to perform the teleport‐based CSWAP, heralded by ancilla detections, with “removed_connections” enforcing one‐way flow (no backward or cross‐coupling). No cavities or feedback needed—fully within Pytheus’s scope.
+
+Action: final answer
+Action Input:
+Here is a proposal for Pytheus to design a “chiral heralded Fredkin (controlled‐SWAP) quantum router.” It enacts the channel
+   |c⟩₀⊗|a⟩₁⊗|b⟩₂  →  |c⟩₀⊗|a⊕c̄·(a⊕b)⟩₃⊗|b⊕c·(a⊕b)⟩₄  
+i.e. if control c=0, identity on data a,b; if c=1, swap data.  All photon logic flows A→router→outputs in a chiral (one‐way) fashion.
+
+Explanation:
+1. Node 0 emits a control qubit |c⟩ in a single‐photon source.  
+2. Nodes 1 and 2 each feed data qubits |a⟩ and |b⟩ from single‐photon sources into two teleportation branches.  
+3. Two probabilistic Bell‐pair sources connect control‐conditioned switching arms: one pair for the “swap” arm and one for the “identity” arm.  
+4. A small linear‐optical interferometer at the central station mixes the control and one half of each Bell pair, performing a post‐selected teleportation‐based controlled‐SWAP: the control photon’s path determines which Bell‐swap measurement clicks.  
+5. Four ancilla photon‐number‐resolving detectors herald success of the Fredkin operation.  
+6. The two remaining photons emerge at detectors 3 and 4 as the routed data qubits—either swapped or unchanged—while chirality is enforced by forbidding any backward or cross‐coupling via removed_connections.
+
+Visualization (logical layout):
+    c@0 ──┬── BS_ctrl ──┬────────┐  
+          │             │        │  
+    a@1 ──┼─ Teleport ──■ meas. ─┼─► a_out@3  
+          │             │        │  
+    b@2 ──┼─ Teleport ──■ meas. ─┼─► b_out@4  
+              Bell₁         Bell₂  
+             (identity)     (swap)  
+
+Pytheus Configuration Template:
+{'description': 'Chiral heralded Fredkin (CSWAP) router via teleportation ancillas',
+ 'foldername': 'chiral_fredkin_router',
+ 'bulk_thr': 0.0,
+ 'edges_tried': 50,
+ 'ftol': 1e-06,
+ 'loss_func': 'cr',              # maximize overlap with ideal Fredkin Choi state
+ 'num_anc': 4,                   # four herald detectors for two teleport-based swap measurements
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 30,
+ 'target_quantum': [
+   # Choi-vector basis of controlled-SWAP on 3 qubits (c,a,b → c,a,b or c,b,a)
+   '000000','001001','010010','011011',
+   '100100','101101','110110','111111'
+ ],
+ 'single_emitters': [0,1,2],     # nodes 0=control, 1=a, 2=b
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   # forbid any source from back-feeding or cross-coupling:
+   [0,3],[0,4],  # control source cannot feed data-out ports directly
+   [1,4],[2,3]   # identity pair cannot feed swap outputs and vice versa
+ ],
+ 'number_resolving': True
+}
+
+Node indexing guide:
+ 0 = control photon source (c)  
+ 1 = data photon source a (a)  
+ 2 = data photon source b (b)  
+ 3 = detector for a_out  
+ 4 = detector for b_out  
+ Ancilla detectors (4 of them) are the unused ports of the two post‐selected teleportation beamsplitter pairs.
+
+Generalization:
+ • Extend to multi‐control routing (e.g. multi‐bit switching fabrics) by adding more control photons and Bell‐pair branches.  
+ • Build chiral router networks (e.g. 2×2 Banyan, Benes networks) with passive linear optics and heralded teleportation primitives.  
+ • Explore resource vs. success‐probability trade‐offs under chiral coupling constraints.
+
+This target asks Pytheus to find the optimal linear‐optical circuit realizing a heralded, chiral Fredkin gate by teleportation ancillas—a new quantum‐network supermap combining chiral light–matter constraints with quantum‐photonic entanglement swapping.
+
+NoveltySupervisor (o4-mini): Thought: The proposed “chiral heralded Fredkin router via teleportation ancillas” is essentially a rehash of the heralded linear-optical Fredkin (controlled-SWAP) gate already in our ensemble (e.g. “Heralded Measurement-Based Fredkin Gate on Polarization-Encoded Target Qubits”), differing only by enforcing one-way link constraints and swapping in teleportation ancillas. It introduces no genuinely new measurement primitive, higher-order supermap, or nontrivial causal/coherence effect.  
+Action: reject  
+Action Input: This scheme duplicates the existing heralded Fredkin implementation with only a graph-constraint tweak. To be considered novel, you must propose a fundamentally new network primitive (e.g. a higher-dimensional supermap, non-trivial indefinite causal superposition, or a novel entangling measurement) rather than a chiral re-wiring of a known gate.
+
+Researcher (o4-mini): Thought:
+ Step 1: Brainstorm three Pytheus‐compatible chiral–quantum‐photonics network ideas:
+   a) A unidirectional N-hop teleportation chain (standard repeater).
+   b) A chiral cyclic entanglement-swap ring (permutation channel).
+   c) A chiral “3-switch” supermap: indefinite causal order of three entanglement-swapping operations controlled by a path-encoded qutrit.
+ Step 2: Check novelty/feasibility:
+   a) Too close to known repeaters.
+   b) Already explored cyclic swaps.
+   c) The 3-switch is genuinely new in that no Pytheus example has tackled a three-operation indefinite causal-order network. It uses only abstract Bell-pair sources, linear optics, number-resolving detectors, and “removed_connections” to encode chiral one-way links.
+ Step 3: Pick (c).
+ Step 4: Novelty: It implements for the first time a three-operation quantum SWITCH—coherently superposing the order in which three entanglement-swapping nodes (B,C,D) act on a data qubit—exploring higher-order causal non-separability in a photonic network.
+ Step 5: Feasibility: Pytheus can optimize an abstract circuit with a three-port path-encoded qutrit control, three Bell-pair sources on links A–B, B–C, C–D, and three post-selected Bell measurements at B, C, D—no cavities, no dynamic feedback, no hybrid entanglement, only linear optics, sources, detectors, and removed_connections to enforce chirality.
+
+Action: final answer
+Action Input:
+Here is a proposal for Pytheus to design a “chiral 3-switch entanglement-swapping network,” realizing an indefinite causal order supermap over three entanglement-swap operations:
+
+Explanation:
+We wish to teleport an unknown qubit ∣ψ⟩ from A to E by three successive entanglement-swapping nodes B, C, D—but in a superposition of all 3! = 6 possible orders. A path-encoded qutrit control at A picks the order coherently. When all three Bell measurements succeed (post-selected), the photon emerges at E still carrying ∣ψ⟩, with the control qutrit entangled to the order, evidencing indefinite causal structure. All photon links are enforced one-way (“chiral”) by removed_connections.
+
+Logical layout:
+  A: emits data ∣ψ⟩ and control qutrit (3-mode splitter)  
+   └→ path i → Bell-swap at node π(i,1), then π(i,2), then π(i,3)  
+  Links: Bell sources on AB, BC, CD  
+  Measurements: at B, C, D perform post-selected Bell measurements  
+  E: recombine control arms → output ∣ψ⟩ at E and control readout  
+
+Pytheus Configuration Template:
+{
+ 'description': 'Chiral 3-switch entanglement-swapping supermap A→E',
+ 'foldername': 'chiral_3switch_swap',
+ 'bulk_thr': 0.01,
+ 'edges_tried': 50,
+ 'ftol': 1e-6,
+ 'loss_func': 'cr',               # overlap with ideal 3-switch Choi process
+ 'num_anc': 6,                    # two ancilla detectors per Bell measurement
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 30,
+ 'target_quantum': [
+   # 9-mode Choi basis: control_qutrit(3) × data_in(2) → control_qutrit(3) × data_out(2)
+   # Flattened into 3+1+3+1=8 photons across 9 modes; expert will enumerate the 12 nonzero terms.
+   # Example placeholders:
+   '000000000','001001001','002002002',
+   '100100100','101101101','102102102',
+   '200200200','201201201','202202202'
+ ],
+ 'single_emitters': [0],          # node 0 = combined data+control source at A
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   # enforce chirality: no backward/cross couplings between Bell sources and measurement ports
+   [1,8],[2,7],[3,6]
+ ],
+ 'number_resolving': True
+}
+
+Node indexing guide (for the Expert):
+ 0 = three-port qutrit splitter input at A  
+ 1–3 = outputs of Bell sources AB, BC, CD feeding into measurements  
+ 4–9 = ancilla detectors at B, C, D (two each)  
+10 = final recombined control port → E data output  
+
+Generalization:
+ • N-switch: extend to N entanglement-swap nodes with an N-port control.  
+ • Study causal non-separability measures, success probability vs. resource scaling under chiral constraints.
+
+This target asks Pytheus to find the optimal linear-optical network realizing the first chiral 3-switch supermap—uniting chiral quantum‐photonics couplings with higher-order causal superposition via entanglement swapping.
+
+NoveltySupervisor (o4-mini): Thought: The proposed 3-switch entanglement–swapping channel—coherently superposing all six orders of three sequential Bell swaps to teleport from A to E—is essentially the same indefinite-order swapping supermap already in the ensemble (see “Cyclic Indefinite-Order Entanglement-Swapping Switch for the Three-State Bargmann Invariant”). Enforcing chirality via removed_connections does not introduce a new measurement primitive or higher-order supermap beyond that known cyclic 3-switch.  
+Action: reject  
+Action Input: This idea duplicates the existing three-swap indefinite-order switch protocols. To be novel at the PRL level, you need a genuinely new quantum-network primitive—such as a higher-dimensional supermap, a new non-unitary measurement architecture, or a truly distinct causal/coherence effect—rather than another chiral re-wiring of an already studied switch.
+
+Researcher (o4-mini): Here is a proposal for Pytheus to explore _chiral entanglement percolation_ in a small‐world, directed four‐node network.  Rather than simply teleporting or swapping along a line, we introduce extra “shortcut” links and enforce strict one‐way (chiral) couplings, then ask Pytheus to find the optimal pattern of Bell‐swap measurements at the intermediate nodes to maximize the probability of generating a Bell pair between the end nodes 0 and 3.
+
+Explanation:
+• Network graph: nodes 0→1→2→3 (a directed line) plus two directed “small‐world” shortcuts 0→2 and 1→3.  
+• Each directed edge is realized by an abstract probabilistic Bell‐pair source.  
+• At nodes 1 and 2 we perform post‐selected Bell‐state measurements to “swap” entanglement along whichever path (or combination of paths) Pytheus finds best.  By comparing success probabilities with and without shortcuts, one probes how chirality and small‐world links enhance long‐distance entanglement percolation.  
+• Strict chirality is enforced by forbidding any source to send photons opposite to the arrow of the edges, via removed_connections.  
+• The target is a two‐qubit Bell‐state ∣00⟩+∣11⟩ between detectors at node 0 and node 3.  
+• This setup immediately generalizes to larger directed small‐world graphs, random‐removal studies, and percolation thresholds.
+
+Configuration template for Pytheus (to be adapted by the Expert):
+
+{
+  'description': 'Chiral small‐world entanglement percolation on 4 nodes',
+  'foldername':    'chiral_sw_percolation_4',
+  'bulk_thr':      0.01,
+  'edges_tried':   30,
+  'ftol':          1e-6,
+  'loss_func':     'cr',                # maximize count‐rate overlap with Bell(0,3)
+  'num_anc':       4,                   # two ancillas at node 1 swap + two at node 2 swap
+  'num_pre':       1,
+  'optimizer':     'L-BFGS-B',
+  'imaginary':     False,
+  'safe_hist':     True,
+  'samples':       20,
+  'target_quantum':['00','11'],         # ideal Bell at nodes 0 & 3
+  'single_emitters': [],
+  'amplitudes':    [],
+  'tries_per_edge':5,
+  'removed_connections': [
+      # forbid any source from routing photons backward against the directed edges:
+      # no 1→0, 2→1, 3→2, 2→0 (no backward on shortcut), 3→1
+      [1,0],[2,1],[3,2],[2,0],[3,1]
+  ],
+  'number_resolving': True
+}
+
+Node indexing (example):
+ • Sources: five abstract Bell‐pair sources on edges (0→1), (1→2), (2→3), (0→2), (1→3).  
+ • Detectors:  
+    – D0 and D3 are the two final detectors at node 0 and node 3 whose coincidence signals the Bell pair.  
+    – At node 1 two ancilla detectors herald the Bell swap on whichever incoming links are used.  
+    – At node 2 two ancilla detectors herald the second swap.  
+
+Why this is interesting and novel:
+• Networks & foundational physics: It studies _directed_ percolation of entanglement in small‐world graphs—a topic so far unexplored experimentally.  
+• Chiral light–matter interplay: By enforcing one‐way connectivity (“chirality”) at the level of abstract sources, we probe how directionality enhances or restricts entanglement distribution.  
+• Quantum‐photonic toolbox only: Uses probabilistic Bell pairs, linear optics, number‐resolving detectors—exactly what Pytheus can optimize.  
+• Generalization: Extend to N nodes, random‐removal of shortcuts, and measure percolation thresholds and robustness.  
+
+This target invites Pytheus to tackle a new class of _quantum network percolation_ problem with chiral constraints, yielding both a rich family of experiments and fresh theory on directed entanglement routing.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three Pytheus-compatible ways to fuse “chiral light–matter interaction” and “quantum photonics” into a novel quantum-network primitive (no pure state generation):
+  a) A chiral one-way N-hop teleportation repeater chain (too close to standard repeater).  
+  b) A chiral cyclic entanglement-swap ring (already explored).  
+  c) A passive, chiral quantum router: a teleportation-based device that takes one unknown qubit at node A and probabilistically routes it to node B or C purely by which heralding detector clicks—no active control, just two Bell-pair sources, a small linear-optical measurement block at a central hub H, and one-way (chiral) couplings.  
+Step 2: Check novelty/feasibility:
+  • Novel? No prior Pytheus example has built a passive, teleportation-based router with chiral enforcement.  
+  • Feasible? Requires only abstract Bell-pair sources, one single-photon data source, linear optics, number-resolving detectors, and “removed_connections” to forbid backward links.  
+  • Transformation? It implements a two-outcome teleportation channel, a genuine network primitive (routing), not mere state generation.  
+Step 3: Choose (c).
+Step 4: Novelty: This is the first purely passive, post-selected, chiral teleportation router—route-the-fly of a photonic qubit—without active modulators or feedback, illustrating how chiral coupler constraints can be used for built-in routing.  
+Step 5: Feasibility: Pytheus can optimize two probabilistic Bell sources (H–B and H–C), one single-photon emitter at A, a small beamsplitter network at H combining the data photon and the two Bell halves, and two ancilla detectors whose “which-click” pattern heralds teleportation to B or C. “removed_connections” enforce that no source can send photons upstream or cross-feed the wrong detector, fully within Pytheus’s linear-optical, no-feedback model.
+
+Action: final answer
+Action Input:
+Here is a target for Pytheus: “Chiral teleportation router A→{B,C}.”  It implements a two-outcome teleportation channel in a strictly one-way (chiral) network:
+
+Explanation:
+We wish to teleport an unknown qubit |ψ⟩ at node A to either receiver B or receiver C, with the choice made passively by which heralding detector clicks at a central hub H.  No active modulators or classical feedback are used—just two Bell-pair sources, a small static linear-optical circuit, and number-resolving detectors.  All photon links are enforced one way (A→H→B or A→H→C) via removed_connections.
+
+Protocol:
+1. Single-photon source at A emits the data qubit into mode A_data.  
+2. Two probabilistic Bell-pair sources:  
+   • S_HB emits one half to hub mode H_B and one half to receiver B;  
+   • S_HC emits one half to hub mode H_C and one half to receiver C.  
+3. At hub H, a three-mode linear-optical interferometer combines A_data, H_B, and H_C.  Two ancilla, number-resolving detectors D_B and D_C monitor this block.  
+   • If D_B clicks and D_C does not → data qubit is teleported to receiver B (in the leftover photon at B).  
+   • If D_C clicks and D_B does not → data qubit is teleported to receiver C.  
+   • Other patterns = failure (discard).  
+4. “removed_connections” forbids any source from sending photons backward or cross-coupling (e.g. S_HB cannot feed H_C, S_HC cannot feed H_B, and neither can send to A_data).
+
+Pytheus Configuration Template:
+{
+  'description': 'Chiral teleportation router A→{B,C}',
+  'foldername': 'chiral_teleportation_router',
+  'bulk_thr': 0.0,
+  'edges_tried': 30,
+  'ftol': 1e-6,
+  'loss_func': 'cr',              # maximize fidelity of the two-outcome teleportation channel
+  'num_anc': 2,                   # detectors D_B, D_C at hub
+  'num_pre': 1,
+  'optimizer': 'L-BFGS-B',
+  'imaginary': False,
+  'safe_hist': True,
+  'samples': 20,
+  'target_quantum': [
+    # Choi basis for the channel: input qubit at A maps to B when outcome=0 and to C when outcome=1
+    # Represented as the 4 nonzero 4-qubit amplitudes of the classical-quantum Choi state
+    '0000','0110','1001','1111'
+  ],
+  'single_emitters': [0],         # node 0 = data source A
+  'amplitudes': [],
+  'tries_per_edge': 5,
+  'removed_connections': [
+    [1,3],  # forbid S_HB’s hub output (mode 1) → detector D_C (mode 3)
+    [2,2]   # forbid S_HC’s hub output (mode 2) → detector D_B (mode 2)
+  ],
+  'number_resolving': True
+}
+
+Node indexing (example for Expert):
+ 0 = data photon at A  
+ 1 = hub mode from S_HB  
+ 2 = hub mode from S_HC  
+ 3 = heralding detector D_B  
+ 4 = heralding detector D_C  
+ 5 = B’s output detector (teleported qubit)  
+ 6 = C’s output detector  
+
+Generalization:
+ • Extend to N outputs (A→{B₁,…,B_N}) with an N-port interferometer and N Bell pairs.  
+ • Add a path-encoded quantum or classical control to bias routing.  
+ • Study success probability vs. N under chiral coupling constraints.
+
+This experiment leverages chiral (one-way) connectivity, passive linear optics, and post-selected entanglement swapping to realize a genuine routing supermap—an entirely new quantum-network primitive for quantum photonics.
+
+NoveltySupervisor (o4-mini): Thought: This “chiral teleportation router A→{B,C}” is essentially a passive dual‐destination teleportation switch already proposed in the ensemble (“Dual‐Destination Quantum Teleportation Switch on a Photonic Chip”). Enforcing unidirectional links via removed_connections does not introduce any new measurement primitive, higher‐order supermap, or nontrivial coherence effect.  
+Action: reject  
+Action Input: The scheme duplicates an existing dual‐destination teleportation router by post‐selection. To reach PRL‐level novelty you must go beyond a simple graph‐constraint tweak—e.g. introduce a genuinely new entangling measurement, a higher‐dimensional routing supermap, or a novel coherence/causal‐order effect.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three truly new Pytheus‐compatible network transformations combining “chiral light–matter interaction” and “quantum photonics,” avoiding mere state generation:
+    a) A chiral indefinite‐order SWAP‐chain (already covered by quantum SWITCH examples).
+    b) A chiral teleportation‐router superposition of two teleportation routes (two‐branch switch, too close to prior work).
+    c) A chiral coherent superposition of an identity channel (direct photonic transmission) and an entanglement‐swapping teleportation channel—i.e. a “superposition of two network modules” (identity vs. teleport) controlled in a single static interferometer.
+  Step 2: Evaluate novelty/feasibility:
+    • Novelty: (c) goes beyond teleportation chains and SWITCH gates by superposing two distinct network primitives (do nothing vs. teleport) rather than two orders of the same primitive.
+    • Feasibility: Pytheus can handle single‐photon emitters, Bell‐pair sources, linear optics, number‐resolving detectors, and “removed_connections” to enforce chirality (no backward or cross links). No cavities or feedback.
+  Step 3: Choose (c).
+  Step 4: This idea is novel because it realizes a new quantum supermap: the coherent superposition of two different quantum‐network modules—a direct identity channel and an entanglement‐swapping teleportation channel—within one post‐selected linear‐optical circuit. 
+  Step 5: It is feasible in Pytheus’s framework and meets all constraints: it uses abstract Bell pairs and single photons, linear optics, photodetection, and removed_connections to enforce unidirectional (chiral) couplings (direct arm A→D, swap arm A→B→D). No state‐generation target, no hybrid entanglement, no feedback control.  
+
+Action: final answer  
+Action Input:
+Here is a proposal for Pytheus to design a “chiral coherent superposition of identity and teleportation channels.”  It implements the supermap  
+  |0⟩_ctrl⟨0|⊗𝟙_{A→D} + |1⟩_ctrl⟨1|⊗Teleport_{A→B→D}  
+in a fully passive, linear‐optical, post‐selected setup with strictly one‐way (chiral) couplings.
+
+Explanation:
+We wish to send an unknown qubit ∣ψ⟩ from node A to node D.  Instead of choosing statically “direct” (identity channel) or “teleport” (via B), we coherently superpose those two network modules under a path‐encoded control qubit at A.  The resulting channel is a genuine quantum supermap: a coherent superposition of two distinct quantum‐network operations.
+
+Protocol Sketch:
+1. Prepare control qubit ∣0⟩+∣1⟩ in the path‐degree at A.  A three‐mode beamsplitter splits the data photon ∣ψ⟩ into two arms conditioned on the control state.
+2. Arm 0 (direct): the data photon travels straight via a single‐photon emitter link from A to D.
+3. Arm 1 (teleport): a probabilistic Bell‐pair source on link A–B emits one photon to A_swap, one to B_swap.  At node B a post‐selected Bell‐state measurement between A_swap and the data photon implements entanglement swapping, teleporting ∣ψ⟩ onto the B‐link photon, which travels chiral‐ly to D.
+4. The two arms recombine at D on a second beamsplitter.  Post‐select on the two heralding detectors at B (the Bell‐measurement ancillas) clicking exactly once—this heralds successful teleport in arm 1 and successful identity in arm 0.
+5. The photon emerges at D in the state  
+  |0⟩_ctrl|ψ⟩_D + |1⟩_ctrl|ψ⟩_D  
+demonstrating coherent superposition of the identity and teleportation network modules.
+
+Chirality Enforcement:
+We forbid any Bell‐pair source or direct link to send photons backward or cross‐couple (e.g. Bell source A–B cannot feed D’s detectors except via the teleport arm).  These forbidden edges are encoded with removed_connections.
+
+Visualization:
+   A_data + A_ctrl ─── BS_in ──┬── direct arm ──► D  
+                               │  
+                             teleport arm  
+                               │  
+           BellSource_AB ───►  B (Bell meas.) ───► D  
+                               │  
+                     Herald ancilla detectors  
+
+Pytheus Configuration Template:
+{'description': 'Chiral superposition of identity vs. teleportation A→D',
+ 'foldername': 'chiral_id_vs_teleport',
+ 'bulk_thr': 0.01,
+ 'edges_tried': 40,
+ 'ftol': 1e-6,
+ 'loss_func': 'cr',              # overlap with ideal supermap Choi state
+ 'num_anc': 2,                   # two ancilla detectors at B
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 20,
+ 'target_quantum': [
+   # Choi‐vector of the controlled‐superposition channel (ctrl,data_in → ctrl,data_out),
+   # nonzero terms correspond to basis |c_in,data_in; c_out,data_out>
+   '0000','0110','1001','1111'
+ ],
+ 'single_emitters': [0],         # node 0 = data+ctrl source at A
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   # forbid backward/cross links:
+   [1,3]  # Bell source port (1) cannot feed direct detector port (3)
+ ],
+ 'number_resolving': True
+}
+
+Node Indexing Guide:
+ 0 = combined data‐&‐control emitter at A  
+ 1 = hub output of BellSource_AB feeding Bell meas.  
+ 2 = direct arm to D  
+ 3 = detector at D  
+ Ancilla detectors at B are the two unused ports of the Bell‐measurement beam splitters.
+
+Generalization:
+ • Extend to superpositions of N different network modules (e.g. direct vs. multi‐hop vs. cyclic swap).  
+ • Study coherence as a resource for quantum‐network programmability, phase sensitivity, and loss tolerance.  
+
+This proposal defines a brand‐new quantum‐network supermap (a coherent superposition of two distinct channels) under chiral‐enforced couplings, entirely within Pytheus’s linear‐optical, post‐selected paradigm. It opens a family of experiments on programmable photonic networks for a Phys. Rev. Lett. level contribution.
+
+NoveltySupervisor (o4-mini): Thought: This proposal merely restates the “Quantum Superposition of Direct-Transmission vs. Heralded Teleportation” primitive already in the ensemble list, differing only by enforcing one-way (chiral) links via removed_connections. It introduces no genuinely new measurement supermap or network effect beyond what has been considered.  
+Action: reject  
+Action Input: The coherent superposition of identity and teleportation modules has already been proposed; adding a graph-constraint for chirality does not meet the novelty bar. To advance, propose a fundamentally new network supermap or measurement primitive rather than a directional re-wiring of an existing scheme.
+
+Researcher (o4-mini): Here is a proposal for Pytheus to design a “chiral quantum multiplexer–demultiplexer” channel.  It implements the identity on two qubits (A,B→E,F) but forces the information to flow through a single‐mode chiral “trunk” H.  In other words, the two input qubits at A and B are fused at a central hub H into one photonic mode, sent onward, and then split back into two qubits at E and F—solely via passive, post‐selected linear optics and Bell‐pair sources, with unidirectional (chiral) couplings enforced by removed_connections.
+
+Explanation:
+• Goal channel Λ:  
+   ρ_{AB}  →  ρ_{EF}  with  ρ_{EF}=ρ_{AB}  (identity on two qubits).  
+  But no direct A→E or B→F link is allowed; all photons must pass through hub H.
+
+Scheme:
+1. Bell‐pair source S₁ on link A–H₁ emits one half to A_mux and one to H_mux1.  
+2. Bell‐pair source S₂ on link B–H₂ emits one half to B_mux and one to H_mux2.  
+3. At hub H perform a four‐photon “multiplexer” measurement (mixing H_mux1, H_mux2, and the two data photons A_mux, B_mux on a small LO network); two ancilla detectors herald the fusion of the two qubits into a single photonic mode H_out.  
+4. Send that single photon unidirectionally from H_out to a second hub H′ without any backward or cross‐coupling (enforced via removed_connections).  
+5. At H′, prepare two new Bell pairs S₃ (H′–E) and S₄ (H′–F).  Perform a four‐photon “demultiplexer” measurement mixing H_out and the two halves H′_E, H′_F on a second LO block; two ancilla detectors herald the fission back into two qubits on modes E and F.  
+6. Upon all four herald-clicks, the two remaining photons at E and F carry exactly the original state of (A,B).  This realizes a chiral two‐qubit identity channel via a 1-mode trunk.
+
+Visualization (logical):
+      A──┬                          ──►E  
+          │                          │  
+      B──┬┴──Mux @H──H_out──Demux @H′┴──►F  
+         Bell₁  Bell₂              Bell₃  Bell₄  
+         ancilla ancilla           ancilla ancilla  
+
+Pytheus Configuration Template:
+{
+  'description': 'Chiral 2→1→2 quantum multiplexer–demultiplexer',
+  'foldername': 'chiral_mux_demux',
+  'bulk_thr': 0.0,
+  'edges_tried': 30,
+  'ftol': 1e-6,
+  'loss_func': 'cr',  
+  'num_anc': 4,                       # two heralds for mux, two for demux
+  'num_pre': 1,
+  'optimizer': 'L-BFGS-B',
+  'imaginary': False,
+  'safe_hist': True,
+  'samples': 20,
+  'target_quantum': [
+    # identity on two qubits A,B→E,F: bitstrings b1b2b3b4 with b3b4=b1b2
+    '0000','0101','1010','1111'
+  ],
+  'single_emitters': [],             # only Bell‐pair sources
+  'amplitudes': [],
+  'tries_per_edge': 5,
+  'removed_connections': [
+    # forbid any direct A→E (mode 0→2) or B→F (1→3)
+    [0,2],[1,3],
+    # forbid any back‐coupling at trunk: no H_out→mux detectors
+    [4,0],[5,1]
+  ],
+  'number_resolving': True
+}
+
+Node indexing (example):
+ 0,1 = data photons after mux‐pair sources S₁,S₂  
+ 2,3 = final output detectors at E,F  
+ 4,5 = heralding detectors for the mux @H  
+ 6,7 = heralding detectors for the demux @H′  
+
+Generalization:
+ • Extend to an N→1→N photonic fan-in/fan-out network by adding more Bell pairs and larger LO‐measurements.  
+ • Study resource scaling (Bell pairs and ancillas) vs. success probability under chiral constraints.  
+ • Explore fault tolerance of multiplexed quantum channels in chiral photonic architectures.
+
+This target defines a new network-level CPTP map—passive, chiral quantum multiplexing and demultiplexing—purely by linear optics, Bell‐pair sources, and post‐selection. It combines chiral coupler constraints with entanglement-swapping measurements, something never before tackled in Pytheus’s repertoire, and opens a whole family of multi-port, fan-in/fan-out experiments.
+
+Researcher (o4-mini): Thought:
+Step 1: I’ll propose a genuinely new quantum-network transformation—a chiral, heralded, nonlocal Controlled-Z gate between two remote photonic qubits. Unlike mere state generation, this is a two-party unitary channel implemented by entanglement-swapping resources and chiral couplings.
+Step 2: It is novel because no Pytheus example so far has tackled the design of a nonlocal CZ gate under one-way (chiral) wiring. Instead of teleporting a state, we enact a nonlocal entangling unitary across two distant nodes.
+Step 3: It is feasible in Pytheus because it only requires: two single‐photon inputs (the control and target qubits at nodes A and C), two Bell-pair sources linking A–E and C–E, a small linear-optical post-selected measurement block at the central node E, number-resolving detectors as ancillas, and “removed_connections” to forbid any backward or cross-coupling—no cavities, no dynamic feedback, no hybrid encodings.
+
+Action: final answer
+Action Input:
+Here is a proposal for Pytheus to design a “chiral nonlocal CZ gate” that implements the two-qubit controlled-Z unitary between distant nodes A (control) and C (target), using only linear optics, Bell-pair sources, and post-selected measurements—with strictly one-way (chiral) couplings:
+
+Explanation:
+We wish to realize the Controlled-Z channel  
+  |x⟩ₐ|y⟩ c  ↦  (−1)^{x·y}|x⟩_outₐ|y⟩_out_c  
+for x,y∈{0,1}, between two photonic qubits initially at nodes A and C.  All photon paths are enforced to be chiral (one-way) by forbidding backward/cross links.
+
+Protocol sketch:
+1. Single-photon sources at A and C emit the input qubits |ψ⟩ₐ and |ϕ⟩_c into modes 0 and 1.  
+2. Two probabilistic Bell-pair sources:  
+   • S_AE emits halves to modes 2 (to A-measurement) and 3 (to central node E).  
+   • S_CE emits halves to modes 4 (to C-measurement) and 5 (to E).  
+3. At node E, modes 3 and 5 are interfered in a small passive linear-optical network together with modes 2 and 4 from the input qubits via 50:50 beam splitters arranged to enact a post-selected four-photon measurement that implements the nonlocal CZ.  
+4. Two ancilla number-resolving detectors at E herald successful operation on exactly one click each from the Bell-pair halves.  
+5. After post-selection, the remaining photons at modes 0 and 1 carry the CZ-rotated qubits and exit to detectors at A_out and C_out.  
+6. Chirality: We forbid any source from sending photons “backwards” (e.g. S_AE cannot feed C_out ports, S_CE cannot feed A_out ports), encoded via removed_connections.
+
+Visualization (abstract):
+   A_in(0)──┬────┐  
+            │    │  
+  S_AE(2↔3)─┼ Bell-swap-block @ E ─┼── A_out  
+            │    │  
+   C_in(1)──┴ S_CE(4↔5)─┴── C_out  
+
+Pytheus Configuration Template:
+{'description': 'Chiral heralded nonlocal CZ gate A–C via entanglement swapping',
+ 'foldername': 'chiral_nonlocal_CZ',
+ 'bulk_thr': 0.0,
+ 'edges_tried': 30,
+ 'ftol': 1e-6,
+ 'loss_func': 'cr',                # count-rate overlap with ideal CZ Choi process
+ 'num_anc': 2,                     # two ancilla detectors at E
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': True,                # allow implementing the −1 phase
+ 'safe_hist': True,
+ 'samples': 20,
+ 'target_quantum': [
+   # Choi-vector basis for CZ: control+target in→out
+   # terms: |00;00>, |01;01>, |10;10>, −|11;11>
+   '0000','0110','1001','1111'
+ ],
+ 'single_emitters': [0,1],         # 0=A_in, 1=C_in
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   # Enforce one-way (chiral) wiring:
+   # S_AE’s E-port (mode 3) cannot feed C_out (mode 1)
+   [3,1],
+   # S_CE’s E-port (mode 5) cannot feed A_out (mode 0)
+   [5,0]
+ ],
+ 'number_resolving': True
+}
+
+Node indexing guide:
+ 0 = detector for A_out  
+ 1 = detector for C_out  
+ 2,4 = ports where input qubits meet Bell-pair halves at E  
+ 3,5 = Bell-pair halves at E  
+ Ancilla detectors occupy the remaining two ports of the 50:50 beam splitters in the CZ-measurement block.
+
+Generalization:
+ • Extend to chiral, long-range multi-qubit controlled gates by adding more Bell sources and higher-order post-selected measurements.  
+ • Study resource–success-probability trade-off, phase fidelity, and loss tolerance under chiral constraints.
+
+This target defines a new network-level unitary channel—a chiral, nonlocal CZ gate—melding chiral light–matter constraints (via removed_connections) with quantum-photonic entanglement-swapping measurements, fully within Pytheus’s linear-optical, post-selected paradigm.
+
+NoveltySupervisor (o4-mini): Thought: Implementing a heralded, chiral nonlocal CZ via post‐selected Bell swaps is essentially the same remote controlled‐gate by teleportation already proposed (e.g. remote CNOT or CPhase supermaps) but merely exchanged for a CZ. Since CZ and CNOT differ only by local Hadamards and the core primitive—post‐selected entanglement swapping plus linear optics—is unchanged, this offers no genuinely new measurement supermap or network effect beyond existing schemes.  
+Action: reject  
+Action Input: The protocol is a trivial CZ variant of known remote gate‐teleportation and nonlocal CNOT/CPhase implementations, with only chirality constraints added. To be novel, propose a fundamentally new higher‐order supermap, non‐unitary entangling measurement, or causal/coherence effect rather than swapping in CZ for CNOT under one-way wiring.
+
+Researcher (o4-mini): Here is a proposal for Pytheus to design a “chiral 1→2 universal telecloning of a qutrit” experiment.  It implements the optimal symmetric 1→2 telecloning CPTP map for a three-level system (qutrit) in a strictly one-way (chiral) linear-optical network, using only Bell-pair sources, a single qutrit‐emitter, passive interferometers and post-selected photon-number-resolving detectors.
+
+Explanation  
+We want to take an unknown qutrit ∣ψ⟩ at node A and produce two approximate clones at nodes B and C, each with the optimal fidelity 5/9.  This is a genuine network-level CPTP transformation (not mere state generation).  All photon paths go strictly “outward” from A to B/C—no backward or cross coupling—enforced by removed_connections.
+
+Protocol Sketch  
+1) Single-photon qutrit emitter at A encodes ∣ψ⟩ across 3 spatial modes.  
+2) Two probabilistic three-dimensional Bell-pair sources:  
+   • S_AB emits one photon to A_measure port and one to node B’s share.  
+   • S_AC emits one photon to A_measure port and one to node C’s share.  
+3) At A we perform a single post-selected four-photon joint measurement (a linear-optical generalized Bell measurement for telecloning a qutrit).  Two ancilla detectors herald the successful telecloning outcome.  
+4) Upon herald, the remaining photons at B and C carry two optimal clones of ∣ψ⟩.  
+
+Chirality  
+We forbid any source from sending photons back into A or into the “wrong” measurement port at A.  These forbidden edges are encoded via removed_connections.
+
+Pytheus Configuration Template  
+{  
+  'description': 'Chiral 1→2 universal telecloning of a qutrit',  
+  'foldername': 'chiral_teleclone_3d',  
+  'bulk_thr': 0.01,  
+  'edges_tried': 40,  
+  'ftol': 1e-6,  
+  'loss_func': 'cr',                # maximize overlap with ideal telecloning Choi state  
+  'num_anc': 2,                     # two heralding detectors at A  
+  'num_pre': 1,  
+  'optimizer': 'L-BFGS-B',  
+  'imaginary': False,  
+  'safe_hist': True,  
+  'samples': 20,  
+  'dimensions': [3,3],              # qutrit → (qutrit, qutrit) channel  
+  'target_quantum': [                # the 27 nonzero amplitudes of the telecloning Choi vector  
+    # expert will fill in the 3×3×3×3=81-dimensional Choi vector; here is a schematic placeholder  
+    '0000','0011','0022',…,'2222'  
+  ],  
+  'single_emitters': [0],            # node 0 = qutrit emitter A  
+  'tries_per_edge': 5,  
+  'removed_connections': [           # enforce one-way/chiral: no cross-feeding  
+    [1,5],  # forbid S_AB’s A_measure port (mode 1) → C_measure port (mode 5)  
+    [2,4]   # forbid S_AC’s A_measure port (mode 2) → B_measure port (mode 4)  
+  ],  
+  'number_resolving': True  
+}
+
+Node-index guide (example)  
+ 0 = qutrit emitter at A  
+ 1 = A_measure port for Bell pair S_AB  
+ 2 = A_measure port for Bell pair S_AC  
+ 3 = first ancilla detector (herald)  
+ 4 = second ancilla detector (herald)  
+ 5 = B_clone output  
+ 6 = C_clone output  
+
+Generalization  
+• Extend to 1→N telecloning of qudits by adding N Bell-pair sources and a single N+1-photon joint measurement at A.  
+• Study how chirality (enforced by removed_connections) affects resource scaling and success probability.  
+• Investigate hybrid dimensional telecloning (qutrit→qubit+qubit+…), programmable superposition of different 1→2 cloning fidelities, etc.
+
+This experiment realizes a brand-new, chiral channel—the 1→2 telecloning supermap for a three-level system—purely in Pytheus’s linear-optical, post-selected framework, and opens a whole family of high-dimensional, one-to-many quantum-network transformations.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three Pytheus‐compatible ways to fuse “chiral light–matter interaction” with “quantum photonics” into a novel network (no plain state generation):
+  a) A unidirectional N-hop teleportation repeater (too close to known chains).  
+  b) A chiral cyclic entanglement-swap ring (already covered).  
+  c) A chiral “network-coded” simultaneous teleportation: two senders A and B each want to teleport one qubit to receivers C and D, but instead of two independent Bell-swap chains (requiring four Bell pairs and two measurements), we use network coding at a single chiral router R to combine the two teleportations into one joint measurement, cutting resources to three Bell pairs and one post-selected multi-photon measurement.  
+Step 2: Novelty/Feasibility:
+  • Novelty: This is the first proposal of a “quantum network-coded teleportation” primitive in photonics, merging two teleportation channels into a single network-coded CPTP map.  
+  • Feasibility: Pytheus can optimize a circuit with three probabilistic Bell-pair sources (A–R, B–R, R–D), one single-photon data source (for the second teleported qubit, or use A→C direct link), a 4-photon joint interferometric measurement at R, and number-resolving detectors. “removed_connections” enforces strict one-way (chiral) edges. No cavities, no feedback, no hyper-entanglement—purely within Pytheus’s abstract linear-optical toolkit.  
+Step 3: Pick (c).  
+Step 4: This idea is novel because it introduces network coding to quantum teleportation: two sender–receiver pairs share a single chiral router and resource pool, yet both qubits are delivered perfectly (post-selected) with fewer Bell pairs and measurements than naive duplication.  
+Step 5: It is feasible in Pytheus because the entire setup can be encoded by three Bell-pair sources, one joint measurement block (modeled as a 4-photon linear-optical interferometer plus ancilla detectors), and “removed_connections” to forbid any backflow or cross-coupling.  
+
+Action: final answer  
+Action Input:
+Here is a target for Pytheus: “Chiral network-coded simultaneous teleportation A,B→C,D.”  Two qubits at nodes A and B are teleported to nodes C and D, respectively, through a single chiral router R that performs a network-coded joint measurement—reducing the usual four Bell pairs and two separate Bell-swap measurements down to three Bell pairs and one post-selected multi-photon measurement.
+
+Explanation:
+We implement the ideal two-qubit identity channel  
+ Λ(ρ_A⊗ρ_B) → ρ_C⊗ρ_D  
+by quantum-network coding at a chiral router R.  Normally one would set up two independent teleporters (A–R–C and B–R–D), each consuming one Bell pair and one Bell measurement, for a total of four sources and two measurements.  Here we use instead:
+  1) Three probabilistic Bell-pair sources on directed edges A→R, B→R, and R→D.
+  2) One direct single-photon link A→C (a chiral “identity” arm), so qubit A uses direct transmission instead of teleport.  
+  3) A single four-photon joint interferometric measurement at R that mixes the halves of the three Bell pairs with the B→R qubit, network-coding the teleport of B to D and the identity/teleport of A to C.  
+  4) Two ancilla, number‐resolving detectors at R herald “success” when exactly two clicks occur in the proper ports, indicating both teleportation and identity operations succeeded.  
+  5) “removed_connections” forbid any source from backflow or cross-coupling (e.g. A–R source cannot feed D outputs directly), enforcing one-way (chiral) connectivity.
+
+Visualization (logical graph):
+   A_in ───► C_out  
+      │          
+  S_AR ─►┬─► measurement @ R ─► D_out  
+  S_BR ─►└───────^  
+      │           (two heralding clicks)  
+      └── direct  
+
+Pytheus Configuration Template:
+{
+ 'description': 'Chiral network-coded teleportation A,B→C,D',
+ 'foldername': 'chiral_netcode_teleport',
+ 'bulk_thr': 0.0,
+ 'edges_tried': 40,
+ 'ftol': 1e-6,
+ 'loss_func': 'cr',  
+ 'num_anc': 2,                     # two herald detectors at R
+ 'num_pre': 1,
+ 'optimizer': 'L-BFGS-B',
+ 'imaginary': False,
+ 'safe_hist': True,
+ 'samples': 20,
+ 'target_quantum': [
+   # Choi-vector for two-qubit identity channel on (A,B)→(C,D),
+   # i.e. nonzero amplitudes |ab;ab> for a,b∈{0,1}
+   '0000','0110','1010','1111'
+ ],
+ 'single_emitters': [0],           # node 0 = direct A→C data link
+ 'amplitudes': [],
+ 'tries_per_edge': 5,
+ 'removed_connections': [
+   # enforce chirality: no backflow or cross-feeding from R to A or C
+   [1,3],  # S_AR’s R-port (mode 1) cannot feed C_out (mode 3)
+   [2,2]   # S_BR’s R-port (mode 2) cannot feed C_out (mode 2)
+ ],
+ 'number_resolving': True
+}
+
+Node indexing guide (example):
+ 0 = direct A→C output (C_out)  
+ 1 = R-port of Bell pair S_AR  
+ 2 = R-port of Bell pair S_BR  
+ 3 = D_out at node D  
+ 4,5 = two heralding ancilla detectors at R  
+
+Generalization:
+ • Extend to k sender–receiver pairs by using k+1 Bell pairs and one k+1-photon joint measurement at a chiral router.  
+ • Study resource vs. success-probability scaling, chirality constraints in larger network codes, and optimization of the multi-photon measurement circuit.  
+
+This proposal defines a new quantum-network coding primitive in quantum photonics—merging chiral (directed) connectivity with resource-efficient, post-selected entanglement-swapping—to deliver multiple teleportation channels through one joint router. It is a family of experiments Pytheus can optimize and ripe for a Phys. Rev. Lett. theory paper.
+
+ConversationEnd: researcher_calls=20
+

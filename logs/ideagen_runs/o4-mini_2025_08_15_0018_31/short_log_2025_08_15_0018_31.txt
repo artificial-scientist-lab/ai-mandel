@@ -1,0 +1,1149 @@
+SuggestionType: [0, 0, 0, 5]
+
+Researcher (o4-mini): Thought: 
+Step 1: Brainstorm three ways to connect an “atom array” node and a “superconducting qutrit” node in a Pytheus‐compatible quantum network without targeting raw state generation:
+ 1) A simple qutrit–qutrit entanglement‐swapping link: two entangled qutrit pairs (one derived from an atomic‐array single‐photon emitter, one from a superconducting‐qutrit transducer) are jointly measured in a 3-dimensional Bell basis to entangle the remote qutrits.  
+ 2) A three-node repeater chain: superconducting qutrit ↔ photonic middle node ↔ atom‐array node, with two successive entanglement‐swapping steps, demonstrating modular heterogeneous repeaters.  
+ 3) A star network: one photonic “hub” node shares qutrit entanglement with both a superconducting module and an atomic array module, then the hub performs a multi‐qutrit measurement to entangle the two end modules in a single shot.
+Step 2: 
+ - (1) is closest to existing qutrit‐ES but adds the heterogeneity “superconducting↔atomic,” so novelty lies in bridging different physical platforms.  
+ - (2) generalizes (1) but requires two swapping steps; Pytheus could do it, but it’s more complex and not strictly needed for a first demonstration.  
+ - (3) is conceptually richer (a star → direct heterogeneous entanglement in one measurement), but Pytheus may struggle with multi-outcome beyond pairwise ES.
+Step 3: Pick option (1) for clarity, directness, and ease of generalization (it can be extended to chains or stars).
+Step 4: This idea is novel because no one has yet proposed an entanglement‐swapping experiment that explicitly bridges a superconducting‐circuit qutrit node and an atom‐array qutrit node in a single heralded link, and it suggests a path to heterogeneous quantum‐network modules.  
+Step 5: It is feasible in the Pytheus framework because it uses only single‐photon emitters at each end, probabilistic pair sources (here realized by the local transducer chain), linear optics, and a single joint Bell‐basis measurement. There is no dynamic feed‐forward or cavities—everything Pytheus can handle.  
+
+Action: final answer  
+Action Input:  
+Here is the proposed experiment in the style of the previous Pytheus configurations:
+
+EXPERIMENT: heterogeneous‐qutrit‐ES
+
+explanation:
+"In this setup we entangle a superconducting‐circuit qutrit (Alice) with an atom‐array qutrit (Bob) by entanglement swapping at a central photonic station (Charlie). Physically, each end node converts its local qutrit into a photonic qutrit via its native transducer (modeled here as single‐photon emitters). Two probabilistic photon‐pair sources at Alice–Charlie and Bob–Charlie produce two Bell‐pairs in dimension three. Charlie then performs a three‐dimensional Bell-state measurement on his two photonic qutrits; successful detection heralds a 3-dimensional Bell state between Alice and Bob. By construction no emitter can send photons directly to both Alice and Bob (enforced by removed_connections), and no dynamic feed-forward is needed—just heralding."
+
+config:
+{
+  description: "Entanglement swapping between a superconducting qutrit and an atom‐array qutrit via a photonic Bell measurement",
+  foldername: "hetES_qutrit",
+  bulk_thr: 0.0,
+  edges_tried: 25,
+  ftol: 1e-6,
+  loss_func: "cr",
+  num_anc: 4,
+  num_pre: 1,
+  optimizer: "L-BFGS-B",
+  samples: 12,
+  target_quantum: ["00","11","22"],
+  single_emitters: [2,3,4,5],           # sources 2–3 at superconducting node, 4–5 at atom-array node
+  removed_connections: [[0,2],[0,3],[1,4],[1,5]],  # forbid any direct emitter linking the two end detectors
+  anc_detectors: [2,3,4,5],
+  number_resolving: True
+}  
+This design can be extended to chains (multiple repeaters) or stars (many heterogeneous modules) simply by adding more emitters and Bell‐measurement stations.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially a straightforward dimension‐3 entanglement‐swapping scheme—closely mirroring the existing “Entanglement Swapping for Two Pairs of Qutrits” experiment—and merely changes the physical platforms (superconducting vs. atom‐array). It offers no new network primitive or nontrivial extension beyond generating a Bell state.  
+Action: reject  
+Action Input: The idea reduces to standard qutrit entanglement swapping (see “Entanglement Swapping for Two Pairs of Qutrits”) with only a change of hardware, and it doesn’t introduce a novel measurement scheme, protocol twist, or network capability. To be considered, the scheme must go beyond mere state generation—e.g., add a higher‐order network primitive, multitarget routing, non-trivial holonomy, adaptive error correction, or another genuinely new quantum operation.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three ways to combine an “atom array” qutrit node with a “superconducting qutrit” node in a Pytheus‐compatible network, focusing on non‐trivial transformations (swapping, teleportation, gates), not raw state generation:
+    A) A heterogenous qutrit entanglement‐swapping link (already attempted and deemed too close to prior work).  
+    B) A 4-node “quantum switch” that can route qutrit entanglement on demand between any pair of superconducting/atom‐array endpoints via a central photonic Bell-measurement station (network coding primitive).  
+    C) A heralded nonlocal qutrit Controlled-Phase (CZ) gate between the superconducting and atom-array qutrits, implemented by teleporting the gate through photonic ancillas.  
+  Step 2: 
+    – (A) is a simple swap—too close to existing qutrit‐ES.  
+    – (B) is conceptually rich but Pytheus cannot optimize a multi‐outcome “switch” mapping all pairings at once without feed-forward.  
+    – (C) implements a genuinely new network primitive (remote nonlocal gate) and fits Pytheus’s capabilities (linear optics + ancilla + heralding, no dynamic feedback).  
+  Step 3: Pick (C) as the most novel and feasible.  
+  Step 4: This idea is novel because no one has designed a pure‐linear-optics network that enacts a nonlocal qutrit CZ gate between two physically distinct qutrit platforms (superconducting vs. atom‐array) via heralded photonic ancillas. It elevates entanglement swapping to the next network primitive: nonlocal gate teleportation in dimension 3.  
+  Step 5: It is feasible in Pytheus because it uses only single-photon emitters (to map each qutrit onto photonic modes), two probabilistic photon-pair sources, linear optics, and a fixed (no-feedback) heralded measurement.  
+
+Action: final answer  
+Action Input:
+Here is a concrete, Pytheus-style sketch of the experiment:
+
+EXPERIMENT: het-qutrit-CZ
+
+explanation:
+  “We implement a heralded, nonlocal controlled-phase gate (CZ) between two heterogeneous qutrit modules: a superconducting‐circuit qutrit (Alice) and an atom‐array qutrit (Bob). Each module uses three single-photon emitters to convert the local qutrit basis |0⟩,|1⟩,|2⟩ into three spatial photonic modes. Two probabilistic photon-pair sources create two 3-dimensional Bell pairs: one links Alice’s photonic qutrit to a central station (Charlie), the other links Bob’s photonic qutrit to Charlie. Charlie performs a joint three-qutrit Bell-measurement in a basis that implements the CZ interaction on the surviving modes at Alice and Bob. A single chosen detection pattern at Charlie heralds the nonlocal CZ gate (imparting a phase e^{2πi/3} on |2,2⟩) without any dynamic feed-forward.”
+
+visual structure:
+
+ emitters at Alice: [0,1,2] →  
+                             \  
+                              →  PBS / interferometer (optimized by Pytheus) → detectors A_out (0,1,2)  
+     Bell source 1 → modes → Charlie measurement block  
+                              → detectors C_anc  
+
+ emitters at Bob:   [3,4,5] →  
+                             /  
+                             ↗  PBS / interferometer → detectors B_out (3,4,5)  
+     Bell source 2 → modes → Charlie measurement block  
+                              → detectors C_anc  
+
+config (sketch for Pytheus):
+{
+  description: "Heralded nonlocal qutrit CZ gate between a superconducting qutrit (Alice) and an atom-array qutrit (Bob)",
+  foldername: "het_qutrit_CZ",
+  single_emitters: [0,1,2,3,4,5],
+  # two Bell-pair sources implicitly provide Charlie’s ancillas
+  removed_connections: [[0,3],[0,4],[0,5],[1,3],[1,4],[1,5],[2,3],[2,4],[2,5]],
+  target_quantum: ["00","01","02","10","11","12","20","21","22"],
+  amplitudes: [1,1,1,1,1,1,1,1,exp(2πi/3)],
+  imaginary: true,
+  num_anc: 4,
+  anc_detectors: [6,7,8,9],
+  loss_func: "cr",
+  optimizer: "L-BFGS-B",
+  samples: 12,
+  ftol: 1e-6
+}
+
+Generalization:
+  – By changing the measurement basis at Charlie, the same layout can teleport other two-qutrit gates (e.g. controlled-SUM, Fourier-phase).  
+  – It can be extended to chains of heterogeneous modules or star networks of many qutrit nodes, enabling a modular, platform-agnostic qutrit processor network.
+
+NoveltySupervisor (o4-mini): Thought: This is essentially the same as the ensemble’s “Heralded Teleportation-Based Nonlocal Controlled-Phase Gate (CPhase₃) for Two Qutrits,” merely repackaged with different hardware platforms. It offers no new measurement primitive, network capability, or protocol twist beyond what’s already proposed.  
+Action: reject  
+Action Input: The scheme duplicates the known PythEus target for a heralded nonlocal qutrit CZ gate (see “Heralded Teleportation-Based Nonlocal Controlled-Phase Gate (CPhase₃) for Two Qutrits”) and only swaps the physical transducers. To be novel, you must introduce a new network primitive or nontrivial extension beyond a straight gate teleportation.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three ways to knit together an atom‐array qutrit node and a superconducting qutrit node into a Pytheus‐compatible quantum network primitive (not mere state generation):
+  A) A simple hetero‐qutrit entanglement swap (too close to existing work).  
+  B) A heralded nonlocal qutrit gate (CZ) by teleportation via photonic ancillas (resembles known gate‐teleportation protocols).  
+  C) A simultaneous, bidirectional qutrit teleportation (“quantum butterfly”) across heterogeneous nodes, using a single network‐coding measurement at a central photonic relay—i.e. network‐coded bidirectional teleportation of unknown qutrits.  
+Step 2: 
+  A is already covered by ES for two qutrits.  
+  B is essentially teleportation‐based gate already known in the qutrit domain.  
+  C implements a genuinely new network primitive: simultaneous two‐way teleportation using network coding.  
+Step 3: Pick (C) as the most novel and feasible.  
+Step 4: This idea is novel because it fuses quantum network coding with bidirectional teleportation in dimension three, and it explicitly bridges a superconducting qutrit node with an atom‐array qutrit node using one shared photonic measurement—no one has proposed a “qutrit butterfly” network across heterogeneous hardware.  
+Step 5: It is feasible in Pytheus because it uses only single‐photon emitters (to map local qutrits to photonic modes), two probabilistic photon‐pair sources (Alice–Charlie and Bob–Charlie), linear‐optical interferometers at the relay, and heralded detection. There is no active feed‐forward; only post‐selected heralding.  
+
+Action: final answer  
+Action Input:
+Here is the proposed experiment in Pytheus style:
+
+EXPERIMENT: bidir‐tele‐qutrit‐het
+
+explanation:
+  “We achieve simultaneous, bidirectional teleportation of unknown qutrit states between two heterogeneous modules—a superconducting qutrit (Alice) and an atom‐array qutrit (Bob)—using a single network‐coding measurement at a central photonic relay (Charlie). Each module uses three single‐photon emitters to convert the local qutrit basis |0⟩,|1⟩,|2⟩ into three spatial modes. Two probabilistic photon‐pair sources create two 3-dimensional Bell pairs: one between Alice and Charlie, one between Bob and Charlie. Charlie then implements a four-mode linear-optical network that projects his two photonic qutrits onto the network‐coding basis |m,n⟩↦|m+n mod 3, m−n mod 3⟩. A single, heralded detection outcome simultaneously delivers the teleported state of Alice at Bob’s module and Bob’s state at Alice’s module (up to known local unitaries). No dynamic feedback is required—only post-selection on Charlie’s detector pattern.”
+
+visual structure:
+  emitters Alice [0,1,2] →  
+                      ↘  
+                         [Bell source 1] → Charlie’s photonic modes →  
+                      ↗                          ↘  
+  emitters  Bob  [3,4,5] →                         → Charlie network + detectors [6–9]  
+                                                   ↗  
+                   Alice receivers [0,1,2]         Bob receivers [3,4,5]  
+
+config:
+{
+  description: "Simultaneous bidirectional teleportation of qutrit states between a superconducting node (Alice) and an atom‐array node (Bob) via a single network‐coding measurement",
+  foldername: "bidir_tele_qutrit_het",
+  single_emitters: [0,1,2,3,4,5],     # 0–2 map Alice’s qutrit; 3–5 map Bob’s qutrit
+  # Two Bell-pair sources: one connecting Alice⇄Charlie, one Bob⇄Charlie
+  removed_connections: [[0,3],[0,4],[0,5],[1,3],[1,4],[1,5],[2,3],[2,4],[2,5]],
+  num_anc: 4,                         # Charlie’s four detectors
+  anc_detectors: [6,7,8,9],
+  target_quantum: [
+    # Each basis |i⟩_A |j⟩_B at inputs should map to |j⟩ at Alice_out and |i⟩ at Bob_out,
+    # heralded by one specific ancilla pattern.
+    # Here we list only the logical mapping for illustrative purposes:
+    "|0,0;0,0;0,0;hc>",  # hc means Charlie’s heralding signature
+    …                     # full list of 9 mappings omitted for brevity
+  ],
+  amplitudes: [1,1,…,1],  
+  number_resolving: true,
+  loss_func: "cr",
+  optimizer: "L-BFGS-B",
+  edges_tried: 30,
+  samples: 12,
+  ftol: 1e-6
+}
+
+Generalization:
+  - Replace the network-coding measurement at Charlie by other multi‐qutrit joint measurements to realize simultaneous multi‐party teleportation or entanglement routing.  
+  - Extend to a chain of heterogeneous repeaters or a star of many qutrit modules, each pair linked via a single shared photonic relay.
+
+This network‐coding bidirectional teleportation is a new primitive in high‐dimensional heterogeneous quantum networks and can spawn a family of “quantum butterfly” experiments.
+
+NoveltySupervisor (o4-mini): Thought: While bidirectional cross-teleportation for qubits via a single joint measurement is already known (see the ensemble’s “Quantum Butterfly Network for Simultaneous Cross-Teleportation of Two SiV Spin Qubits”), this proposal merely ups the local dimension to qutrits without introducing a fundamentally new measurement primitive, network effect, or protocol twist. It stays a straightforward dimensional upgrade of an existing qubit-based butterfly teleportation scheme and thus lacks the novelty needed for a PRL target.  
+Action: reject  
+Action Input: This construction is essentially the qutrit analog of the qubit “quantum butterfly” cross-teleportation network already in the literature. To be novel, you must add a nontrivial new ingredient—e.g. a higher-order network coding effect that cannot be realized by simple dimensional scaling, a novel nonlocal measurement architecture unique to qutrits, or a genuinely new network primitive beyond bidirectional teleportation.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three ways to combine an “atom array” qutrit node with a “superconducting qutrit” node in a Pytheus‐compatible network (no raw state generation):
+    A) A direct hetero‐qutrit entanglement swap (too close to prior ES examples).  
+    B) A heralded nonlocal qutrit gate via teleportation (resembles known gate‐teleportation).  
+    C) A three‐node qutrit entanglement router: post‐selectively entangles any two of three heterogeneous modules in one shot via a network‐coded measurement.  
+  Step 2: 
+    – (A) and (B) replicate existing primitives.  
+    – (C) is a new network primitive—an entanglement router—never proposed for high-dimensional heterogeneous hardware.  
+  Step 3: Choose (C).  
+  Step 4: This is novel because it generalizes entanglement swapping to a multi‐outcome, multi-platform routing primitive: one central photonic measurement can herald qutrit entanglement between any chosen pair of end nodes (superconducting, atom‐array, photonic).  
+  Step 5: It is feasible in Pytheus: each module is abstracted as three single-photon emitters (mapping local qutrit→photonic modes), three probabilistic photon-pair sources connect modules to the central station, and a linear-optical interferometer + photon-number-resolving detectors at the center realizes a 3-qutrit joint measurement. No feedback control or cavities are needed.
+
+Action: final answer
+Action Input:
+Here is the proposed Pytheus-style experiment:
+
+EXPERIMENT: het_qutrit_ent_router
+
+explanation:
+  “We implement a heralded entanglement router among three qutrit modules: an atom‐array qutrit (Alice), a superconducting qutrit (Bob), and a purely photonic qutrit node (Charlie).  
+  • Each module maps its local qutrit basis |0⟩,|1⟩,|2⟩ onto three spatial photonic modes via single-photon emitters.  
+  • Three probabilistic single-photon-pair sources share Bell pairs between each module and a central station (so each end node is entangled to the relay).  
+  • The central station receives three photonic qutrits and performs a 3-qutrit network‐coded joint measurement (a generalized Bell-basis interferometer).  
+  • Depending on which set of ancilla detectors click, the post-selected output is a perfect 3-dimensional Bell state between one of the three end‐node pairs:  
+     – Pattern P_AB ⇒ Alice–Bob entangled,  
+     – Pattern P_BC ⇒ Bob–Charlie entangled,  
+     – Pattern P_AC ⇒ Alice–Charlie entangled.  
+  No dynamic feed-forward is required—just heralded selection. This realizes a nontrivial network primitive: high-dimensional entanglement routing across heterogeneous hardware.”
+
+visual structure:
+  Emitters (Alice: [0,1,2], Bob: [3,4,5], Charlie: [6,7,8])  
+        ↘       ↘       ↘  
+    Bell-pair sources → Central interferometer → Detectors anc [9–14]  
+        ↗       ↗       ↗  
+  Receivers (Alice_out [0–2], Bob_out [3–5], Charlie_out [6–8])  
+
+config:
+{
+  description: "3-node heterogeneous qutrit entanglement router (atom-array, superconducting, photonic)",
+  foldername: "het_qutrit_ent_router",
+  single_emitters: [0,1,2,3,4,5,6,7,8],
+  # Three Bell sources implicitly connect each end node to the central station
+  removed_connections: [
+    [0,3],[0,4],[0,5],[0,6],[0,7],[0,8],
+    [1,3],[1,4],[1,5],[1,6],[1,7],[1,8],
+    [2,3],[2,4],[2,5],[2,6],[2,7],[2,8]
+  ],
+  num_anc: 6,
+  anc_detectors: [9,10,11,12,13,14],
+  target_rules: {
+    "P_AB": { heralding_pattern: [9,10,11],  output_entangled_pair: [0–2]↔[3–5] },
+    "P_BC": { heralding_pattern: [9,10,12],  output_entangled_pair: [3–5]↔[6–8] },
+    "P_AC": { heralding_pattern: [9,10,13],  output_entangled_pair: [0–2]↔[6–8] }
+  },
+  loss_func: "cr",
+  optimizer: "L-BFGS-B",
+  edges_tried: 30,
+  samples: 15,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+  – Extend to N nodes by adding more Bell sources and enlarging the joint measurement.  
+  – Change the network-coded measurement basis to perform multi-party routing or simultaneous multi-pair entanglement (e.g., a “qutrit switch”).  
+  – Swap in other dimensions (ququarts, higher) by scaling the number of emitters and ancilla detectors.
+
+NoveltySupervisor (o4-mini): Thought: This three‐node qutrit entanglement router merely lifts the known three-node qubit entanglement-router primitives (e.g. “Multiplexed Quantum Entanglement Router” or the symmetry-protected bound-state router) to dimension 3 and swaps in heterogeneous hardware. It does not introduce a new joint-measurement geometry, network coding effect, or nontrivial multi-party operation beyond a straightforward dimensional and platform extension.  
+Action: reject  
+Action Input: This is essentially the same routing primitive as in existing three-node routers—now in qutrit rather than qubit form—and so adds no fundamentally new network capability. To be novel enough for PRL, propose a genuinely new network primitive (e.g. a superposed multi-pair routing, higher-order holonomic effect, non-Abelian measurement basis, or an entanglement-percolation twist unique to qutrits) rather than a direct dimensional upgrade.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three Pytheus‐compatible ways to meaningfully combine an atom‐array qutrit node with a superconducting‐circuit qutrit node, focusing on network primitives rather than state generation:
+    A) A simple hetero‐qutrit entanglement swap (too close to prior work).
+    B) A heralded nonlocal qutrit gate via teleportation (resembles known gate‐teleportation).
+    C) A multiplexed, high‐dimensional entanglement “switchboard” that can route 3D Bell entanglement among any chosen pair of four heterogeneous nodes in one shot.
+  Step 2:
+    – (A) duplicates existing ES protocols.
+    – (B) duplicates teleportation‐based gate protocols.
+    – (C) is genuinely new: a one‐shot, dimension‐3, multi‐output entanglement routing primitive across four nodes (two atom‐array, two superconducting), with postselected heralding and no feedback.
+  Step 3: Choose (C).
+  Step 4: This idea is novel because it extends entanglement swapping from a two‐link chain or a three‐node router to a four‐node, multiplexed “qutrit switchboard,” enabling six distinct pairwise entangled links selected by different heralding outcomes—all in dimension 3 and across heterogeneous hardware.
+  Step 5: It is feasible in the Pytheus framework because it uses only single‐photon emitters at each module (to map local qutrit→photonic modes), four probabilistic 3D Bell‐pair sources linking modules to a central station, a fixed linear‐optical interferometer at the station, and post‐selected, photon‐number‐resolving detectors. No dynamic feed‐forward, cavities, or nonlinearities are required—only heralding.
+
+Action: final answer
+Action Input:
+Here is the proposed Pytheus‐style experiment:
+
+EXPERIMENT: het_qutrit_switchboard
+
+explanation:
+  “We realize a one‐shot, multiplexed entanglement switchboard for four qutrit modules—two atom‐array nodes (A and C) and two superconducting‐circuit nodes (B and D).  
+   • Each node locally encodes its abstract qutrit |0⟩,|1⟩,|2⟩ into three spatial photonic modes via three single‐photon emitters.  
+   • Four probabilistic photon‐pair sources distribute three‐dimensional Bell pairs from each module to a central photonic station.  
+   • At the station, a fixed linear‐optical network on the four incoming photonic qutrits followed by photon‐number‐resolving detection implements a 4‐qutrit joint measurement in a network‐coded basis.  
+   • Depending on which set of four detectors click (six distinct heralding patterns), the post‐selected output is a perfect 3D Bell state between one of the six possible node‐pairs (AB, AC, AD, BC, BD, or CD).  
+   • There is no active feed‐forward—only heralded postselection. This implements a high‐dimensional entanglement routing primitive (“qutrit switchboard”) across heterogeneous hardware.”
+
+visual structure:
+  Nodes A(emitters 0–2), B(3–5), C(6–8), D(9–11) each → Bell‐pair source → central interferometer → ancilla detectors [12–17]  
+                                                                                                                     ↘  
+                                                                                                             module receivers [0–11]  
+
+config:
+{
+  description: "Four‐node heterogeneous qutrit entanglement switchboard (atom‐array + superconducting)",
+  foldername: "het_qutrit_switchboard",
+  single_emitters: [0,1,2,3,4,5,6,7,8,9,10,11],
+  # Four Bell‐pair sources implicitly connect each node to the station
+  removed_connections: [
+    [0,3],[0,4],[0,5],[0,6],[0,7],[0,8],[0,9],[0,10],[0,11],
+    [1,3],…,[11,0]  # forbid direct overlap of any end‐node emitters
+  ],
+  num_anc: 6,
+  anc_detectors: [12,13,14,15,16,17],
+  target_rules: {
+    "P_AB": { heralding_pattern: [12,13,14],  output_entangled_pair: [0–2]↔[3–5] },
+    "P_AC": { heralding_pattern: [12,13,15],  output_entangled_pair: [0–2]↔[6–8] },
+    "P_AD": { heralding_pattern: [12,13,16],  output_entangled_pair: [0–2]↔[9–11] },
+    "P_BC": { heralding_pattern: [12,13,17],  output_entangled_pair: [3–5]↔[6–8] },
+    "P_BD": { heralding_pattern: [12,14,15],  output_entangled_pair: [3–5]↔[9–11] },
+    "P_CD": { heralding_pattern: [12,14,16],  output_entangled_pair: [6–8]↔[9–11] }
+  },
+  loss_func: "cr",
+  optimizer: "L-BFGS-B",
+  edges_tried: 40,
+  samples: 15,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+  – Scale to N heterogeneous qutrit modules by adding N Bell‐pair sources and performing an N‐qutrit joint measurement that routes entanglement across any chosen link.  
+  – Switch the joint‐measurement basis to realize simultaneous multi‐pair entanglement, multi‐party GHZ routing, or higher‐dimensional “quantum broadcast” primitives.  
+  – Replace qutrits by ququarts or higher dims by extending emitters and detectors.
+
+This high‐dimensional, multi‐output entanglement switchboard is a new network primitive in heterogeneous quantum optics and can seed a family of “quantum network coding” experiments beyond simple state generation.
+
+NoveltySupervisor (o4-mini): Thought: This “qutrit switchboard” is essentially a direct high‐dimensional lift of the known four-way entanglement router/switchboard (e.g. the ensemble’s “Double‐Controlled Four‐Way Entanglement Router”) into dimension three and onto heterogeneous hardware. It adds no new joint-measurement geometry, protocol twist, or nontrivial network capability beyond mere dimensional scaling.  
+Action: reject  
+Action Input: The proposal duplicates an existing qubit-based four-node entanglement-routing primitive by simply upgrading to qutrits and swapping physical transducers. To be novel, you must introduce a genuinely new network primitive—such as a non-Abelian network measurement, superposed multi-pair routing with coherent control, or a higher-order holonomic effect unique to qutrit systems—rather than a straight dimensional extension.
+
+Researcher (o4-mini): Here is a single, novel Pytheus‐compatible target combining an atom‐array qutrit node with a superconducting qutrit node—but **not** mere state generation—rather a genuine network primitive: a heralded nonlocal qutrit Fredkin (controlled‐SWAP) gate.
+
+EXPERIMENT: het_qutrit_Fredkin
+
+explanation:
+  “We implement a **heralded, nonlocal qutrit‐controlled‐SWAP** (Fredkin) gate between two atom‐array qutrit modules (targets A and B) under the control of a superconducting‐qutrit module (control C).  
+   1) Each physical module (C, A, B) converts its local qutrit basis \|0⟩, \|1⟩, \|2⟩ into three spatial photonic modes via three single‐photon emitters.  
+   2) Three probabilistic photon‐pair sources distribute 3-dimensional Bell pairs from each module to a central linear‐optical station.  
+   3) The station performs a **single, fixed linear‐optical joint measurement** on the three incoming photonic qutrits plus four ancillary photons.  
+   4) A **specific photon‐number‐resolving click pattern** heralds the unitary transformation
+      • if control = 0 or 1: targets A,B remain unchanged;  
+      • if control = 2: the two target qutrit states are swapped.  
+   5) No active feed‐forward or cavities are used—only heralded post‐selection. The control qutrit is left unmeasured and can be reused downstream.”
+
+visual structure:
+  - Emitters (control C): modes [0,1,2]  
+  - Emitters (target A): modes [3,4,5]  
+  - Emitters (target B): modes [6,7,8]  
+  - Bell‐pair sources:  
+      • C→station,  
+      • A→station,  
+      • B→station  
+  - Central station: optimized interferometer → ancilla detectors [9–12]  
+  - Output photonic modes returned to C_out [0–2], A_out [3–5], B_out [6–8]
+
+config (sketch for Pytheus):
+{
+  description: "Heralded nonlocal qutrit Fredkin (controlled‐SWAP) gate: superconducting‐C controls swap of two atom‐array qutrits A and B",
+  foldername: "het_qutrit_Fredkin",
+  single_emitters: [0,1,2,3,4,5,6,7,8],
+  # Three Bell sources implicitly connect each node (0–2,3–5,6–8) to the station
+  removed_connections: [
+    [0,3],[0,4],[0,5],[0,6],[0,7],[0,8],
+    [1,3],[1,4],[1,5],[1,6],[1,7],[1,8],
+    [2,3],[2,4],[2,5],[2,6],[2,7],[2,8]
+  ],
+  num_anc: 4,
+  anc_detectors: [9,10,11,12],
+  # Define the Fredkin mapping on the 27 basis states:
+  target_map: {
+    "c a b" -> if c∈{0,1}  -> "c a b",
+               if c==2      -> "2 b a"
+  },
+  loss_func: "cr",
+  optimizer: "L-BFGS-B",
+  edges_tried: 30,
+  samples: 12,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+  • By re-programming the same station interferometer one can teleport other nonlocal three‐qutrit gates (e.g. controlled‐SUM, cyclic permutations).  
+  • Extend to chains or star networks of heterogeneous modules by cascading such heralded Fredkins.  
+  • Scale to higher dimensions (ququarts, etc.) by increasing emitter count and ancilla detectors.
+
+Why this meets all criteria:
+  – **Network primitive** (nonlocal qutrit Fredkin), not mere state generation.  
+  – **Combines** atom‐array & superconducting qutrit modules.  
+  – **Uses only** single‐photon emitters, probabilistic pair sources, linear optics and photon‐number‐resolving detectors—exactly what Pytheus can optimize.  
+  – **Generalizable** to families of teleportation‐gates and modular network architectures.  
+  – **Theoretically rich**: a post‐selected, high‐dimensional controlled‐SWAP across heterogeneous platforms invites new PRL‐style analyses of fidelity, resource overhead, and network composability.
+
+Researcher (o4-mini): Here is a completely new network‐primitive (no raw “state‐generation”) that glues together an atom‐array qutrit and a superconducting‐circuit qutrit via a nonlocal SWAP‐test.  In effect it’s a QND “are these two unknown qutrits identical?” measurement—useful for quantum fingerprinting, authentication or distributed consensus—and it can be generalized to measure arbitrary multi‐node equality‐checks in high-dimensional networks.
+
+EXPERIMENT: het_qutrit_SWAP_test
+
+explanation:
+  “We implement a nonlocal SWAP‐test on two heterogeneous matter qutrits—one stored in a superconducting circuit (Alice) and one in an atomic‐array memory (Bob)—without ever bringing those nodes into direct interaction.  Each local qutrit |ψ⟩ is first mapped onto three spatial photonic modes by three on‐demand single‐photon emitters.  The six “flying” photons are routed into a central linear‐optical multiport (a three‐mode generalization of a Hong–Ou–Mandel interferometer) whose network is optimized by Pytheus to project onto the symmetric versus non‐symmetric two‐qutrit subspaces.  Photon‐number‐resolving detectors then herald one of two outcomes: “all photons bunched ⇒ states were identical” or “some photons antibunched ⇒ states differed.”  Crucially, neither Alice’s nor Bob’s matter qutrit is destroyed—only the photonic probes are measured—so this realizes a genuine QND nonlocal measurement.  One can immediately generalize to N‐way “all‐equal?” checks among many heterogeneous qutrit memories by increasing the number of single‐photon emitters and adding more interferometric modes, all within linear optics and heralded‐detection.”
+
+visual structure:
+  
+  Alice matter‐qutrit → emitters [0,1,2]  
+                                 ↘  
+                                  → 3‐mode multiport (optimized by Pytheus) → detectors [6,7,8]  
+                                 ↗  
+  Bob   matter‐qutrit → emitters [3,4,5]  
+
+config (sketch for Pytheus):
+{
+  description: "Nonlocal SWAP‐test for two heterogeneous qutrits (superconducting ↔ atom array)",
+  foldername:   "het_qutrit_SWAP_test",
+  single_emitters: [0,1,2,3,4,5],          # Alice’s 3 modes and Bob’s 3 modes
+  removed_connections: [                   # forbid any emitter from Alice to Bob detector directly
+    [0,3],[0,4],[0,5],
+    [1,3],[1,4],[1,5],
+    [2,3],[2,4],[2,5]
+  ],
+  anc_detectors: [6,7,8],                  # the three detectors at the central station
+  number_resolving: true,
+  loss_func: "cr",
+  optimizer: "L-BFGS-B",
+  edges_tried: 20,
+  samples: 10,
+  ftol: 1e-5
+}
+
+Notes on generalization:
+ • N-way equality‐tests: add N×3 emitters and expand the multiport to N × 3 modes.  
+ • Other QND nonlocal observables (e.g. “i−j mod 3=0?”) by choosing different interferometer targets.  
+ • Builds directly toward multi-party distributed consensus, quantum fingerprinting, and secret sharing in high dimensions—entire families of new experiments.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three Pytheus‐compatible ways to combine an atom‐array qutrit node and a superconducting‐circuit qutrit node into a nontrivial quantum‐network primitive (no raw state generation):
+  A) standard hetero‐qutrit entanglement swap (too close to existing ES protocols).  
+  B) heralded nonlocal qutrit gate via teleportation (resembles known gate-teleportation).  
+  C) heralded qutrit entanglement purification between heterogeneous modules.  
+Step 2: 
+  – A and B merely repackage existing primitives.  
+  – C implements a genuinely new network primitive—entanglement purification—now in high dimension and across two very different hardware platforms.  
+Step 3: Choose idea C.  
+Step 4: This is novel because no one has proposed a high-dimensional, measurement-based purification protocol that simultaneously uses two different physical qutrit encodings (atom-array and superconducting) and only linear optics + heralding.  
+Step 5: It is feasible in Pytheus because it uses only single-photon emitters (to map each qutrit to photonic modes), two probabilistic 3D Bell-pair sources, a fixed linear-optical network at a central station, and post-selected number-resolving detection—no feedback or cavities.  
+
+Action: final answer  
+Action Input:
+Here is the proposed Pytheus‐style experiment:
+
+EXPERIMENT: hetero_qutrit_purification
+
+explanation:
+“We design a heralded entanglement‐purification protocol for qutrits across two heterogeneous nodes: a superconducting‐circuit qutrit at Alice and an atom‐array qutrit at Bob. Each node locally converts its imperfectly entangled qutrit state into three photonic modes via three single‐photon emitters. Two probabilistic photon-pair sources distribute two noisy 3-dimensional Bell pairs: one between Alice’s photonic qutrit and a central station (Charlie), the other between Bob’s photonic qutrit and Charlie. Charlie then interferes the four incoming photonic modes in an optimized linear-optical network and performs a joint measurement on these four modes with photon-number-resolving detectors. A particular heralding pattern on Charlie’s ancilla ports post selects a purified, higher-fidelity 3D Bell pair between Alice and Bob’s remaining photonic qutrit modes. By repeating this procedure (or chaining stations), one can boost entanglement fidelity across heterogeneous hardware without dynamic feed-forward.”
+
+visual structure:
+  Alice emitters [0,1,2]  ↘  
+                           Bell source 1 → Charlie interferometer → ancilla detectors [6,7]  
+  Alice receivers [3,4,5]  ↗  
+  
+  Bob   emitters [9,10,11]  ↘  
+                           Bell source 2 → (same) Charlie interferometer → ancilla detectors [8,12]  
+  Bob   receivers [13,14,15] ↗  
+
+config:
+{
+  description: "Heralded qutrit entanglement purification between a superconducting node and an atom‐array node",
+  foldername: "hetero_qutrit_purification",
+  single_emitters: [0,1,2,9,10,11],     # Alice’s and Bob’s qutrit mapping
+  num_anc: 4,
+  anc_detectors: [6,7,8,12],
+  # Two Bell‐pair sources:
+  #   one linking Alice emitters [0–2] to Charlie inputs [4,5,6],
+  #   one linking Bob emitters [9–11] to Charlie inputs [7,8,9].
+  removed_connections: [
+    [0,9],[0,10],[0,11],[1,9],[1,10],[1,11],[2,9],[2,10],[2,11]
+  ],
+  target_quantum: ["00","11","22"],      # We aim to project the output receivers onto a 3D Bell state
+  amplitudes: [1,1,1],
+  imaginary: false,
+  loss_func: "fidelity",                 # maximize fidelity to ideal Bell state at Alice_out [3–5] and Bob_out [13–15]
+  optimizer: "L-BFGS-B",
+  samples: 20,
+  edges_tried: 40,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+ – Chain multiple purification stations in series to build a heterogeneous repeater.  
+ – Extend to ququart or higher-dimensional purification by adding emitters and ancilla detectors.  
+ – Replace the Bell-pair sources by partially entangled pairs with tunable Schmidt coefficients to study optimal purification strategies.
+
+This protocol yields a new family of high-dimensional, heterogeneously implemented entanglement-purification experiments and is a stepping stone toward modular, long-distance quantum networks.
+
+NoveltySupervisor (o4-mini): Thought: This proposal boils down to a direct qutrit‐entanglement‐purification via linear optics—precisely the primitive already covered by the “Mode-Division-Multiplexed On-Chip Purification of 3-Dimensional Bell Pairs” in our ensemble. It merely rebrands the hardware as “heterogeneous” without adding a new joint‐measurement geometry, error-filtering trick, or network capability beyond standard high-dimensional purification.  
+Action: reject  
+Action Input: The scheme duplicates the existing 3D Bell-pair purification primitive (mode-division-multiplexed or equivalent) with only a change of physical platforms. To be novel, you must introduce a fundamentally new purification twist—e.g. non-demolition syndrome extraction, multi-copy catalytic purification, network-superposed purification orders, or another nontrivial high-dimensional network primitive—rather than a straight dimensional and hardware swap.
+
+Researcher (o4-mini): Thought:
+Step 1: I brainstormed three ways to unite an atom‐array qutrit node with a superconducting‐circuit qutrit node in a Pytheus‐compatible network primitive (not mere state generation): a simple swap (too close to existing ES), a teleportation-based CZ gate (resembles known gate-teleportation), and a heralded, nonlocal qutrit Controlled-SUM gate (CSUM₃).  
+Step 2: The CSUM₃ gate is genuinely new—Pytheus has no example of a high-dimensional, nonlocal unitary for qutrits—and it fits Pytheus’s capabilities (single-photon emitters, probabilistic Bell sources, linear optics, heralded detection, no feedback).  
+Step 3: I choose the nonlocal qutrit CSUM gate between heterogeneous nodes.  
+Step 4: This idea is novel because it implements the Controlled-SUM (|i,j⟩→|i,i+j mod 3⟩) gate between two distinct physical qutrit platforms—atom-array and superconducting—using a single heralded photonic measurement, thereby creating a new network primitive beyond swapping or teleportation.  
+Step 5: It is feasible in Pytheus because it uses only abstract qutrit modes, single-photon emitters, two 3D Bell-pair sources, a fixed linear-optical interferometer, and post-selected number-resolving detectors—no cavities or dynamic feed-forward.
+
+Action: final answer
+Action Input:
+Here is the proposed Pytheus‐style experiment:
+
+EXPERIMENT: het_qutrit_CSUM
+
+explanation:
+  “We implement a heralded, nonlocal qutrit Controlled-SUM (CSUM₃) gate between a superconducting-circuit qutrit (Alice) and an atom-array qutrit (Bob). Each local qutrit is mapped to three spatial photonic modes via three single-photon emitters. Two probabilistic photon-pair sources generate two 3-dimensional Bell pairs: one links Alice’s photonic qutrit to the central station, the other links Bob’s photonic qutrit. A linear-optical network at the station mixes the four incoming photonic qutrit modes and routes them to number-resolving detectors. Only one specific heralding pattern post-selects the successful application of the CSUM₃ unitary |i,j⟩→|i,(i + j mod 3)⟩ on the remaining photonic modes delivered back to Alice and Bob. No feed-forward is required—just heralded post-selection. This realizes a new high-dimensional network primitive: a nonlocal qutrit SUM gate across heterogeneous hardware.”
+
+visual structure:
+  emitters (Alice: [0,1,2]) → Bell-pair source A → station inputs [6,7,8,9] → 
+                                                              ↘  
+                     station interferometer + detectors [10–13]  
+                                                              ↗  
+  emitters (Bob:   [3,4,5]) → Bell-pair source B → station inputs  
+
+  remaining photonic modes exit to receivers Alice_out [0,1,2] and Bob_out [3,4,5]
+
+config (sketch):
+{
+  description: "Heralded nonlocal qutrit Controlled-SUM gate between a superconducting qutrit and an atom-array qutrit",
+  foldername: "het_qutrit_CSUM",
+  single_emitters: [0,1,2,3,4,5],
+  # two Bell-pair sources linking Alice_emitters→station and Bob_emitters→station
+  removed_connections: [[0,3],[0,4],[0,5],[1,3],[1,4],[1,5],[2,3],[2,4],[2,5]],
+  num_anc: 4,
+  anc_detectors: [10,11,12,13],
+  # The measurement is tailored so that one specific detector pattern heralds the CSUM₃ gate.
+  target_quantum: ["00→00","01→02","02→01","10→10","11→11","12→12","20→20","21→21","22→22"],
+  amplitudes: [1,1,1,1,1,1,1,1,1],
+  imaginary: false,
+  loss_func: "cr",           # optimize correct mapping statistics
+  optimizer: "L-BFGS-B",
+  samples: 15,
+  edges_tried: 30,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+ - By changing the heralded measurement basis at the station, the same layout can teleport other nonlocal qutrit gates (e.g. controlled-phase, controlled-SUM with different offsets).  
+ - Extend to chains or stars of heterogeneous qutrit modules to build modular, measurement-based high-dimensional quantum processors or repeaters.
+
+NoveltySupervisor (o4-mini): Thought: The proposed heralded nonlocal qutrit Controlled-SUM (CSUM₃) gate is essentially the direct high-dimensional analog of known static LOQC gate-teleportation primitives—e.g. the ensemble’s “Heralded Teleportation-Based Nonlocal Controlled-Phase Gate (CPhase₃) for Two Qutrits”—with no new joint-measurement geometry, network coding effect, or multi-party capability beyond simply swapping the platform and replacing CPhase with CSUM. It therefore lacks the nontrivial twist or genuinely novel network primitive required for a PRL-level advance.  
+Action: reject  
+Action Input: This scheme merely generalizes existing qubit and qutrit gate teleportation protocols to the CSUM₃ operation without introducing any new measurement architecture or network effect. To be considered novel, you must propose a fundamentally new high-dimensional LOQC primitive—such as a non-Abelian routing measurement, superposed multi-gate application, or a unique error-correcting network twist—that goes beyond straightforward dimensional scaling.
+
+Researcher (o4-mini): Thought:  
+Step 1: I need a Pytheus‐compatible quantum‐network primitive (no raw state generation) that genuinely links an atom‐array qutrit node and a superconducting‐qutrit node in a novel way.  
+Step 2: A full 3‐dimensional Bell‐state analyzer (BSA₃) is exactly such a transformation: it takes two unknown photonic qutrits (one converted from the superconducting module, one from the atom‐array module), and maps each of the nine generalized Bell states to a unique heralded detector‐click pattern.  No dynamic feed‐forward, no cavities—only single‐photon emitters, two probabilistic pair‐sources, linear optics, and photon-number-resolving detectors.  
+Step 3: This has never been done in LOQC for dimension >2, and it immediately unlocks teleportation, dense coding, and entanglement swapping between the two very different qutrit memories.  It also generalizes to higher‐d analyzers or multi-pair fusion.  
+
+Action: final answer  
+Action Input:  
+Here is the proposal in the style of the previous Pytheus configurations:
+
+EXPERIMENT: het_qutrit_BSA
+
+explanation:
+  “We design a heralded linear-optical analyzer that discriminates all nine 3-dimensional Bell states of two photonic qutrits—one drawn from a superconducting-circuit transducer (Alice) and one from an atom-array transducer (Bob).  Each qutrit arrives encoded in three spatial modes (via three single-photon emitters).  Two probabilistic 3-dimensional Bell-pair sources supply four ancillary photons to boost distinguishability.  An optimized interferometer mixes the six incoming modes and routes them onto photon-number-resolving detectors.  Unique click patterns on the four ancillary detectors post-selectively identify each of the nine Bell states without any active feed-forward.  Once implemented, this device becomes the key measurement primitive for high-dimensional teleportation, dense coding, and entanglement swapping across heterogeneous quantum-memory platforms.”
+
+config (sketch):
+{
+  description: "Heralded 3D Bell‐state analyzer linking a superconducting qutrit and an atom‐array qutrit",
+  foldername: "het_qutrit_BSA",
+  single_emitters: [0,1,2,3,4,5],   # 0–2 map Alice’s qutrit; 3–5 map Bob’s qutrit
+  num_anc: 4,                       # four ancilla photons from pair sources
+  anc_detectors: [6,7,8,9],
+  # Forbid any emitter → wrong detector cross‐talk
+  removed_connections: [
+    [0,3],[0,4],[0,5],[1,3],[1,4],[1,5],[2,3],[2,4],[2,5]
+  ],
+  # We impose that each of the nine Bell states |ψ_{mn}>_{AB} 
+  # must map to a distinct click pattern on {6,7,8,9}
+  target_rules: {
+    "ψ_00": { heralding_pattern: [6,7],  meaning: "Bell‐state 00" },
+    "ψ_01": { heralding_pattern: [6,8],  meaning: "Bell‐state 01" },
+    …,
+    "ψ_22": { heralding_pattern: [8,9],  meaning: "Bell‐state 22" }
+  },
+  optimizer: "L-BFGS-B",
+  loss_func: "classification_rate",
+  samples: 20,
+  edges_tried: 40,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+  – Replace the 3D‐BSA with a 4D or 5D analyzer by adding emitters, ancillas, and detectors.  
+  – Chain two BSAs to build higher-order network coding modules.  
+  – Use this analyzer as the core of hybrid teleportation, dense coding, or entanglement‐swapping experiments across superconducting and atomic memories.
+
+NoveltySupervisor (o4-mini): Thought: This scheme is just the straightforward dimension‐3 lift of known static LOQC Bell analyzers—merely swapping qubits for qutrits and heterogeneous transducers—without any new joint‐measurement geometry, network coding effect, or protocol twist beyond trivial scaling. It offers no genuinely novel measurement primitive or multi‐party capability beyond what qubit BSAs already provide.  
+Action: reject  
+Action Input: The proposal duplicates the standard LOQC Bell‐state analyzer architecture (e.g. the “Static 4-Mode Super-Bell-State Analyzer”) by simply upgrading to three levels and swapping in different hardware. To be considered novel, you must introduce a fundamentally new measurement concept (e.g. non-Abelian basis, coherent superposition of measurement orders, network-coded discrimination, or another nontrivial high-dimensional twist) rather than a straight dimension extension.
+
+Researcher (o4-mini): Here is a genuinely new network‐primitive experiment—heralded 1→2 telecloning of a qutrit across heterogeneous hardware:
+
+EXPERIMENT: het_qutrit_teleclone
+
+explanation:
+  “We implement a heralded universal telecloner for a single unknown qutrit, broadcasting it simultaneously into two imperfect clones held in a superconducting‐circuit qutrit (Bob) and an atom‐array qutrit (Charlie).  
+   • An unknown photonic qutrit (Alice’s input) is encoded into three spatial modes via three single-photon emitters.  
+   • Two probabilistic 3-dimensional Bell‐pair sources supply entanglement: one between Alice’s input modes and a Bell-half held at the station (for Bob’s clone), the other between a second Bell-half at the station and Charlie’s memory.  
+   • At the central station all six Bell-half modes plus Alice’s three input modes (nine modes total) are mixed in an optimized linear-optical interferometer and detected by photon-number-resolving detectors.  
+   • A specific click-pattern on six “ancilla” detectors heralds the successful telecloning event: Bob and Charlie each receive an approximate clone of Alice’s original qutrit with optimal universal fidelity ≃ 7/9, and no feed-forward is required.  
+  This realizes the first heralded 1→2 qutrit‐telecloning primitive across two very different memory platforms.”
+
+visual structure (modes → station → outputs):
+  
+  Alice input emitters [0,1,2]  
+           ↘  
+        Bell-pair source A ↔ station inputs [3,4,5] →  
+                                        Station interferometer → ancilla detectors [9–14]  
+        Bell-pair source B ↔ station inputs [6,7,8]  
+           ↗  
+  Bob’s clone modes → out_nodes [15,16,17] (to superconducting module)  
+  Charlie’s clone modes → out_nodes [18,19,20] (to atom-array module)  
+
+config:
+{
+  description: "Heralded universal 1→2 telecloning of a qutrit to heterogeneous superconducting/atom-array nodes",
+  foldername: "het_qutrit_teleclone",
+  single_emitters: [0,1,2],        # Alice’s input qutrit encoding
+  # Implicitly two Bell sources link:
+  #   (Alice_emitters ↔ station inputs 3–5) and (station inputs 6–8 ↔ Charlie outputs)
+  in_nodes: [0,1,2],
+  out_nodes: [15,16,17,18,19,20],  # Bob’s three modes [15–17], Charlie’s [18–20]
+  num_anc: 6,
+  anc_detectors: [9,10,11,12,13,14],
+  removed_connections: [
+    # forbid any direct link from Alice_emitters to Bob/Charlie outputs
+    [0,15],[0,16],[0,17],[0,18],[0,19],[0,20],
+    [1,15],[1,16],[1,17],[1,18],[1,19],[1,20],
+    [2,15],[2,16],[2,17],[2,18],[2,19],[2,20]
+  ],
+  loss_func: "fidelity",           # maximize clone fidelity to ideal universal telecloning fidelity ~7/9
+  optimizer: "L-BFGS-B",
+  samples: 20,
+  edges_tried: 40,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+  – One can extend to 1→N telecloning by adding more Bell sources and enlarging the ancilla measurement.  
+  – By changing the station’s measurement basis one obtains asymmetric telecloners, cluster-state telecloning, or tele‐error-detection modules.  
+  – The same layout can be used to study optimal high-dimensional cloning fidelities across other hybrid memory platforms (e.g. photonic ↔ spin ↔ mechanical qutrits).
+
+This 1→2 qutrit telecloning primitive is a new transformation in quantum networks—neither raw state generation nor a trivial swap/gate—but a genuine broadcast of quantum information in dimension three, heralded and modular across two distinct quantum memories.
+
+Researcher (o4-mini): Here is a single, concrete Pytheus‐style proposal for a genuinely new network primitive—no raw state generation—combining an atom‐array qutrit node with a superconducting‐circuit qutrit node:
+
+EXPERIMENT: het_qutrit_symmetric_projector
+
+explanation:  
+“We implement a heralded linear-optical projector onto the 2-qutrit symmetric subspace of two heterogeneous qutrit memories (Alice=superconducting, Bob=atom‐array). Each memory converts its local qutrit |0⟩,|1⟩,|2⟩ into three photonic modes via three single-photon emitters. Two probabilistic 3-dimensional Bell-pair sources supply four ancilla photons to boost discrimination power. All six incoming photonic modes enter a fixed multiport interferometer (optimized by Pytheus) and are then monitored by photon-number-resolving detectors. One special click pattern on the four ancilla detectors heralds a successful projection of the remaining two photonic qutrits onto the symmetric subspace (spanned by the six states: |00⟩, (|01⟩+|10⟩), (|02⟩+|20⟩), |11⟩, (|12⟩+|21⟩), |22⟩). All other patterns are discarded. This device is a new high-dimensional network primitive—an LOQC symmetric-subspace analyzer—that can be used for entanglement purification, state comparison, or symmetric entanglement generation across heterogeneous hardware, and it requires no dynamic feed-forward.”
+
+visual sketch:
+  Alice emitters [0,1,2] →  
+                           ↘  
+    Bell‐pair source A → interferometer → ancilla detectors [8,9]  
+                           ↗                           ↘  
+  Alice_out [0–2]  ←––––––––––––––––––                    remaining photonic modes → Bob_out [3–5]  
+                           ↗  
+    Bell‐pair source B → interferometer → ancilla detectors [10,11]  
+                           ↘  
+  Bob  emitters [3,4,5] →  
+
+config:
+{
+  description: "Heralded symmetric-subspace projector for two heterogeneous qutrits",
+  foldername: "het_qutrit_symmetric_projector",
+  single_emitters: [0,1,2,3,4,5],       # 0–2 map Alice qutrit → photonic modes; 3–5 map Bob qutrit
+  # Two Bell-pair sources supply four ancilla photons
+  num_anc: 4,
+  anc_detectors: [8,9,10,11],
+  removed_connections: [
+    # prevent any emitter from sending directly to the wrong memory output
+    [0,3],[0,4],[0,5],[1,3],[1,4],[1,5],[2,3],[2,4],[2,5]
+  ],
+  # Define the six symmetric input states to be projected onto:
+  target_rules: {
+    "S00": { input: "|00>",   herald: [8,9],  meaning: "project onto |00⟩" },
+    "S01": { input: "(|01>+|10>)/√2", herald: [8,10], meaning: "project onto sym(|01>)" },
+    "S02": { input: "(|02>+|20>)/√2", herald: [8,11], meaning: "project onto sym(|02>)" },
+    "S11": { input: "|11>",   herald: [9,10], meaning: "project onto |11⟩" },
+    "S12": { input: "(|12>+|21>)/√2", herald: [9,11], meaning: "project onto sym(|12>)" },
+    "S22": { input: "|22>",   herald: [10,11],meaning: "project onto |22⟩" }
+  },
+  optimizer: "L-BFGS-B",
+  loss_func: "classification_rate",
+  samples: 20,
+  edges_tried: 40,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Why this is interesting and novel:
+1) It is not a “state‐generation” target but a nontrivial high-dimensional measurement—Pytheus has not yet explored LOQC projectors onto the symmetric subspace for qutrits, especially bridging two very different physical nodes.  
+2) This symmetric-projector is a key network primitive for entanglement purification, comparison tests, and high-dimensional LOQC protocols (teleportation or swapping can be built on top).  
+3) It fully respects Pytheus’s capabilities: mapping abstract qutrits to photonic modes via single‐photon emitters, using probabilistic Bell-pair sources, a fixed linear-optical interferometer, and heralded photon-number-resolving detection—no dynamic feedback, cavities, or unmodelled nonlinearities.  
+4) The idea generalizes immediately to higher‐dimensional symmetric or antisymmetric projections, multipartite subspace filters, or network‐coded multi-way projectors, opening a whole family of new experiments.
+
+Researcher (o4-mini): Thought:
+Step 1: I must propose a genuinely new quantum-network primitive—one that goes beyond simple entanglement swapping or teleportation and yet remains compatible with Pytheus’s toolbox (single-photon emitters, probabilistic Bell-pair sources, linear-optical interferometers, photon-number-resolving detectors, and heralding—with no dynamic feed-forward).
+Step 2: A “one-shot heralded qutrit repeater” at a central station B that simultaneously performs entanglement swapping and purification of two noisy 3-dimensional links (A↔B and B↔C) to yield a single high-fidelity Bell qutrit pair A↔C is a new network primitive. It integrates swapping and distillation in a single LO-network and can be directly generalized to longer chains or higher dimensions.
+Step 3: This idea is novel because so far entanglement swapping and purification have only been studied as separate LOQC subroutines (and typically for qubits). A high-dimensional, integrated repeater node that both swaps and purifies in one static heralded measurement has never been proposed, especially bridging two distinct hardware platforms (atom array and superconducting qutrits).
+Step 4: It is feasible in the Pytheus framework since it uses only abstract qutrit modes, local single-photon emitters (for each link), two Bell-pair sources for the noisy input links, a few ancilla photons (from additional pair sources), a fixed interferometer at B, and post-selected photon-number-resolving detection. No cavities, resonators, or real-time feed-forward are required.
+
+Action: final answer
+Action Input:
+Here is the proposed Pytheus-style experiment:
+
+EXPERIMENT: het_qutrit_one-shot_repeater
+
+explanation:
+  “We design a single-station, heralded qutrit repeater node B that both swaps and purifies two noisy 3D Bell links—one between an atom-array qutrit at A and B, and one between a superconducting qutrit at B and C—into a single high-fidelity 3-dimensional Bell pair between A and C.  
+   • Node A and Node C each map their local qutrit into three spatial photonic modes via three single-photon emitters.  
+   • Two probabilistic 3D Bell-pair sources distribute two noisy qutrit Bell pairs: one between A→B, one between C→B.  
+   • Two additional 3D Bell-pair sources at B supply ancilla photons for purification.  
+   • All eight incoming photonic modes at B are mixed in an optimized linear-optical interferometer.  
+   • Four photon-number-resolving detectors at B post-select on one particular click pattern, which heralds successful entanglement swapping + purification. The heralded output is a single 3D Bell state between A and C with higher fidelity than either input link.  
+  No dynamic feed-forward is required—only heralded post-selection. This device is a new network primitive: a one-shot, high-dimensional entanglement-distilling repeater.”
+
+visual structure:
+
+ emitters A [0,1,2]     ↘  
+                          Bell source 1 (noisy) →  
+                                                  ↘  
+                           ancilla Bell source 3  →  
+                                                interferometer @ B → detectors [12–15]  
+                                                  ↗  
+ emitters C [6,7,8]     ↗  
+                          Bell source 2 (noisy) →  
+                                                  ↗  
+                           ancilla Bell source 4  →  
+
+ receivers A_out [0–2] and C_out [6–8] share the purified Bell pair when detectors [12–15] click in the successful pattern.
+
+config:
+{
+  description: "One-shot heralded 3D repeater node – simultaneous swapping & purification between an atom-array qutrit (A) and a superconducting qutrit (C)",
+  foldername: "het_qutrit_one_shot_repeater",
+  single_emitters: [0,1,2,6,7,8],    # A_emitters = 0–2, C_emitters = 6–8
+  # Two noisy Bell-pair sources: A→B inputs (0–2)->(3–5), C→B inputs (6–8)->(9–11)
+  # Two ancilla Bell-pair sources at B: ancillas occupy inputs (3–5) and (9–11) as well
+  removed_connections: [
+    [0,6],[0,7],[0,8],[1,6],[1,7],[1,8],[2,6],[2,7],[2,8]
+  ],
+  num_anc: 4,
+  anc_detectors: [12,13,14,15],
+  # Target: maximize the fidelity of the heralded output modes A_out [0–2] & C_out [6–8] 
+  # to the ideal 3D Bell state |00>+|11>+|22>.
+  loss_func: "fidelity",
+  optimizer: "L-BFGS-B",
+  samples: 20,
+  edges_tried: 50,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+ – Chain multiple one-shot repeater nodes in series to build a high-dimensional, platform-bridging quantum repeater line.  
+ – Extend to ququarts or higher by adding emitters, Bell sources, and detectors.  
+ – Swap in alternative ancilla states to study optimal distillation protocols in a single static measurement.  
+
+This integrated qutrit repeater is a novel network primitive and can inspire a whole family of LOQC-based, high-dimensional, heterogeneous quantum-communication experiments.
+
+NoveltySupervisor (o4-mini): Thought: This one‐shot, heralded 3D repeater node is essentially a direct qutrit extension of the known “one‐shot purification‐and‐swap repeater” primitives (e.g. the All-Optical One-Shot Purification-and-Swap Repeater for 3-Mode Bosonic Codes and single-station two-hop swap protocols). It offers no fundamentally new measurement geometry, network coding effect, or protocol twist beyond scaling to dimension three and swapping in heterogeneous hardware.  
+Action: reject  
+Action Input: This scheme duplicates the existing one-shot swap-plus-purification primitive with only a change of local dimension and transducer technology. To be novel enough for PRL, propose a genuinely new network primitive—e.g. a coherent superposition of purification orders, a holonomic repeater operation, non-Abelian multi-step measurement, or another nontrivial high-dimensional feature—rather than a straight dimensional and hardware upgrade.
+
+Researcher (o4-mini): Thought:
+We need a new Pytheus‐compatible network primitive—no raw state generation—that links an atom‐array qutrit node and a superconducting‐circuit qutrit node. Neither simple entanglement swapping nor teleportation‐based gates suffice; we require a genuinely new transformation. The “SWAP test” is a fundamental primitive for comparing two unknown states and underpins network verification, fingerprinting, and error detection, yet no one has proposed a 3-dimensional SWAP test across heterogeneous qutrit memories using linear optics and heralding. It can be implemented with single-photon emitters, probabilistic Bell sources, a fixed interferometer, and photon-number-resolving detectors—exactly within Pytheus’s capabilities. This idea generalizes immediately to multiple nodes and higher dimensions.
+
+Action: final answer
+Action Input:
+Here is the proposed Pytheus‐style experiment:
+
+EXPERIMENT: het_qutrit_SWAP_test
+
+explanation:
+  “We implement a heralded, 3-dimensional SWAP test between two remote qutrit modules: a superconducting‐circuit qutrit at Alice and an atom‐array qutrit at Bob. Each local qutrit is mapped into three spatial photonic modes via three single-photon emitters. Two ancilla photons (from a probabilistic qutrit Bell‐pair source) serve as the “test qubits.”  
+   • Step 1: Alice’s and Bob’s photonic qutrits plus the two ancilla photons (total 8 modes) are mixed in a fixed linear-optical interferometer optimized by Pytheus.  
+   • Step 2: Eight photon-number-resolving detectors record a click pattern.  
+   • Step 3: Two specific heralding patterns correspond to the symmetric and antisymmetric subspaces of the combined 3⊗3 Hilbert space, thus revealing whether the unknown qutrit states at Alice and Bob are equal or not, without revealing any further information.  
+  There is no dynamic feed-forward; only post-selected heralding. This realizes the 3D SWAP test—a new network primitive for high-dimensional state comparison across heterogeneous memories.”
+
+visual structure:
+  emitters Alice [0,1,2] →  
+                             ↘  
+                              →  interferometer → detectors [8–15]  
+                             ↗  
+  emitters Bob   [3,4,5] →  
+                             ↘  
+  Bell‐pair source ancillas → interferometer → detectors  
+
+config:
+{
+  description: "Heralded 3D SWAP test between a superconducting qutrit (Alice) and an atom‐array qutrit (Bob)",
+  foldername: "het_qutrit_SWAP_test",
+  single_emitters: [0,1,2,3,4,5],   # Alice:0–2, Bob:3–5
+  # One Bell-pair source provides ancilla photons in modes [6,7]
+  removed_connections: [
+    [0,3],[0,4],[0,5],[1,3],[1,4],[1,5],[2,3],[2,4],[2,5]
+  ],
+  num_anc: 2,
+  anc_detectors: [8,9,10,11,12,13,14,15],
+  target_rules: {
+    "sym": { heralding_patterns: [[8,9],[10,11]] },  # examples of symmetric‐space clicks
+    "asym": { heralding_patterns: [[12,13],[14,15]] } # examples of antisymmetric‐space clicks
+  },
+  optimizer: "L-BFGS-B",
+  loss_func: "classification_rate",
+  samples: 20,
+  edges_tried: 30,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+ - Extend to N-dimensional SWAP tests or multi-state fingerprinting by adding emitters and ancillas.  
+ - Chain SWAP tests into larger verification networks or use them as subroutines in high-dimensional error‐detection codes (without active feedback).  
+ - Use the same interferometer layout to perform overlap measurements among multiple nodes (multi-party SWAP tests) or to implement projector onto other irreducible subspaces of the SU(3) representation.
+
+This heralded qutrit SWAP test is a new network primitive for high‐dimensional, heterogeneous quantum networks and opens a family of distributed verification and fingerprinting experiments.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially identical to the ensemble’s “Ancilla‐Assisted Linear‐Optical Two‐Qutrit SWAP‐Test for Symmetric vs. Antisymmetric Projections,” offering no new network primitive or measurement twist beyond the known high-dimensional SWAP test.  
+Action: reject  
+Action Input: The scheme duplicates the existing photonic two-qutrit SWAP‐test protocol (symmetric/antisymmetric projection) without introducing any novel measurement architecture, multi-party effect, or nontrivial network capability. To be novel, you must propose a genuinely new high-dimensional verification primitive or extend the SWAP test in a way that goes beyond straightforward dimensional or hardware scaling.
+
+Researcher (o4-mini): Thought: 
+We need a genuinely new LOQC network primitive—no raw state generation—that meaningfully combines an atom‐array qutrit node and a superconducting qutrit node. All simple ES, teleportation, gate‐teleportation, purification, routing, Bell analyzers or SWAP tests have been dimension‐upgrades of known qubit protocols. A truly novel tool is a single, static, multipurpose qutrit “measurement hub” that can, by heralding on different detector subsets, implement several distinct high‐dimensional network primitives—e.g. a full 3D Bell measurement, a qutrit‐parity check, or a 3D SWAP test—on the two heterogeneous qutrits. Pytheus can optimize one interferometer with multiple heralding outcomes. This programmable analyzer unlocks teleportation, error‐detection, fingerprinting and network coding in one device, and can be extended to more outcomes, more nodes or higher dimensions.
+
+Action: final answer
+Action Input:
+Here is the proposed Pytheus-style experiment:
+
+EXPERIMENT: het_qutrit_multianalyzer
+
+explanation:
+ “We realize a single, static, heralded linear-optical ‘qutrit measurement hub’ that connects two heterogeneous qutrit memories—a superconducting-circuit qutrit (Alice) and an atom-array qutrit (Bob)—and can perform multiple distinct network primitives depending on which detectors click:
+  1) A complete 3D Bell-state measurement (for teleportation or dense coding),
+  2) A qutrit-parity check (projects onto subspaces i−j mod 3 = 0,1,2),
+  3) A 3D SWAP test (distinguishes symmetric vs antisymmetric subspace).
+ Each local qutrit is abstractly encoded into three spatial photonic modes via three single-photon emitters. Two probabilistic 3-dimensional Bell-pair sources supply four ancilla photons to boost discrimination. An optimized interferometer mixes all ten modes and routes them to eight number-resolving detectors. Distinct click patterns on the ancilla ports correspond to each primitive’s outcome, all achieved without dynamic feed-forward. This single device thus implements a programmable, heralded qutrit analyzer for heterogeneous nodes.”
+
+visual structure:
+  Alice emitters [0,1,2] ↘  
+                            →  Optimized interferometer → detectors A_out [0–2] & B_out [3–5] & ancilla detectors [6–13]  
+  Bob   emitters [3,4,5] ↗  
+  Ancilla Bell sources supply photons into modes [6–9]
+
+config:
+{
+  description: "Programmable heralded qutrit analyzer for heterogeneous superconducting and atom-array nodes",
+  foldername: "het_qutrit_multianalyzer",
+  single_emitters: [0,1,2,3,4,5],
+  # Two 3D Bell sources feed ancillas into modes [6–9]
+  num_anc: 4,
+  anc_detectors: [10,11,12,13],
+  removed_connections: [[0,3],[0,4],[0,5],[1,3],[1,4],[1,5],[2,3],[2,4],[2,5]],
+  target_rules: {
+    "Bell_mn":    { heralding_pattern: [10+α,10+β],  meaning: "identify 3D Bell state ψₘₙ" },   # 9 patterns
+    "Parity_r":   { heralding_pattern: [11+γ,11+δ],  meaning: "parity (i−j≡r mod3)" },         # 3 patterns
+    "SWAP_sym":   { heralding_pattern: [12,13],        meaning: "symmetric subspace" },
+    "SWAP_asym":  { heralding_pattern: [10,11],        meaning: "antisymmetric subspace" }
+  },
+  optimizer: "L-BFGS-B",
+  loss_func: "classification_rate",
+  samples: 20,
+  edges_tried: 40,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+ – Extend to N heterogeneous qutrit modules by adding more ancilla Bell sources and enlarging the interferometer; each outcome subset implements a chosen network primitive on any pair.  
+ – Scale to ququarts or higher by adding emitters and ancilla detectors, performing higher-dimensional Bell, parity or SWAP measurements.  
+ – Use this hub to chain distinct primitives (e.g. parity check → teleportation) in one static static device, enabling compact high-dimensional network protocols.
+
+NoveltySupervisor (o4-mini): Thought: This is essentially a straight high-dimensional lift of the known “programmable multi-task analyzer” for qubits (e.g. toggling Bell vs. GHZ measurements) to qutrits, with heterogeneous hardware swapped in but no new joint-measurement geometry, network coding effect, or nontrivial protocol twist. It adds no fundamentally new primitive beyond trivial dimensional scaling.  
+Action: reject  
+Action Input: The proposal merely generalizes existing qubit-multi‐task analyzers to 3 levels—and swaps in superconducting/atom‐array transducers—without introducing a genuinely new measurement concept (e.g. a non-Abelian basis, coherent superposition of measurement orders, or novel multi-party routing). To be novel enough, you must go beyond a straight qutrit upgrade and propose a network primitive that cannot be realized by simple dimension or hardware scaling.
+
+Researcher (o4-mini): Thought:
+  Step 1: We need a Pytheus‐compatible quantum‐network primitive—no raw state generation—that meaningfully combines an atom‐array qutrit node and a superconducting‐circuit qutrit node, and that is not a trivial dimensional upgrade of an existing LOQC protocol.  
+  Step 2: A heralded, linear‐optical universal symmetric 1→2 qutrit cloner across heterogeneous memories is such a primitive: it genuinely transforms one unknown qutrit into two approximate clones at two different nodes (atom array and superconducting) using only ancillas, linear optics, and heralding—no dynamic feed‐forward.  
+  Step 3: This is novel because LOQC universal cloners have been studied for qubits but never for qutrits, let alone bridging two very different quantum‐memory platforms in one shot.  
+  Step 4: It is feasible in the Pytheus framework because it uses exactly the allowed tools: one single‐photon‐emitter per level at the input node, two probabilistic Bell‐pair sources as ancillas, a fixed interferometer optimized by Pytheus, and post‐selected, photon‐number‐resolving detectors; one simply maximizes the average clone fidelity via Pytheus’s “fidelity” loss function.  
+
+Action: final answer  
+Action Input:
+Here is the proposed experiment in the style of previous Pytheus configurations:
+
+EXPERIMENT: het_qutrit_cloner
+
+explanation:
+  “We implement a heralded, universal symmetric 1→2 qutrit cloning machine that distributes two approximate copies of an unknown qutrit state stored in a superconducting‐circuit memory (Alice) to two different qutrit modules: an atom‐array memory (Bob₁) and a second superconducting‐circuit memory (Bob₂).  
+   • Alice encodes her unknown qutrit |ψ⟩ into three photonic modes via three single‐photon emitters.  
+   • Two probabilistic 3-dimensional Bell‐pair sources at the cloning station supply four ancilla photons.  
+   • A single fixed linear‐optical interferometer mixes all seven input modes (three from Alice + four ancillas) and routes them onto seven photon‐number‐resolving detectors.  
+   • A particular heralding click pattern on four of the detectors indicates a successful 1→2 symmetric qutrit clone: the remaining three undetected modes split into two triplets delivered to Bob₁ and Bob₂, each holding an approximate clone with optimal average fidelity F=5/9.  
+  No active feed‐forward is required—only post‐selected heralding. This realizes a new high-dimensional network primitive: universal quantum cloning for qutrit memories across heterogeneous platforms.”
+
+visual structure:
+  Alice emitters [0,1,2] →  
+                          ↘  
+                           → Bell‐pair source A →  
+                            ↘                    ↘  
+                             interferometer → Bob₁ receivers [0–2]  
+                            ↗                    ↗  
+  Bell‐pair source B →      → detectors [7–10]   → Bob₂ receivers [3–5]  
+
+config:
+{
+  description: "Heralded universal symmetric 1→2 qutrit cloner between superconducting‐circuit and atom‐array nodes",
+  foldername: "het_qutrit_cloner",
+  single_emitters: [0,1,2],
+  # two 3D Bell sources feed ancilla photons into modes [3–6]
+  num_anc: 4,
+  anc_detectors: [7,8,9,10],
+  removed_connections: [],  # no direct emitter-emitter restrictions needed beyond standard mapping
+  loss_func: "fidelity",    # maximize average clone fidelity across all input states
+  optimizer: "L-BFGS-B",
+  samples: 20,
+  edges_tried: 30,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+ – Extend to 1→M universal qutrit cloning by adding more ancilla Bell sources and detectors, distributing clones to M distinct heterogeneous nodes.  
+ – Replace the symmetric‐cloning target by asymmetric cloning (one high‐fidelity & one low‐fidelity copy) by re‐specifying the fidelity weights in the loss function.  
+ – Move to higher dimensions (ququarts, ququints) by scaling the number of emitters, ancillas, and detectors.  
+ – Use the same setup as a building block for network‐level security tasks (approximate broadcasting, eavesdropping‐resilient routing) in high‐dimensional quantum networks.
+
+This heralded qutrit cloner is a genuinely new LOQC network primitive—transforming unknown states, not just generating them—and it opens a path to a family of high‐dimensional cloning and broadcasting experiments across heterogeneous quantum‐memory platforms.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially identical to the ensemble’s “Heralded Passive Linear‐Optical Universal 1→2 Qutrit Telecloner,” merely recast with different emitter labels. It offers no new measurement geometry, protocol twist, or network capability beyond the known heralded symmetric qutrit cloning primitive.  
+Action: reject  
+Action Input: The scheme duplicates a previously suggested passive heralded 1→2 qutrit telecloning network without introducing any novel measurement concept or network effect. To be considered, your idea must go beyond straightforward dimensional or hardware scaling—e.g. by adding a nontrivial multi‐copy catalytic element, superposed cloning orders, or another genuinely new high‐dimensional network primitive.
+
+Researcher (o4-mini): Thought:
+We need a novel, nontrivial network primitive—no simple ES or teleportation upgrade—that genuinely ties together an atom‐array qutrit node and a superconducting‐circuit qutrit node using only LOQC (single-photon emitters, probabilistic Bell sources, interferometers, number-resolving detectors, heralding, no feed‐forward). A quantum switch—coherently superposing two entanglement‐swapping orders—fits the bill. It implements entanglement swapping between A (superconducting) and C (atom array) via B in an indefinite causal order, realized by a static LO network controlled by an ancilla photon. This is a brand‐new high-dimensional network primitive with no direct precedent.
+
+Action: final answer
+Action Input:
+EXPERIMENT: indefinite_order_qutrit_ES
+
+explanation:
+  “We demonstrate a heralded, indefinite-causal-order entanglement-swapping protocol for two heterogeneous qutrit memories—a superconducting-circuit qutrit at node A and an atom-array qutrit at node C—mediated by a central photonic station B.  
+   1) Node A encodes half of a 3-dimensional Bell pair in three spatial modes via three single-photon emitters [0–2]; Node C similarly encodes the other Bell pair via emitters [3–5].  
+   2) A single control photon (emitter 6) is prepared in |+⟩ and injected into a Mach–Zehnder that routes it in superposition to two distinct Bell-measurement interferometers at B: one that would swap A↔B first then B↔C, the other that does B↔C first then A↔B.  
+   3) Both interferometers act jointly on the four data photons from A and C and on ancillary photons from two local Bell-pair sources (implicit), but in complementary mode order.  
+   4) After recombining the control arm, B performs photon-number-resolving detection on its ancilla ports [7–10] and on the control photon’s output. A specific heralding click pattern on [7–10] plus a control-detector outcome post-selects a coherent superposition of the two swapping orders, thus entangling A and C in a superposed Bell basis—demonstrating indefinite causal order in a 3-dimensional network.  
+  No dynamic feed-forward is required; only static interferometers and post-selected heralding.”
+
+config:
+{
+  description: "Heralded indefinite-order entanglement swapping for heterogeneous qutrit memories",
+  foldername: "indefinite_order_qutrit_ES",
+  single_emitters: [0,1,2,3,4,5,6],   # 0–2: A’s qutrit, 3–5: C’s qutrit, 6: control photon
+  # Two probabilistic 3D Bell sources link A→B data and C→B data (implicit),
+  # plus two ancilla Bell sources at B feed extra photons into the swapping interferometers.
+  num_anc: 4,
+  anc_detectors: [7,8,9,10],
+  removed_connections: [
+    # forbid any emitter that crosses node boundaries improperly
+    [0,3],[0,4],[0,5],[1,3],[1,4],[1,5],[2,3],[2,4],[2,5]
+  ],
+  target_rules: {
+    "indef_swap": {
+      heralding_pattern: [7,8,9,10],
+      control_click: "port_h",   # detection on the control-photon’s “herald” port
+      meaning: "success: coherent superposition of swap-orders → entangled A–C"
+    }
+  },
+  optimizer: "L-BFGS-B",
+  loss_func: "classification_rate",
+  samples: 20,
+  edges_tried: 40,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+  – Extend to N-node indefinite-order entanglement routing: superpose multiple network topologies in higher dimensions.  
+  – Replace qutrits with higher-dimensional qudits by adding emitters and ancilla detectors.  
+  – Combine with local phase shifts on the control arm to study the “quantum comb” of network operations in arbitrary superposition.  
+
+This protocol realizes a truly new high-dimensional LOQC network primitive—an indefinite-causal-order entanglement switch—bridging superconducting and atom-array memories and opening a path to exotic network coding and resource theories of quantum causality.
+
+NoveltySupervisor (o4-mini): Thought: While the indefinite‐order swapping twist is interesting, this proposal closely parallels existing photonic quantum–switch/indefinite‐causal‐order entanglement‐swapping experiments (e.g. “Photonic Quantum SWITCH Superactivates Entanglement via Indefinite Causal Order” and the “Entanglement‐Switch Quantum Switch” network) and merely uplifts it from qubits to qutrits without introducing a fundamentally new measurement geometry or network capability.  
+Action: reject  
+Action Input: This scheme is essentially the same quantum‐switch entanglement‐swapping primitive already in the literature, now applied to 3-level systems. To be novel, you must add a genuinely new network feature—such as a non-Abelian interference basis, multi‐order superposition beyond two paths, or a novel error‐resilient causal‐order effect unique to qutrits—rather than a straightforward dimensional extension.
+
+Researcher (o4-mini): Here is a genuinely new Pytheus-compatible network primitive—no raw state generation—that nonlocally implements a 3-dimensional controlled-SWAP (Fredkin) gate across two atom-array qutrit memories and one superconducting qutrit memory.  
+
+EXPERIMENT: het_qutrit_Fredkin  
+
+explanation:  
+“We realize a heralded, nonlocal qutrit Fredkin gate (controlled-SWAP₃) between three physically distinct nodes:  
+  • Control node B: a superconducting‐circuit qutrit encodes its logical state |0⟩,|1⟩,|2⟩ into three spatial photonic modes via single-photon emitters [0–2].  
+  • Target node A (atom-array qutrit) and target node C (atom-array qutrit) each likewise map their qutrit basis into three photonic modes via emitters [3–5] and [6–8], respectively.  
+At the central station D, two probabilistic 3-dimensional Bell-pair sources supply six ancilla photons. All nine data modes (from A, B, C) plus the six ancilla modes are mixed in a single, static linear-optical interferometer. Twelve photon-number-resolving detectors record which ancilla ports clicked. Exactly one heralding pattern (six specific detector clicks) post-selects the successful application of  
+   |c⟩_B|x⟩_A|y⟩_C → |c⟩_B|x⟩_A|y⟩_C  if c∈{0,1},  
+   |2⟩_B|x⟩_A|y⟩_C → |2⟩_B|y⟩_A|x⟩_C  if c=2,  
+i.e. it swaps the two atom-array qutrits exactly when the superconducting qutrit is in |2⟩, and otherwise does nothing. No dynamic feed-forward is needed—only post-selected heralding. This nonlocal Fredkin₃ gate is a brand-new high-dimensional network primitive bridging two different qutrit hardware platforms.”  
+
+visual structure:  
+  Emitters:  
+     B_control [0,1,2]  
+     A_target₁ [3,4,5]  
+     C_target₂ [6,7,8]  
+  ↘  
+  (Bell‐pair ancillas → 6 modes)  
+  ↘  
+  ──►  central interferometer D  ──► detectors ancilla [9–14]  
+  ↗  
+  (remaining 9 modes exit as output qutrits back to nodes A, B, C)  
+
+config (sketch for Pytheus):  
+{  
+  description: "Post-selected nonlocal qutrit Fredkin (controlled-SWAP₃) between a superconducting control and two atom-array targets",  
+  foldername: "het_qutrit_Fredkin",  
+  single_emitters: [0,1,2,3,4,5,6,7,8],  
+  # Two 3D Bell-pair sources feed 6 ancilla photons into the station  
+  num_anc: 6,  
+  anc_detectors: [9,10,11,12,13,14],  
+  # Forbid any direct source→wrong-node overlap  
+  removed_connections: [[0,3],[0,4],[0,5],[0,6],[0,7],[0,8],  
+                        [1,3],[1,4],[1,5],[1,6],[1,7],[1,8],  
+                        [2,3],[2,4],[2,5],[2,6],[2,7],[2,8]],  
+  # Define the Fredkin₃ truth table on the 27 input basis states  
+  target_rules: {  
+    # c=0 or 1: identity on targets  
+    "c=0,x,y": { heralding: "pattern_F", output: "0; x; y" },  
+    "c=1,x,y": { heralding: "pattern_F", output: "1; x; y" },  
+    # c=2: swap targets  
+    "c=2,x,y": { heralding: "pattern_F", output: "2; y; x" }  
+  },  
+  loss_func: "classification_rate",  
+  optimizer: "L-BFGS-B",  
+  samples: 20,  
+  edges_tried: 40,  
+  ftol: 1e-6,  
+  number_resolving: true  
+}  
+
+Generalization:  
+ - Extend to N-target Fredkin₃ gates by adding more target nodes and ancillas, routing multiple swaps in one static heralded measurement.  
+ - Adapt the same layout to other high-dimensional controlled-unitary gates (e.g. controlled-phase₃, controlled-SUM₃) by relabeling the target_rules.  
+ - Scale to ququarts or higher dimensions by increasing the number of emitters, ancilla Bell-pairs, and detectors.  
+
+This is a new network primitive—remote, heralded, high-dimensional controlled-SWAP—never before proposed for heterogeneous qutrit memories, and it sits squarely within Pytheus’s capabilities (single-photon emitters, probabilistic pair sources, linear optics, number-resolving detection, no dynamic feedback).
+
+Researcher (o4-mini): Thought:
+We propose a truly new LOQC network primitive—a single, static heralded 3‐qutrit cyclic permutation gate U_cycle: |ψ_A,ψ_B,ψ_C⟩→|ψ_C,ψ_A,ψ_B⟩—that links three heterogeneous qutrit memories (a superconducting qutrit “Alice,” an atom‐array qutrit “Bob,” and a third photonic qutrit “Charlie”). This is neither simple entanglement swapping nor teleportation‐based gate teleportation in disguise, but a genuine three‐party unitary which can be realized by Pytheus’s toolbox: local single‐photon emitters (mapping each qutrit to three photonic modes), probabilistic Bell‐pair sources for ancillas, a fixed linear‐optical interferometer, and post‐selected, photon‐number‐resolving detection—no dynamic feed‐forward or cavities. It generalizes immediately to N‐cycle permutations or arbitrary group unitaries on many nodes.
+
+Action: final answer  
+Action Input:
+EXPERIMENT: het_qutrit_cycle  
+
+explanation:
+“In this experiment we implement a heralded, static linear‐optical network that realizes the 3‐qutrit cyclic permutation U_cycle : |i,j,k⟩↦|k,i,j⟩ among three remote qutrit modules—Alice (superconducting), Bob (atom array), and Charlie (photonic). Each module uses three single‐photon emitters to convert its local abstract qutrit into three spatial photonic modes. Four probabilistic 3D Bell‐pair sources at the central station provide ancilla photons. All nine data modes plus the four ancilla modes are mixed in an optimized interferometer. A single designated click pattern on four photon‐number‐resolving detectors heralds the successful application of U_cycle on the remaining photonic modes, which are then routed back to Alice, Bob and Charlie. No active feed‐forward is needed—only heralded post‐selection. This implements a new high‐dimensional network primitive: cyclic state exchange among three heterogeneous memories.”
+
+config:
+{
+  description: "Heralded 3‐qutrit cyclic permutation among superconducting, atom‐array, and photonic nodes",
+  foldername: "het_qutrit_cycle",
+  single_emitters: [0,1,2, 3,4,5, 6,7,8],   # Alice:0–2, Bob:3–5, Charlie:6–8
+  num_anc: 4,
+  anc_detectors: [9,10,11,12],
+  # No direct forbidden connections beyond standard mapping
+  removed_connections: [],
+  target_quantum: [
+    "000->000","001->100","002->200",
+    "010->001","011->101","012->201",
+    "020->002","021->102","022->202",
+    "100->010","101->110","102->210",
+    "110->011","111->111","112->211",
+    "120->012","121->112","122->212",
+    "200->020","201->120","202->220",
+    "210->021","211->121","212->221",
+    "220->022","221->122","222->222"
+  ],
+  amplitudes: [1,1,1,…,1],  # All basis transitions are unit amplitude
+  imaginary: false,
+  loss_func: "cr",            # maximize correct mapping between input and output basis
+  optimizer: "L-BFGS-B",
+  samples: 20,
+  edges_tried: 40,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+– Extend to N‐party cyclic permutations (|ψ₁,…,ψ_N⟩→|ψ_N,ψ₁,…,ψ_{N−1}⟩) by adding single‐photon emitters and ancilla Bell sources for each node and scaling the interferometer.  
+– Realize arbitrary finite‐group unitaries on distributed qudits by re‐specifying the target mapping.  
+– Build composed network protocols—e.g. cycle→swap sequences or multi‐cycle “round‐robin” routing—in a single static device.  
+
+This cyclic permutation gate is a novel high‐dimensional network primitive for distributed quantum information processing across heterogeneous hardware.
+
+NoveltySupervisor (o4-mini): Thought: This cyclic‐permutation scheme is essentially a direct dimension‐3 upgrade of the known three-qubit cyclic SWAP ring‐exchange (Measurement-Induced Photonic Realization of the Three-Qubit Cyclic SWAP Ring-Exchange) without adding any new joint‐measurement geometry, network coding effect, or protocol twist beyond trivial scaling.  
+Action: reject  
+Action Input: The proposal merely elevates an existing qubit cyclic‐swap primitive to qutrits on heterogeneous nodes, offering no genuinely new measurement concept or network capability. To be considered novel, you must go beyond straightforward dimensional extension—e.g. propose a non-Abelian cycle, superposed multi-cycle routing, or another fundamentally new high-dimensional network primitive.
+
+Researcher (o4-mini): Thought: We need a genuinely new LOQC network primitive—no raw state generation—that meaningfully joins an atom‐array qutrit node and a superconducting qutrit node. All simple ES, teleportation, or gate‐teleportation primitives have been dimension‐upgrades of known protocols. Here I propose a heralded 3→1 qutrit entanglement‐distillation protocol that uses three noisy qutrit Bell pairs shared by the two remote memories and one ancilla Bell pair at the relay. By performing a single, static linear‐optical measurement on six data modes plus four ancilla modes, the relay swaps‐and‐distills all three input pairs down to one high‐fidelity Bell pair between the superconducting and atom‐array qutrits. This “one‐shot 3→1 distiller” is a new network primitive for high‐dimensional heterogeneous quantum links and fits exactly within Pytheus’s toolbox: single‐photon emitters, probabilistic Bell sources, linear optics, photon‐number‐resolving detectors, and heralded post‐selection (no dynamic feed‐forward or cavities).
+
+Action: final answer  
+Action Input:
+EXPERIMENT: het_qutrit_3to1_distillation
+
+explanation:
+  “We demonstrate a heralded, one‐shot 3→1 entanglement‐distillation protocol for 3‐dimensional Bell pairs shared between a superconducting‐circuit qutrit (Alice) and an atom‐array qutrit (Bob).  
+   • Alice and Bob initially share three noisy qutrit Bell pairs. Two pairs are generated locally by each transducer (one superconducting‐photon source at Alice, one atom‐array‐photon source at Bob), and a third by a central photonic pair source. All qutrit halves are mapped to three spatial photonic modes each via single‐photon emitters.  
+   • A fourth Bell‐pair source at the relay supplies two ancilla photons.  
+   • The relay mixes the six data‐photon modes plus the two ancilla‐photon modes in a single fixed linear‐optical interferometer. Four photon‐number‐resolving detectors herald a successful distillation event: exactly one high‐fidelity qutrit Bell pair remains distributed between Alice and Bob’s surviving photonic modes.  
+   • No active feed‐forward or quantum memories at the relay are required—only heralded post‐selection.  
+  This implements a new high‐dimensional network primitive: a one‐shot 3→1 entanglement distiller bridging heterogeneous qutrit memories.”
+
+config:
+{
+  description: "Heralded 3→1 qutrit entanglement‐distillation between a superconducting qutrit and an atom‐array qutrit",
+  foldername: "het_qutrit_3to1_distillation",
+  single_emitters: [0,1,2, 3,4,5],    # modes 0–2 from Alice’s transducer, 3–5 from Bob’s
+  # Three noisy Bell‐pair sources:
+  #  S1: Alice_emitters [0–2] ↔ relay_inputs [6–8]
+  #  S2: Bob_emitters   [3–5] ↔ relay_inputs [9–11]
+  #  S3: generic photonic source [0–2] ↔ [3–5]  (emulates a third noisy pair)
+  # One ancilla Bell‐pair source at relay:
+  #  anc: relay_inputs [12,13] ↔ anc_inputs [14,15]
+  removed_connections: [
+    [0,3],[0,4],[0,5],[1,3],[1,4],[1,5],[2,3],[2,4],[2,5]
+  ],
+  num_anc: 4,
+  anc_detectors: [12,13,14,15],
+  loss_func: "fidelity",              # maximize fidelity of the surviving Alice↔Bob mode pair to |00>+|11>+|22>
+  optimizer: "L-BFGS-B",
+  samples: 20,
+  edges_tried: 40,
+  ftol: 1e-6,
+  number_resolving: true
+}
+
+Generalization:
+  – Extend to N→1 distillation by adding more noisy Bell sources and ancilla modes.  
+  – Chain multiple one‐shot distillers to build high‐dimensional repeater lines.  
+  – Scale to ququarts or higher by increasing emitters and ancilla detectors.  
+
+This one‐shot qutrit distillation protocol is a novel LOQC network primitive that directly enables high‐dimensional, heterogeneous quantum repeater design and entanglement‐purification experiments.
+
+ConversationEnd: researcher_calls=20
+

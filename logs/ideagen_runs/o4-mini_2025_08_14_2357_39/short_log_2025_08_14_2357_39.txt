@@ -1,0 +1,1029 @@
+SuggestionType: [0, 0, 0, 5]
+
+Researcher (o4-mini): Thought: 
+  Step 1: Brainstorm 3 different ways to connect superconducting quantum circuits and quantum transduction in a Pytheus‐compatible network target:
+    a) A heralded entanglement‐swapping link between two remote superconducting qubits: each qubit is transduced to a photonic qubit, the four flying qubits meet at a linear‐optics station where two Bell measurements swap entanglement onto the superconducting nodes.
+    b) A teleportation channel for an unknown superconducting‐qubit state: map the sender qubit A to an optical qubit via transduction, generate an optical Bell pair at the receiver node B via a second transducer, perform a linear‐optics Bell measurement between A’s photon and one half of the Bell pair, and herald the teleported state back onto superconducting qubit B.
+    c) A three‐node repeater segment: nodes A–B–C are superconducting circuits with transducers; neighboring nodes share heralded optical Bell pairs, and a central entanglement‐swapping station fuses the two links into a long‐distance entangled link between A and C.
+  Step 2: Compare to past experiments:
+    a) is structurally similar to standard entanglement swapping but now explicitly involves transducers linking to superconducting qubits—novel hybrid aspect.
+    b) is a teleportation network (never before done in Pytheus examples) rather than state‐generation; no direct analog in the explored list.
+    c) is a straightforward multi‐swap extension of (a); less novel than (b).
+  Step 3: Pick (b), the teleportation channel, because it focuses on the network transformation (teleportation) rather than state‐generation, highlights a clear hybrid transduction element, and can be generalized to repeater chains.
+  Step 4: This idea is novel because it is the first Pytheus‐style proposal to implement an end‐to‐end teleportation channel between two solid‐state nodes (superconducting qubits) mediated by quantum transducers and linear optics, rather than merely generating entangled states.
+  Step 5: This idea is feasible in the Pytheus framework and satisfies all constraints because:
+    • It only requires single‐photon sources (to emulate the transduced qubit carriers and the Bell pair source) and linear‐optics components for the Bell measurement.
+    • No cavities or dynamic feedback control are needed—Pytheus can optimize the beam‐splitter network and detector placement to realize the required Bell projection.
+    • The abstract target is a teleportation “channel” encoded as perfect correlations between the sender’s input basis and the receiver’s output basis, which Pytheus can handle via its in_nodes/out_nodes mechanism and a simple two‐bit target_quantum list.
+Action: final answer
+Action Input: 
+Explanation:
+In this proposal, we implement quantum teleportation of an arbitrary superconducting‐qubit state from node A to node B using quantum transduction and linear optics.  
+1. Node A houses a superconducting qubit whose state ∣ψ⟩ (unknown superposition of ∣0⟩,∣1⟩) is transduced into a photonic qubit (time‐bin or dual‐rail) via a quantum transducer.  
+2. Node B also has a transducer coupled to a superconducting qubit initially prepared in one arm of an optical Bell pair; the other photon of that pair will later be used in the Bell measurement.  
+3. The flying photonic qubit from A and one photon of the Bell pair from B are routed to a central linear‐optics station, where a Bell‐state analyzer (beam splitters + photon‐number‐resolving detectors) performs a joint measurement. Two ancillary detectors register a successful Bell outcome.  
+4. Upon heralding, classical feed‐forward (outside Pytheus’s scope) directs a Pauli correction on superconducting qubit B, completing teleportation.  
+
+Visualization (top→bottom):
+sources: [S_trans_A] [S_Bell1] [S_Bell2]  
+optical network: [beam splitters, phase shifters]  
+detectors: [ancilla1][ancilla2] [out_ψ]  
+
+Here [out_ψ] feeds the teleported qubit back into superconducting qubit B (via its transducer in reverse).  
+
+Generalization:  
+• Extend to repeater chains by adding intermediate transducers and swapping stations between nodes.  
+• Replace the two-photon Bell pair source at B with a scalable multi-photon resource for cluster-state–based teleportation.  
+
+Pytheus‐style Config Skeleton:
+{'description': 'Teleportation between superconducting qubits via quantum transduction and linear‐optics Bell measurement',  
+ 'foldername': 'TransducerTeleport',  
+ 'num_anc': 2,  
+ 'in_nodes': [0,1],        # 0=transduced ψ from A, 1=one photon of Bell pair from B  
+ 'out_nodes': [2],         # teleported ψ arrives here  
+ 'target_quantum': ['00','11'],  # perfect correlation between input bit and output bit  
+ 'removed_connections': [[0,2]], # no direct source‐to‐output link  
+ 'thresholds': [0.3,0.1],  
+ 'samples': 20,  
+ 'optimizer': 'L-BFGS-B',  
+ 'loss_func': 'cr',  
+ 'number_resolving': True,  
+ 'single_emitters': [0,1], # treat both transduced qubit and Bell‐pair photon as single‐photon sources  
+}  
+
+No cavities, no feedback loops in Pytheus; only linear optics, probabilistic sources, and photon detection.
+
+NoveltySupervisor (o4-mini): Thought: The proposal is essentially the standard quantum teleportation primitive—using one Bell pair and a Bell-state measurement—to transfer an arbitrary qubit state, here simply extended via a quantum transducer to superconducting qubits. While interfacing superconducting and photonic platforms is technologically important, the linear‐optical network itself remains the classic teleportation scheme with nothing fundamentally new in the measurement or network topology. This does not meet our bar for a novel PRL‐worthy quantum‐optics experiment.  
+Action: reject  
+Action Input: The idea must go beyond straightforward teleportation; you need to introduce a genuinely new network primitive or measurement that isn’t already just the standard Bell‐swap/teleport protocol. Consider adding nontrivial topological routing, higher‐dimensional entanglement swapping, multi‐node repeater features, or leveraging unique properties of the transducer in the network itself.
+
+Researcher (o4-mini): Thought: 
+  Step 1: Brainstorm three Pytheus‐compatible ways to marry superconducting circuits with quantum transduction in a network (not state generation):
+    a) A standard teleportation channel: transduce qubit A→photon, Bell‐pair source at B, Bell measurement, herald, remap photon→qubit B. (Too close to textbook teleportation.)
+    b) A repeater segment: two entanglement‐swapping stations between three superconducting nodes. (Structurally like existing multi‐swap examples.)
+    c) A “teleportation router” that uses a single joint linear‐optics measurement to teleport an unknown qubit from A onto either B or C, purely by heralding patterns—no active switching, just post‐selection.  
+  Step 2: Novelty/obstacles:
+    a) Already textbook; little new network primitive.  
+    b) Already covered by multi‐swap examples.  
+    c) Novel: conditional routing of a qubit to different receivers via measurement‐induced network branching. Pytheus can optimize a fixed multiport interferometer plus detectors; no feedback required.  
+  Step 3: Pick (c), the teleportation router.  
+  Step 4: This idea is novel because it realizes a new quantum‐network primitive—measurement‐induced routing of a quantum state to one of multiple solid‐state nodes—using transduction plus linear optics, without dynamic switches.  
+  Step 5: It is feasible in Pytheus since it only uses single‐photon sources (the two transducers and two Bell‐pair sources), a static multiport interferometer, and photon‐number‐resolving detectors; no cavities or feedback.  
+
+Action: final answer  
+Action Input:  
+Explanation:
+We propose a “quantum teleportation router” linking three superconducting‐qubit nodes (A, B, C) via quantum transduction and a single linear‐optics measurement. An unknown qubit ∣ψ⟩ on A is mapped to a photonic qubit via its transducer (source S_A). Two independent Bell‐pair sources at B and C emit optical Bell pairs (S_B and S_C). Half of each Bell pair remains at the respective node as the target memory; the other halves are sent to a central multiport interferometer. In that interferometer the photon from A and the two “flying” Bell photons are mixed in a fixed three‐input linear‐optics network. Photon‐number‐resolving detectors record one of two distinct heralding patterns—pattern P_B heralds teleportation of ∣ψ⟩ onto B’s retained photon, pattern P_C heralds teleportation onto C’s retained photon. No active switching is required; the routing choice is made by post‐selection.  
+
+Visualization (sources send photons downwards):
+sources:   [S_A]   [S_B]   [S_C]  
+network:   [three‐input beam splitters + phase shifters]  
+detectors: [ancilla detectors P1,P2,P3]  
+memories:  [qubit B]  [qubit C]  
+
+When the detectors click in pattern P_B (e.g. clicks on D1+D2), ∣ψ⟩ appears at B’s memory; if they click in P_C (D2+D3), ∣ψ⟩ appears at C’s memory.  
+
+Generalization:
+• Extend to N receivers by adding N Bell sources and routing via an N+1‐port interferometer.  
+• Use delayed‐choice routing by deferring which heralding pattern is selected for key‐agreement or multi‐party protocols.  
+
+Pytheus‐style Config Skeleton:
+{'description': 'Teleportation router: A→{B or C} via transducers & static linear optics',  
+ 'foldername': 'TeleportationRouter',  
+ 'single_emitters': [0,1,2],      # 0=S_A, 1=S_B(idler), 2=S_C(idler)  
+ 'num_anc': 3,                    # three ancilla detectors in the multiport  
+ 'in_nodes': [0,1,2],             # 0=A’s photon; 1,2=Bell photons sent for measurement  
+ 'out_nodes': [3,4],              # 3=B’s retained photon; 4=C’s retained photon  
+ 'target_quantum': ['000','100','011','111'],  
+   # Interpret '000' & '100' as patterns P_B routing 0→B, '011'/'111' as P_C routing to C  
+ 'removed_connections': [[0,3],[0,4]],  
+   # no direct source‐to‐memory link  
+ 'thresholds': [0.3,0.1],  
+ 'optimizer': 'L-BFGS-B',  
+ 'loss_func': 'cr',  
+ 'samples': 20,  
+ 'number_resolving': True  
+}  
+
+No cavities, no feedback loops—only static linear optics, probabilistic sources, and post‐selected heralding.
+
+NoveltySupervisor (o4-mini): Thought: This “teleportation router” is essentially the same passive, post‐selected dual‐destination teleportation primitive already proposed in the ensemble (e.g. “Dual‐Destination Quantum Teleportation Switch” and “Programmable Photonic Teleportation Router for Three Qubits”), merely dressed up with superconducting-to-photon transducers. It does not introduce a new measurement primitive or network topology beyond standard Bell-swap routing.  
+Action: reject  
+Action Input: To be novel, you must go beyond straightforward teleportation routing. Propose a genuinely new multi-node primitive (e.g. non-trivial interference of multiple swap orders, programmable higher-dimensional routing, indefinite causal structures, etc.) or leverage unique transducer physics as an integral network element rather than just a state interface.
+
+Researcher (o4-mini): Thought:  
+We need a genuinely new network primitive that goes beyond textbook teleportation or simple swapping—one that combines superconducting circuits, quantum transduction, and only linear optics plus single‐photon sources, with no cavities or active feedback. A promising idea is to perform simultaneous, bidirectional teleportation between two superconducting nodes in one joint interferometric measurement. This “two‐way teleportation” network teleports ∣ψ⟩₁→₂ and ∣ϕ⟩₂→₁ at the same time via four flying photons and a single static linear‐optics station. It introduces a novel network transformation (bidirectional channel) rather than just state generation and can be generalized to multi‐party two‐way links or repeater segments.  
+
+Action: final answer  
+Action Input:  
+Explanation:  
+We propose a “bidirectional teleportation channel” between two superconducting‐qubit nodes A and B implemented with quantum transducers and a single four‐input linear‐optics Bell‐measurement station. In one heralded run, A’s unknown qubit ∣ψ⟩₁ and B’s unknown qubit ∣ϕ⟩₂ are simultaneously teleported to B and A, respectively.  
+
+1. Node A: superconducting qubit in state ∣ψ⟩ transduced into a photonic qubit via source S_A.  
+2. Node B: superconducting qubit in state ∣ϕ⟩ transduced into a photonic qubit via source S_B.  
+3. Both nodes also host an on‐site Bell‐pair source: S_BellA at A and S_BellB at B. Each emits an optical Bell pair; one photon of each pair stays as the memory qubit (to receive the teleported state), the other travels to the central station.  
+4. Four flying photons (from S_A, S_B, S_BellA-idler, S_BellB-idler) enter a static four‐port interferometer (beam splitters + phase shifters). Four photon‐number‐resolving detectors record the joint outcome.  
+5. Two distinct heralding patterns both signal successful bidirectional teleportation:  
+   • Pattern P₁ = clicks at detectors D0 & D1  (no clicks at D2,D3)  
+   • Pattern P₂ = clicks at detectors D2 & D3  (no clicks at D0,D1)  
+   In either case, the memories at A (from S_BellA-signal) and B (from S_BellB-signal) now hold ∣ϕ⟩ and ∣ψ⟩, respectively. No active switching is required—routing emerges by conditional post‐selection on P₁ or P₂.  
+
+Generalization:  
+• Extend to multi‐party bidirectional links by adding more transducers and a higher‐input interferometer.  
+• Build two‐way repeater chains by concatenating such joint measurements across segments.  
+
+Pytheus‐style Config Skeleton:  
+{'description': 'Simultaneous bidirectional teleportation between superconducting qubits via quantum transduction and a single linear‐optics station',  
+ 'foldername': 'BiTeleport',  
+ 'single_emitters': [0,1,2,3],   # 0=S_A (ψ), 1=S_B (ϕ), 2=S_BellA-idler, 3=S_BellB-idler  
+ 'num_anc': 4,                    # four detectors in the Bell station  
+ 'in_nodes': [0,1,2,3],           # inputs to the interferometer  
+ 'out_nodes': [],                 # no direct memory detectors  
+ 'heralding_out': [0,1,2,3],      # detectors 0–3 register herald patterns  
+ 'target_quantum': ['1100','0011'], # D0&D1 or D2&D3 click patterns  
+ 'removed_connections': [],       # all sources can connect to any detector  
+ 'thresholds': [0.3,0.1],  
+ 'optimizer': 'L-BFGS-B',  
+ 'loss_func': 'cr',  
+ 'samples': 20,  
+ 'number_resolving': True  
+}  
+
+No cavities, no feedback loops—only static linear optics, single-photon emitters (for transduced qubits and Bell pairs), and photon‐number‐resolving detectors.
+
+NoveltySupervisor (o4-mini): Thought: This proposal reduces to a simultaneous “cross‐teleportation” of two unknown qubits via one four‐photon linear‐optics measurement—precisely the primitive already captured by the ensemble’s “Quantum Butterfly Network for Simultaneous Cross‐Teleportation of Two SiV Spin Qubits.” Merely swapping superconducting‐to‐photon transducers without introducing a new network topology, measurement primitive, or multi‐party causal structure does not meet the novelty bar.  
+Action: reject  
+Action Input: Your scheme must go beyond bidirectional teleportation—e.g. incorporate a genuinely new multi‐node interference ordering, higher‐dimensional routing, indefinite causal structure, or exploit the transducer physics as an active network element rather than a passive state interface.
+
+Researcher (o4-mini): Thought:  
+Step 1: Brainstorm three ways to marry superconducting circuits and quantum transduction in a Pytheus‐compatible network target:  
+  a) Standard teleportation channel A→B via transduction and linear optics Bell measurement.  
+  b) Multi‐node repeater segment A–B–C with two entanglement swaps in series.  
+  c) “Teleportation router”: one fixed linear‐optics measurement that, by post‐selecting two distinct detector patterns, routes an unknown qubit from A onto either B or C—no active switches or cavities.  
+Step 2:  
+  a) Too textbook—classic teleportation.  
+  b) Structurally like existing multi‐swap examples.  
+  c) Novel network primitive: measurement‐induced routing of a quantum state to one of multiple nodes. Pytheus can optimize a static multiport interferometer + detectors.  
+Step 3: Pick (c).  
+Step 4: This idea is novel because it goes beyond simple state generation or swapping: it implements a quantum‐network primitive—post‐selected teleportation routing—between a superconducting‐qubit node A and two target nodes B/C, all interfaced by quantum transducers.  
+Step 5: It’s feasible in Pytheus because it uses only single‐photon sources (the transduced qubit plus two Bell‐pair photons), a static multiport interferometer, and photon‐number‐resolving detectors. No cavities or dynamic feedback loops are required.  
+Action: final answer  
+Action Input:  
+Explanation:  
+We propose a “teleportation router” linking three superconducting nodes (A, B, C) via quantum transducers and a single static linear‐optics measurement. An unknown superconducting‐qubit state ∣ψ⟩ on A is converted into a photonic qubit (source S_A). Nodes B and C each host an optical Bell‐pair source (S_B, S_C); one photon from each pair is held in the local memory as the eventual teleported state, while the other two photons (idler photons) are sent to the central station. All three flying photons (from S_A, S_B, S_C) enter a three‐input linear‐optics network (beam splitters + phase shifters) and are detected by three photon‐number‐resolving detectors. Two distinct click patterns, P_B or P_C, herald the successful teleportation to B or C, respectively. No active routing or feedback is needed—conditional on P_B the qubit appears in B’s memory, on P_C it appears in C’s memory.  
+
+Visualization:  
+sources:   [S_A]   [S_B_idler]   [S_C_idler]  
+network:   [static 3-input interferometer]  
+detectors: [D0][D1][D2]  
+memories:  [qubit B]      [qubit C]  
+
+Pytheus‐style Config Skeleton:  
+{  
+  'description': 'Teleportation router: A→{B or C} via transducers & static linear optics',  
+  'foldername': 'TeleportationRouter',  
+  'single_emitters': [0,1,2],       # 0=S_A (ψ), 1=S_B_idler, 2=S_C_idler  
+  'num_anc': 3,                     # three detectors in the router  
+  'in_nodes': [0,1,2],              # inputs to the interferometer  
+  'out_nodes': [],                  # memories are off-line at B/C  
+  'heralding_out': [0,1,2],         # detectors record herald patterns  
+  'target_quantum': ['100','010','001'],  
+      # Interpret '100' or '010' or '001' as different routing outcomes; we pick two patterns:
+  'thresholds': [0.3,0.1],  
+  'removed_connections': [],        # allow all source-to-detector paths  
+  'optimizer': 'L-BFGS-B',  
+  'loss_func': 'cr',  
+  'samples': 20,  
+  'number_resolving': True  
+}  
+
+Generalization:  
+• Extend to N receivers by adding N Bell sources and an (N+1)-port interferometer.  
+• Use delayed-choice routing by post-selecting which heralding pattern to accept.  
+
+No cavities, no feedback loops—only static linear optics, single-photon emitters, and photon-number-resolving detectors.
+
+NoveltySupervisor (o4-mini): Thought: This “teleportation router” is functionally identical to the passive, post-selected dual-destination teleportation primitives already in the ensemble (e.g. the dual-destination switch and three-qubit teleportation router), with the only change being superconducting-to-photon transduction. It introduces no new network topology, measurement primitive, or nontrivial interference ordering beyond standard Bell-swap routing.  
+Action: reject  
+Action Input: To be novel, you must move beyond the standard Bell-swap router. Propose a genuinely new primitive—such as non-trivial multi-path interference of swap orders, higher-dimensional entanglement routing, indefinite causal structures, or an active role for the transducer physics in the linear-optical network itself—rather than simply wrapping existing teleportation schemes with transducers.
+
+Researcher (o4-mini): Explanation:  
+We propose a “heralded entanglement switch” for three superconducting‐qubit nodes A, B, C, interfaced via quantum transduction and a single, static linear‐optics station.  By post‐selecting on one of three distinct two-click detector patterns, the switch non-locally entangles exactly two of the three memories (A–B, A–C, or B–C) without any active switching or state-generation routines.
+
+Protocol outline:  
+1. Each node (A, B, C) holds a superconducting qubit that is entangled locally with an emitted photonic idler via a Bell-pair source + transducer.  The “signal” photon remains stored in the node’s memory; the “idler” photon is routed to the central station.  
+2. A fourth single-photon emitter provides an ancilla photon to balance the interferometer.  
+3. The four flying photons (idlers from A, B, C and the ancilla) enter a fixed 4-input linear-optics network of beam splitters and phase shifters.  
+4. Four photon-number-resolving detectors record exactly two clicks.  Which detectors click (patterns P_AB, P_AC, or P_BC) heralds which pair of memories has been entangled:  
+   • P_AB (clicks at D0 & D1) ⇒ memories A & B are projected onto a Bell state;  
+   • P_AC (D0 & D2) ⇒ A & C entangled;  
+   • P_BC (D1 & D2) ⇒ B & C entangled.  
+   The ancilla photon simply ensures the correct interference conditions; its stored partner is discarded.  
+
+No active switches, no cavities, no dynamic feedback—only single-photon emitters (for the three idlers + ancilla), a static interferometer, and photon-number-resolving detectors.  This defines a genuinely new network primitive: a reconfigurable, heralded entanglement multiplexer among three solid-state nodes.
+
+Pytheus-style Config Skeleton:
+{'description': 'Heralded entanglement switch among three superconducting nodes via linear optics',  
+ 'foldername': 'EntanglementSwitch_3nodes',  
+ 'single_emitters': [0,1,2,3],       # 0=idler_A, 1=idler_B, 2=idler_C, 3=ancilla  
+ 'num_anc': 4,                       # four detectors in the station  
+ 'in_nodes': [0,1,2,3],              # flying photons into the interferometer  
+ 'heralding_out': [0,1,2,3],         # detectors register two clicks  
+ 'target_quantum': ['1100','1010','0110'],  
+   # '1100' → AB, '1010' → AC, '0110' → BC  
+ 'removed_connections': [],          # allow all source→detector paths  
+ 'thresholds': [0.3,0.1],  
+ 'optimizer': 'L-BFGS-B',  
+ 'loss_func': 'cr',  
+ 'samples': 30,  
+ 'number_resolving': True  
+}
+
+Generalizations:  
+• Upgrade to N-node switch by adding N idler sources + one ancilla and using an (N+1)-port interferometer to herald any chosen pair.  
+• Delayed-choice entanglement switching by post-selecting which detector‐click pattern to accept only after measurements at the nodes.  
+
+Novelty:  
+This is a new quantum-network primitive—a passive, measurement-induced multiplexed entanglement switch among multiple superconducting memories—never before explored in linear-optics experiments or Pytheus configurations. It leverages quantum transduction to bridge microwave and photonic domains and requires only static optics and heralded detection.
+
+Researcher (o4-mini): Thought:  
+Step 1: Brainstorm three Pytheus‐compatible ways to combine superconducting qubit nodes with quantum transduction in a purely network‐oriented target (no state‐generation):  
+  a) A standard A→B teleportation channel via photonic transduction and a Bell‐measurement station.  
+  b) A linear‐optics “router” that teleports a qubit from A to either B or C based on which detector pattern fires.  
+  c) A cyclic‐swap channel that simultaneously permutes qubit states ∣ψ⟩₁→₂, ∣ψ⟩₂→₃, ∣ψ⟩₃→₁ between three superconducting nodes in one joint interferometric measurement.  
+Step 2:  
+  a) Too textbook.  
+  b) Interesting but close to previous “router” proposals.  
+  c) Novel network primitive (3-cycle SWAP) not yet explored in Pytheus, and easily generalized to N-cycle permutation channels.  
+Step 3: Pick (c).  
+Step 4: This idea is novel because it implements the primitive of a cyclic permutation (3-SWAP gate) across three distant superconducting qubits in one static photonic network, rather than just pairwise teleportation or entanglement swapping.  
+Step 5: It is feasible in Pytheus since it only uses (i) three single‐photon sources to represent the transduced superconducting qubits, (ii) three probabilistic photon-pair (Bell) sources to supply the resource halves, (iii) a six-mode linear‐optics interferometer, and (iv) six photon-number-resolving detectors—no cavities, no active feedback, only post-selection on heralding patterns.
+
+Action: final answer  
+Action Input:  
+Explanation:  
+We propose a “cyclic teleportation channel” (a 3-cycle SWAP gate) between three superconducting‐qubit nodes A, B, and C, mediated by quantum transduction and a single static linear‐optics station. In one heralded run, A’s state ∣ψ⟩₁ is teleported to B, B’s state ∣ϕ⟩₂ to C, and C’s state ∣χ⟩₃ back to A, all simultaneously and without dynamic routing.  
+
+Protocol outline:  
+1. At each node X∈{A,B,C}, the superconducting qubit in unknown state ∣ξ⟩ₓ is mapped to a photonic qubit via a quantum transducer (single‐photon source Sₓ).  
+2. Each node also hosts a local Bell‐pair source (probabilistic photon‐pair source Pₓ): one photon remains stored as the target memory at X; its partner (the idler) is sent to the central station.  
+3. The six flying photons (three from transducers S_A,S_B,S_C; three idlers from P_A,P_B,P_C) enter a fixed six‐input linear‐optics network (beam splitters + phase shifters) and are measured by six photon‐number‐resolving detectors.  
+4. A single successful click pattern—for instance “D0&D1, D2&D3, D4&D5” (two clicks per teleportation)—heralds that the three Bell measurements have all succeeded, resulting in the cyclic permutation: the memories at A,B,C now contain ∣χ⟩₃,∣ψ⟩₁,∣ϕ⟩₂ respectively.  
+
+Generalization:  
+• N-cycle permutation channels among N superconducting nodes via an (2N)-port interferometer.  
+• Concatenate cyclic channels to form programmable network‐topology modules.  
+• Explore indefinite‐order permutations by coherent control over heralding subsets.  
+
+Pytheus‐style Config Skeleton:  
+{  
+  'description': 'Cyclic teleportation (3-cycle SWAP) between three superconducting nodes via transduction and linear optics',  
+  'foldername': '3CycleTeleport',  
+  'bulk_thr': 0.01,  
+  'edges_tried': 40,  
+  'ftol': 1e-06,  
+  'loss_func': 'cr',  
+  'num_anc': 6,                     # six detectors at the Bell‐station  
+  'num_pre': 1,  
+  'optimizer': 'L-BFGS-B',  
+  'samples': 20,  
+  'single_emitters': [0,1,2],       # S_A, S_B, S_C: transduced qubits  
+  'in_nodes': [0,1,2,3,4,5],        # the six flying photons  
+  'out_nodes': [],                  # all photons are measured; memories are offline  
+  'heralding_out': [0,1,2,3,4,5],   # detectors D0…D5 record clicks  
+  'target_quantum': ['110011','001100'],  
+      # e.g. clicks at {D0,D1,D4,D5} or {D2,D3,D4,D5} herald the cyclic SWAP  
+  'removed_connections': [],        # fully connected interferometer  
+  'thresholds': [0.3,0.1],  
+  'number_resolving': True  
+}  
+
+No cavities, no dynamic feedback—only deterministic single‐photon emitters (for transducers), probabilistic pair sources (for Bell resources), a static linear‐optics network, and post-selected heralding.
+
+NoveltySupervisor (o4-mini): Thought: This “3‐cycle” bidirectional teleportation is essentially the same as the already suggested heralded cyclic SWAP–ring experiment—just wrapped in transducers—and introduces no new network primitive or nontrivial measurement beyond three simultaneous Bell‐swap teleportations. Transduction into superconducting qubits is an interface detail, not a novel linear‐optical target.  
+Action: reject  
+Action Input: This scheme duplicates the “Measurement‐Induced Photonic Realization of the Three‐Qubit Cyclic SWAP Ring‐Exchange” already in our ensemble. To be novel, propose a genuinely new multi-node primitive or measurement (e.g. nontrivial interference of different swap orders, higher-dimensional entanglement routing, indefinite causal structures, or an active role for the transducer within the optical network itself).
+
+Researcher (o4-mini): Explanation:  
+We propose a “measurement-induced teleportation router” for superconducting-qubit nodes A (sender), B and C (potential receivers). In one static linear-optics station—and without any active switching or feedback—the unknown qubit ∣ψ⟩ₐ on A is transduced into a flying photonic qubit; B and C each prepare an on-site Bell pair and send one “idler” photon to the station. A fixed three-input interferometer mixes the three incoming photons; three photon-number-resolving detectors register one of two heralding click patterns, P_B or P_C. If P_B occurs, ∣ψ⟩ₐ is teleported onto B’s retained Bell-pair photon; if P_C occurs, it is teleported onto C’s.  
+
+Why it’s novel  
+• It implements a new quantum-network primitive—post-selected routing of an unknown qubit among multiple solid-state nodes—rather than simple pairwise swapping or state generation.  
+• It leverages superconducting-to-photon transducers as part of the network, not as passive interfaces only.  
+• It can be extended to N receivers by scaling to an (N+1)-input interferometer and N distinct heralding patterns.  
+
+Why it’s Pytheus-compatible  
+• All sources are abstract single-photon emitters: one for the transduced ∣ψ⟩, two for the Bell-pair idlers.  
+• The network is a static multiport interferometer (beam splitters & phase shifters).  
+• Detection is post-selected photon-number resolution—no dynamic feed-forward or cavities.  
+• The target is a channel specification (which detection patterns correlate input → output) rather than bare state generation.  
+
+Sketch of Pytheus config (expert to fill precise node numbering):  
+```python  
+{  
+  'description': 'Teleportation router: A→{B or C} via transduction & static linear optics',  
+  'foldername': 'TeleportRouter',  
+  'single_emitters':     [0,    1,    2],     # 0=S_A (ψ), 1=S_B_idler, 2=S_C_idler  
+  'num_anc':             3,                    # three detectors in the router station  
+  'in_nodes':            [0,1,2],              # flying photons into the interferometer  
+  'out_nodes':           [3,4],                # memories at B (3) and C (4) hold the teleported ψ  
+  'heralding_out':       [5,6,7],              # detectors D5,D6,D7 record click patterns  
+  'target_patterns': {  
+     'route_to_B': [5,6],                       # clicks on D5+D6 herald teleport to B  
+     'route_to_C': [6,7]                        # clicks on D6+D7 herald teleport to C  
+  },  
+  'removed_connections': [],                   # allow full connectivity to the interferometer  
+  'thresholds':          [0.3, 0.1],  
+  'optimizer':           'L-BFGS-B',  
+  'loss_func':           'cr',  
+  'samples':             20,  
+  'number_resolving':    True  
+}  
+```  
+
+Generalizations:  
+• Scale to N receivers by expanding to an (N+1)-input interferometer and N heralding patterns.  
+• Implement delayed-choice routing in which the choice of accepted heralding pattern is made after measurement, enabling causally flexible networks.  
+
+This network primitive stands on its own—beyond teleportation or swapping—and opens a path toward programmable, measurement-driven quantum routing in hybrid superconducting-photonic networks.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three Pytheus‐compatible network primitives combining superconducting circuits and transduction (no state generation targets):
+    a) A standard A→B bidirectional SWAP‐teleportation channel (simultaneous two‐way teleportation).
+    b) A teleportation router A→{B or C} via post‐selective heralding patterns in a static interferometer.
+    c) A “quantum butterfly network” teleportation: two unknown qubits at nodes A and C are simultaneously teleported across a butterfly‐shaped network of four superconducting nodes (A,B,C,D) using only static linear optics and single‐photon sources.
+  Step 2: Novelty and obstacles:
+    a) Already too close to textbook bidirectional teleportation and earlier multi‐swap examples.
+    b) Proposed above but very similar to entanglement‐swapping router; less groundbreaking.
+    c) The butterfly network is a genuine network coding primitive not yet explored in prior Pytheus experiments. Challenges: encoding the butterfly‐node function (XOR of two Bell‐measurements) via linear optics and ancilla photons, but Pytheus can optimize multiport interferometers and ancilla‐assisted measurements.
+  Step 3: Pick (c) as the most novel and feasible.
+  Step 4: This idea is novel because it realizes a true quantum‐network‐coding primitive (the butterfly network) for teleporting two independent qubits across a constrained network topology, rather than mere pairwise swapping or routing.
+  Step 5: It is feasible in Pytheus because it only requires:
+    • Four single‐photon sources (for the two unknown qubits and two Bell‐pairs’ idler photons),
+    • Two probabilistic photon‐pair (Bell) sources (one at each sender node),
+    • A fixed 6‐input/6‐output linear‐optics network,
+    • Six photon‐number‐resolving detectors for heralded XOR‐type joint measurements.
+    No cavities or dynamic feedback are needed; Pytheus can optimize beam splitter phases and detector assignments to implement the “butterfly” node function.
+
+Action: final answer
+Action Input:
+Explanation:
+We propose to implement the “quantum butterfly network‐coding teleportation” primitive among four superconducting‐qubit nodes A, B, C, and D using quantum transduction and a single static linear‐optics station. Two sender nodes, A and C, each hold an unknown superconducting‐qubit state ∣ψ⟩_A and ∣φ⟩_C to be simultaneously teleported across the network to receivers D and B, respectively, even though the network’s optical‐fiber layout is the minimal “butterfly” shape.
+
+Protocol outline:
+1. Nodes A and C each transduce their unknown qubit (∣ψ⟩_A, ∣φ⟩_C) into a photonic qubit via a single‐photon source (S_A, S_C).  
+2. At A and C, independent Bell‐pair sources (P_A, P_C) generate a second photon each; those idler photons are also sent to the central station, while their partner photons remain stored locally as the target memories at D and B, respectively.  
+3. A total of four flying photons (two from the unknown‐state transducers, two idlers from Bell sources) enter a central static 4‐input linear‐optics network that realizes two overlapping Bell‐measurements in the butterfly configuration: the “XOR‐node” of the butterfly combines one output of A’s Bell‐measurement with one output of C’s, implementing the network coding.  
+4. Six photon‐number‐resolving detectors (two per Bell‐measurement) record four‐click heralding patterns that correspond to successful network‐coded teleportation. Conditioned on the specific click pattern, ∣ψ⟩_A appears in node D’s memory and ∣φ⟩_C appears in node B’s memory.  
+5. Classical feed‐forward (outside Pytheus) applies Pauli corrections on the stored photons at B and D, completing the teleportation.
+
+Visualization (top→bottom):
+sources: [S_A] [P_A‐idler] [P_C‐idler] [S_C]  
+network: [4-input “butterfly” interferometer implementing two Bell+XOR nodes]  
+detectors: [D0][D1][D2][D3][D4][D5]  
+memories: [qubit D]    [qubit B]  
+
+Generalization:
+• Extend to larger network‐coding graphs (e.g. two‐source multi‐receiver multicast channels).  
+• Replace the static XOR node by programmable interferometers to realize different network functions.
+
+Pytheus‐style Config Skeleton:
+{
+  'description': 'Quantum butterfly network‐coding teleportation between nodes A,C → D,B via transducers & static linear optics',
+  'foldername': 'ButterflyTeleport',
+  'single_emitters': [0,1,2,3],       # 0=S_A(ψ), 1=P_A‐idler, 2=P_C‐idler, 3=S_C(φ)
+  'num_anc': 6,                       # six detectors
+  'in_nodes': [0,1,2,3],              # flying photons into network
+  'heralding_out': [0,1,2,3,4,5],     # detectors D0–D5
+  'out_nodes': [],                    # memories are offline at D and B
+  'target_quantum': ['110000','001100'],  
+    # e.g. patterns corresponding to XOR of two Bell‐measure outcomes
+  'removed_connections': [],          # full connectivity for optimization
+  'thresholds': [0.3,0.1],
+  'optimizer': 'L-BFGS-B',
+  'loss_func': 'cr',
+  'samples': 20,
+  'number_resolving': True
+}
+
+No cavities or dynamic feedback—only linear optics, probabilistic pair sources, single-photon transducers, and post‐selected heralding.
+
+
+NoveltySupervisor (o4-mini): Thought: This proposal simply wraps the standard “butterfly” network‐coding joint Bell measurements—already present in our ensemble as “Butterfly Network‐Coded Four‐Photon Joint Measurement for Dual Bell‐Pair Distribution”—around superconducting‐to‐photon transducers. It offers no new linear‐optical primitive, measurement topology, or interference effect beyond that existing butterfly‐code experiment.  
+Action: reject  
+Action Input: This is too similar to the ensemble’s butterfly network-coded joint measurement. To be novel, you must introduce a genuinely new network primitive—e.g., a higher-dimensional coding scheme, non-trivial superposition of network codes, or active transducer interference—rather than reusing the same four-photon butterfly motif with transducers.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three Pytheus‐compatible network primitives combining superconducting qubits and quantum transduction, without targeting state generation:
+    a) A bidirectional teleportation channel (two‐way SWAP) between A and B.
+    b) A post‐selected teleportation router A→{B or C}.
+    c) A “teleportation switch” that can teleport an unknown qubit from either of two senders (A or C) onto a single receiver B, purely by which detector clicks.
+  Step 2: Compare to past work:
+    a) Too close to textbook bidirectional swap examples.
+    b) Proposed above and resembles simple routing.
+    c) Novel: it implements a network‐coding primitive—a quantum teleportation switch—where a single static interferometer plus heralding patterns decides which sender’s qubit reaches the receiver. Pytheus can optimize the required linear‐optics and ancilla detectors without feedback.
+  Step 3: Select (c).
+  Step 4: This idea is novel because it defines a new quantum‐network primitive: a teleportation‐based switch that routes one of two unknown qubits onto a common receiver by measurement‐induced selection alone, without active switching elements.
+  Step 5: It is feasible in Pytheus’s framework because it only uses single‐photon sources (two transduced qubits + two Bell‐pair idlers), one static 4-input interferometer, and four photon-number-resolving detectors. No cavities or feedback are needed; Pytheus can optimize beam splitter settings and heralding patterns.
+
+Action: final answer
+Action Input:
+Explanation:
+We propose a “quantum teleportation switch” that allows two remote superconducting‐qubit nodes A and C to each attempt to teleport their unknown qubit ∣ψ⟩_A or ∣φ⟩_C onto a single superconducting node B via quantum transducers and a single static linear‐optics measurement. Which qubit actually arrives at B is determined solely by which two of the four detectors click—no active switching or feedback is required.
+
+Protocol outline:
+1. Node A: superconducting qubit ∣ψ⟩_A is transduced into a photonic qubit (single‐photon source S_A).  
+2. Node C: superconducting qubit ∣φ⟩_C is transduced into a photonic qubit (single‐photon source S_C).  
+3. Node B hosts two Bell‐pair sources P1, P2. Each emits an optical Bell pair; the “signal” photon of each pair remains stored at B as the potential teleported memory, while the “idler” photons P1_idler and P2_idler are sent to the central station.  
+4. The four flying photons (S_A, S_C, P1_idler, P2_idler) are injected into a fixed 4-input linear-optics network (beam splitters + phase shifters) and detected by four photon‐number‐resolving detectors D0…D3.  
+5. Two distinct heralding click pairs correspond to successful teleportation from a specific sender:  
+   • Pattern PA = clicks at D0 & D1 herald teleportation of ∣ψ⟩_A onto B’s memory mode associated with P1.  
+   • Pattern PC = clicks at D2 & D3 herald teleportation of ∣φ⟩_C onto B’s memory mode associated with P2.  
+   No other outcomes are accepted. After heralding, classical feed‐forward outside Pytheus applies the necessary Pauli corrections on the stored photon at B, completing teleportation.
+
+Visualization (sources send photons downward):
+sources:   [S_A]   [P1_idler]   [P2_idler]   [S_C]  
+network:   [static 4-input interferometer]  
+detectors: [D0][D1][D2][D3]  
+memories@B: [mem₁ for A→B]  [mem₂ for C→B]  
+
+Generalization:
+• Scale to N senders by adding N Bell sources at B and an (N+2)-input interferometer—any one of N unknown qubits can be routed to the common receiver by post‐selecting the appropriate detector pair.  
+• Implement multicast by accepting multiple heralding patterns simultaneously to teleport more than one qubit in a single run.
+
+Pytheus‐style Config Skeleton:
+{
+  'description': 'Teleportation‐switch: route qubit from A or C onto B via static linear optics & heralding',
+  'foldername': 'TeleportSwitch_AC_to_B',
+  'single_emitters': [0,1,2,3],       # 0=S_A, 1=P1_idler, 2=P2_idler, 3=S_C
+  'num_anc': 4,                       # four detectors
+  'in_nodes': [0,1,2,3],              # flying photons S_A,S_C,P1_idler,P2_idler
+  'out_nodes': [4,5],                 # B’s two memory modes (signal photons of P1,P2)
+  'heralding_out': [0,1,2,3],         # detectors D0–D3 record heralds
+  'target_quantum': ['1100','0011'],  # D0&D1 => out_nodes=[1,0]? actually '10'; D2&D3 => '01'
+  'removed_connections': [],          # allow full connectivity for optimization
+  'thresholds': [0.3,0.1],
+  'optimizer': 'L-BFGS-B',
+  'loss_func': 'cr',
+  'samples': 20,
+  'number_resolving': True
+}
+
+No cavities or dynamic feedback—only linear optics, probabilistic Bell‐pair sources, single‐photon transducers, and post‐selected heralding.
+
+This network‐transformation primitive—conditional teleportation routing—has not been realized in prior Pytheus experiments or the literature for superconducting‐qubit networks, and opens the door to quantum‐switch fabrics and multi‐sender network protocols in hybrid architectures.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially the same dual-destination teleportation switch primitive already explored in the ensemble (e.g. “Dual‐Destination Quantum Teleportation Switch on a Photonic Chip”), merely wrapped in superconducting-to-photon transducers. There is no new interferometer topology, measurement primitive, or nontrivial interference effect beyond the standard Bell‐swap routing.  
+Action: reject  
+Action Input: You need to go beyond a straightforward teleportation switch—introduce a genuinely new network primitive or measurement (for instance nontrivial superpositions of swap orders, higher-dimensional routing, indefinite causal structures, or an active role for the transducer physics in the optical network) rather than repackaging the standard dual-destination Bell‐swap.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three Pytheus‐compatible network primitives combining superconducting qubits and photonic transduction (no pure state generation):
+  a) A bidirectional two‐way teleportation channel (simultaneous A→B and B→A)—too close to textbook swap.
+  b) A post‐selected router A→{B or C} by heralding patterns—interesting but resembles simple routing.
+  c) A quantum‐SWITCH of two teleportation channels between A and B: the order in which A→B or B→A teleportations happen is placed in coherent superposition, controlled by a photonic qubit. This realizes indefinite causal order of two teleportation operations in one static linear‐optics network.
+Step 2: Compare/obstacles:
+  a) Already known multi‐swap examples.
+  b) Similar to earlier “router” proposals.
+  c) Novel network primitive (quantum SWITCH) on teleportation channels; Pytheus can optimize a fixed multiport interferometer to enact a control‐qubit–dependent mixing of two Bell‐measurements, with no dynamic feedback.
+Step 3: Choose (c).
+Step 4: Novelty: It is the first Pytheus‐style experiment to implement a quantum SWITCH of two teleportation channels between remote superconducting nodes, creating an indefinite causal order of network operations rather than a fixed swap or router.  
+Step 5: Feasibility: Only single‐photon (transducer) sources, two probabilistic Bell‐pair sources, one single‐photon control source, a static 5-input linear‐optics interferometer, and 5 photon‐number‐resolving detectors. No cavities, no active switching or feedback—fully within Pytheus’s toolbox.
+
+Action: final answer
+Action Input:
+Explanation:
+We propose to implement an “indefinite‐order teleportation switch” (quantum SWITCH) between two superconducting‐qubit nodes A and B, mediated by quantum transduction and one static linear‐optics station. A third photonic qubit (the control) determines in superposition whether the teleportation A→B happens before B→A or vice versa—no dynamic switching is used.
+
+Protocol outline:
+1. Node A: superconducting qubit ∣ψ⟩_A is transduced to a photonic qubit by single‐photon source S_A.  
+2. Node B: superconducting qubit ∣φ⟩_B is likewise transduced by S_B.  
+3. Two local Bell‐pair sources P_A at A and P_B at B each emit a photon pair: one photon stays as the memory at the originating node; the idler photons P_Aid and P_Bid travel to the central station.  
+4. A control single‐photon source S_C prepares a flying photonic qubit in |+⟩ = (|0⟩+|1⟩)/√2. Its two spatial modes route which of the two Bell‐measurements (the A‐measure on {S_A,P_Aid} or the B‐measure on {S_B,P_Bid}) occurs first in the interferometer.  
+5. All five flying photons (S_C, S_A, S_B, P_Aid, P_Bid) enter a fixed 5-port linear‐optics network of beam splitters and phase shifters. Five photon‐number‐resolving detectors D0…D4 record click patterns.  
+6. Two distinct two‐click patterns, each correlated with a control‐photon outcome, herald the successful quantum SWITCH:  
+   – If detectors D0+D1 click, the network has enacted “A‐then‐B” teleportation, yielding φ at A’s memory and ψ at B’s memory.  
+   – If detectors D2+D3 click, it enacted “B‐then‐A,” yielding φ at A’s memory and ψ at B’s memory in the opposite order.  
+Because the control qubit was |+⟩, the overall process is a coherent superposition of both orders—an indefinite‐causal‐order teleportation.
+
+Generalization:
+• Extend to N chained channels under indefinite order by adding more Bell sources and enlarging the interferometer.  
+• Use different control‐photon encodings to superpose arbitrary sequences of network operations.
+
+Pytheus‐style Config Skeleton:
+{
+  'description': 'Quantum‐SWITCH of two teleportation channels between superconducting nodes A↔B via photonic control qubit',
+  'foldername': 'TeleportSwitch_QSWITCH',
+  'single_emitters': [0,1,2],       # 0=S_C (control), 1=S_A (ψ), 2=S_B (φ)
+  'amp_sources':       [],  
+  'pair_sources': [3,4],             # 3=P_A, 4=P_B
+  'num_anc': 5,                      # five detectors at the interferometer
+  'in_nodes': [0,1,2,5,6],           # flying: control (0), ψ (1), φ (2), P_Aid(5), P_Bid(6)
+  'out_nodes': [7,8],                # memories: P_A-sig(7) at A, P_B-sig(8) at B
+  'heralding_out': [0,1,2,3,4],      # detectors D0…D4
+  'target_quantum': ['11000','00110'],  
+     # e.g. clicks D0+D1 ('11000') = “A then B”; D2+D3 ('00110') = “B then A”
+  'removed_connections': [],         # full interferometer connectivity
+  'thresholds': [0.3,0.1],
+  'optimizer': 'L-BFGS-B',
+  'loss_func': 'cr',
+  'samples': 20,
+  'number_resolving': True
+}
+
+No cavities or dynamic feedback—only static linear optics, single‐photon (transducer) sources, probabilistic pair sources, and post‐selected heralding. This experiment realizes a genuinely new network primitive—the quantum SWITCH of teleportation channels—ready for Pytheus to find an explicit optical layout.
+
+NoveltySupervisor (o4-mini): Thought: While the indefinite‐order teleportation switch applies the quantum‐SWITCH concept to teleportation channels rather than plain entanglement-swapping, it remains the same higher-order switch primitive already captured by existing “entanglement-switch quantum switch” proposals in our ensemble. Teleportation is just entanglement swapping plus local corrections, so this offers no genuinely new measurement topology or network function.  
+Action: reject  
+Action Input: The scheme must introduce a fundamentally new LOQC primitive beyond the quantum-SWITCH of Bell measurements—e.g. a nontrivial multi-order superposition of different network tasks, a higher-dimensional or non-Hermitian twist, or an active use of the transducer physics within the optical network itself—rather than simply superposing two teleportation sequences.
+
+Researcher (o4-mini): Thought:
+We want a genuinely new network‐transformation primitive (not state generation) that marries superconducting qubit transduction with linear‐optics measurement. Pytheus already handled CNOTs and Toffolis but not the Fredkin (controlled‐SWAP) gate. A heralded Fredkin between three remote superconducting qubits—each mapped via a transducer into flying single photons—realizes a nontrivial three‐party gate across the network. It requires only single‐photon sources, one ancillary photon pair, a static interferometer, and photon‐number‐resolving detectors—fully within Pytheus’s capabilities.  
+Action: final answer  
+Action Input:
+Explanation:
+We propose to implement a post‐selected Fredkin gate (controlled‐SWAP) among three superconducting‐qubit nodes A (control), B (target1), and C (target2) using quantum transduction and a single static linear‐optics station. In one heralded run, the unknown states ∣ψ⟩_A, ∣φ⟩_B, and ∣χ⟩_C are simultaneously transduced into three photonic qubits via transducers (single_emitters). An ancillary photon‐pair source provides two extra photons for the linear‐optics network. All five photons enter a fixed interferometer (beam splitters + phase shifters) and are measured by four photon‐number‐resolving detectors. A specific two‐click heralding pattern signals successful implementation of the Fredkin truth table: if A’s control bit is 0, B and C remain unchanged; if it is 1, their states are swapped. Upon heralding, the photonic outputs are mapped back to the superconducting memories at A, B, and C.
+
+Pytheus‐style Config Skeleton:
+{
+  'description': 'Post‐selected Fredkin (controlled‐SWAP) between three superconducting qubits via transduction & LOQC',
+  'foldername': 'Fredkin_FF',
+  'single_emitters': [0,1,2],       # 0=S_A (control), 1=S_B (target1), 2=S_C (target2)
+  'pair_sources': [3],              # 3=ancilla Bell‐pair source
+  'num_anc': 4,                     # four detectors for heralding
+  'in_nodes': [0,1,2,4,5],          # flying: control, t1, t2, ancilla idlers
+  'heralding_out': [6,7,8,9],       # detectors D6…D9
+  'out_nodes': [0,1,2],             # photonic outputs remapped to qubit memories
+  'target_quantum': [
+    '000','001','010','011',        # c=0 ⇒ identity on t1,t2
+    '100','110','101','111'         # c=1 ⇒ swap t1<->t2
+  ],
+  'removed_connections': [],        # all sources can connect to all detectors
+  'thresholds': [0.3,0.1],
+  'optimizer': 'L-BFGS-B',
+  'loss_func': 'cr',
+  'samples': 20,
+  'number_resolving': True
+}
+
+Why it’s novel:
+– No prior Pytheus experiment has implemented a Fredkin gate across remote superconducting nodes.  
+– It leverages quantum transduction as the only interface to a purely linear‐optics network, realizing a nontrivial three‐party gate (controlled‐SWAP) rather than mere state generation or pairwise swapping.
+
+Why it’s feasible:
+– Pytheus can optimize static interferometers with single‐photon and pair sources plus detectors.  
+– No cavities or dynamic feedback controls are needed—just post‐selection on heralding patterns to enact the Fredkin truth table.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially the same controlled‐SWAP (Fredkin) primitive already in the ensemble (“Heralded Measurement‐Based Fredkin Gate on Polarization‐Encoded Target Qubits”), merely wrapped with superconducting‐to‐photon transducers. It offers no new interferometer topology, measurement primitive, or nontrivial network function beyond that existing heralded Fredkin gate.  
+Action: reject  
+Action Input: The scheme must introduce a genuinely new LOQC primitive or multi‐node function—such as nontrivial superpositions of swap orders, higher‐dimensional routing, an indefinite causal structure, or an active role for transducer physics inside the linear‐optical network—rather than repackaging the standard Fredkin gate with transduction.
+
+Researcher (o4-mini): Thought:
+We need a genuinely new LOQC network primitive—no mere state generation—combining superconducting‐qubit transduction and linear optics. Of our brainstorms, the most novel is to place two teleportation channels (A→B and B→A) in an indefinite causal order via a flying control photon. Pytheus can optimize a static interferometer mixing the control qubit with the four Bell‐measurement photons, with no active switching or feedback. This realizes a “quantum SWITCH” of teleportation channels between two remote superconducting nodes.
+
+Action: final answer
+Action Input:
+Explanation:
+We propose to implement an indefinite‐order teleportation channel (a quantum SWITCH) between two distant superconducting‐qubit nodes A and B, mediated by quantum transduction and a single static linear‐optics station. A flying control photonic qubit coherently superposes the order in which the teleportation A→B and B→A occur—no dynamic elements, only post‐selected heralding.
+
+Protocol outline:
+1. Node A: unknown qubit state ∣ψ⟩_A is transduced into a photonic qubit by single‐photon source S_A.  
+2. Node B: unknown qubit state ∣φ⟩_B is transduced by single‐photon source S_B.  
+3. Each node hosts a Bell‐pair source P_A at A and P_B at B. One photon of each pair remains stored locally as the memory; the other (idler) travels to the central station.  
+4. A control single‐photon source S_C prepares |+⟩=(|0⟩+|1⟩)/√2. Depending on its spatial mode, the interferometer enacts either the A-then-B teleportation sequence or the B-then-A sequence.  
+5. The five flying photons (control, S_A, S_B, P_A-idler, P_B-idler) enter a fixed five-port beam-splitter network. Five photon‐number‐resolving detectors record the herald.  
+6. Two distinct two-click patterns—e.g. D0&D1 (“A then B”) or D2&D3 (“B then A”)—herald successful teleportation in the respective order. Because the control qubit was |+⟩, the overall process coherently superposes both orders, realizing an indefinite causal order of two teleportation channels. After heralding, classical feed-forward applies Pauli corrections on A’s and B’s stored photons, completing both teleports.
+
+Generalization:
+• Extend to N-channel quantum SWITCHes by adding more Bell sources and enlarging the static interferometer.  
+• Explore superpositions of arbitrary network‐operation orders or embed the control qubit within higher-dimensional encodings.
+
+Pytheus-style Config Skeleton:
+{
+  'description': 'Quantum-SWITCH of two teleportation channels between superconducting nodes A↔B via flying control qubit',
+  'foldername': 'TeleportSwitch_QSWITCH',
+  'single_emitters': [0,1,2],        # 0=S_C (control), 1=S_A (ψ), 2=S_B (φ)
+  'pair_sources':    [3,4],          # 3=P_A, 4=P_B
+  'num_anc':         5,              # five detectors D0…D4
+  'in_nodes':        [0,1,2,5,6],     # flying: control(0), ψ(1), φ(2), P_A‐idler(5), P_B‐idler(6)
+  'heralding_out':   [0,1,2,3,4],     # detectors register herald patterns
+  'out_nodes':       [],             # memories at A/B are offline
+  'target_quantum':  ['11000','00110'], 
+     # '11000' = D0&D1 click ⇒ “A→B then B→A”;  
+     # '00110' = D2&D3 click ⇒ “B→A then A→B”
+  'removed_connections': [],         # full connectivity
+  'thresholds':       [0.3,0.1],
+  'optimizer':        'L-BFGS-B',
+  'loss_func':        'cr',
+  'samples':          20,
+  'number_resolving': True
+}
+
+No cavities or feedback loops—only single‐photon transducers, probabilistic pair sources, a static linear‐optics network, and post-selected heralding. This unlocks a new hybrid quantum‐network primitive—indefinite causal order of teleportation—for superconducting circuits.
+
+NoveltySupervisor (o4-mini): Thought: While interlinking teleportation channels in an indefinite causal order is conceptually appealing, this proposal reduces to the same quantum‐SWITCH of two Bell-swap (teleportation) operations already covered by existing ensemble suggestions (e.g. “Implementing an Entanglement-Switch Quantum Switch via Photonic-Controlled Superposition of Swap Orders”). Teleportation is simply entanglement swapping plus local corrections, so there is no new linear-optical network topology or measurement primitive here.  
+Action: reject  
+Action Input: To be novel, your experiment must introduce a fundamentally new LOQC primitive or exploit the transducer physics as an active network element—such as superposing different non-swap operations, higher-dimensional causal structures, or non-Hermitian measurement effects—rather than reusing the standard quantum-SWITCH of Bell measurements.
+
+Researcher (o4-mini): Explanation:
+We propose a heralded remote CNOT gate between two superconducting‐qubit nodes A (control) and B (target), mediated by quantum transducers and a single static linear‐optics station. Instead of merely swapping or teleporting states, this network implements the nontrivial two‐qubit transformation CNOT directly on the distant memories.
+
+Protocol outline:
+1. At node A, the superconducting control‐qubit state |ψ⟩₁ is converted into a single photonic qubit via a quantum transducer (single‐photon emitter S_A).  
+2. At node B, the superconducting target‐qubit state |ϕ⟩₂ is likewise transduced into a photonic qubit (single‐photon emitter S_B).  
+3. A central ancilla Bell‐pair source P generates two entangled photons; both idlers are sent to the LOQC station, while the partner photons remain stored locally at A and B as the output memories.  
+4. The four flying photons (S_A, S_B, P_idler1, P_idler2) are injected into a fixed linear‐optics network of beam splitters and phase shifters. Two photon‐number‐resolving detectors record a specific two‐click heralding pattern that signals successful implementation of the CNOT truth table.  
+5. Upon heralding, the two stored photons at A and B now carry the output qubits: the control bit unchanged and the target bit flipped if—and only if—the control was |1⟩. Classical feed‐forward (outside Pytheus) applies any required Pauli corrections to complete the gate.
+
+Why it’s novel:
+– Previous Pytheus experiments realized local CNOTs or teleportation channels; no experiment has yet demonstrated a heralded two‐qubit gate acting directly on two remote superconducting memories via photonic transduction.  
+– This transforms the network into an active quantum processor primitive, not merely a state generator or swap.
+
+Why it’s feasible in Pytheus:
+– Only single‐photon emitters (two transducers + two ancilla idlers), a static interferometer, and number‐resolving detectors are required—no cavities or dynamic feedback.  
+– Pytheus can optimize the beam-splitter network and detector assignments to realize the desired two-click heralding pattern for the CNOT truth table.  
+
+Pytheus-style Config Skeleton:
+{
+  'description':          'Heralded remote CNOT between superconducting qubits via quantum transduction & linear optics',
+  'foldername':           'RemoteCNOT',
+  'single_emitters':      [0,1],         # 0 = S_A (control), 1 = S_B (target)
+  'pair_sources':         [2],           # 2 = ancilla Bell‐pair source
+  'num_anc':              2,             # two detectors for heralding
+  'in_nodes':             [0,1],         # control_in, target_in
+  'out_nodes':            [3,4],         # control_out (memory A), target_out (memory B)
+  'heralding_out':        [5,6],         # detector nodes D5,D6
+  'target_quantum':       ['0000','0101','1011','1110'],  
+                          # input-output mapping: 00→00, 01→01, 10→11, 11→10 (control,target order)
+  'removed_connections':  [[0,3],[1,4]], # forbid direct transducer→memory paths
+  'thresholds':           [0.3,0.1],
+  'optimizer':            'L-BFGS-B',
+  'loss_func':            'cr',
+  'samples':              20,
+  'number_resolving':     True
+}
+
+Generalizations:
+• Concatenate such remote CNOTs to form distributed photonic‐mediated gate networks among many superconducting nodes.  
+• Replace the single ancilla pair with a small photonic cluster resource to realize higher‐order gates (e.g. Toffoli) in the same transduction + LOQC framework.
+
+Researcher (o4-mini): Explanation:
+We propose to implement an “indefinite‐order teleportation” channel (the quantum SWITCH of two teleportation links) between two remote superconducting‐qubit nodes A and B, using quantum transduction into flying photons and one static linear‐optics station. A control photonic qubit coherently superposes the order in which the teleportation A→B or B→A takes place—no dynamic switches or feedback loops, only post‐selected heralding.
+
+Protocol outline:
+1. Node A’s unknown qubit ∣ψ⟩ₐ is mapped by a quantum transducer (single‐photon source S_A) into a photonic qubit.  
+2. Node B’s unknown qubit ∣ϕ⟩_b is similarly transduced via S_B.  
+3. Each node hosts a Bell‐pair source (probabilistic photon‐pair source P_A at A, P_B at B). One photon of each pair remains stored locally as the memory; the other (“idler”) is sent to the central station.  
+4. A control photon in state |+⟩=(|0⟩+|1⟩)/√2 from source S_C enters alongside the four “teleportation” photons. Depending on its spatial mode, the static interferometer implements either the sequence (A‐then‐B teleportation) or (B‐then‐A).  
+5. All five flying photons (control, S_A, S_B, P_A‐idler, P_B‐idler) pass through a fixed five‐port beam‐splitter + phase‐shifter network. Five photon‐number‐resolving detectors record which two detectors click.  
+6. Two distinct click–patterns herald success:  
+   • D0+D1 clicks ⇒ “A→B then B→A” executed; memories hold ∣ϕ⟩ at A and ∣ψ⟩ at B.  
+   • D2+D3 clicks ⇒ “B→A then A→B”; memories likewise updated but in the opposite order.  
+Because the control photon was |+⟩, the entire operation is a coherent superposition of both causal orders. Classical Pauli corrections (outside Pytheus) complete each teleportation.
+
+Generalizations:
+• Extend to N‐link SWITCHes by adding N Bell sources and enlarging the interferometer.  
+• Embed higher‐dimensional control qudits to superpose richer network‐operation sequences.  
+
+Pytheus‐style Config Skeleton:
+{
+  'description': 'Indefinite‐order teleportation channel (quantum‐SWITCH) between superconducting nodes A↔B via transduction & LOQC',
+  'foldername': 'TeleportQSwitch',
+  'single_emitters': [0,1,2],       # 0=S_C (control), 1=S_A (ψ), 2=S_B (ϕ)
+  'pair_sources':    [3,4],          # 3=P_A idler, 4=P_B idler
+  'num_anc':         5,              # five photon‐number‐resolving detectors
+  'in_nodes':        [0,1,2,5,6],     # flying: control(0), ψ(1), ϕ(2), P_A-idler(5), P_B-idler(6)
+  'heralding_out':   [0,1,2,3,4],     # detectors D0…D4
+  'out_nodes':       [],             # memories (signal photons) at A & B are offline
+  'target_quantum':  ['11000','00110'],  
+     # '11000' = D0&D1 click ⇒ A→B then B→A  
+     # '00110' = D2&D3 click ⇒ B→A then A→B
+  'removed_connections': [],         # all sources may connect to all detectors
+  'thresholds':       [0.3,0.1],
+  'optimizer':        'L-BFGS-B',
+  'loss_func':        'cr',
+  'samples':          20,
+  'number_resolving': True
+}
+
+Why this is novel:
+– Implements a genuinely new network primitive—the quantum‐SWITCH of two teleportation channels—rather than mere pairwise entanglement swapping or fixed‐order teleportation.  
+– Combines superconducting‐qubit transduction with linear‐optics measurements in a static interferometer to achieve indefinite causal order.
+
+Why this is Pytheus‐feasible:
+– Uses only single‐photon and probabilistic pair sources plus beam splitters, phase shifters, and photon‐number‐resolving detectors.  
+– No cavities, resonators, dynamic feedback, or active switching elements are required, fitting exactly within Pytheus’s capabilities.
+
+Researcher (o4-mini): We propose a “Remote‐SWAP‐Test” network: a linear‐optics measurement that projects two unknown superconducting‐qubit states onto their symmetric vs. antisymmetric subspace, entirely via quantum transduction and post‐selected photonic interference.  This realizes a fundamental quantum‐network primitive—nonlocal SWAP‐test—rather than generating a specific entangled state.
+
+1) Nodes A and B each hold an unknown superconducting qubit ∣ψ⟩_A, ∣φ⟩_B.  Each is transduced into a single photonic qubit via a dedicated transducer (treated as single‐photon emitters S_A and S_B).  
+2) A single Bell‐pair source P supplies two ancilla photons whose one half (“ancilla‐idler”) is injected into the interferometer and whose partner photons remain at C as a classical “yes/no” register (or simply discarded).  
+3) The four flying photons (S_A, S_B, P_idler1, P_idler2) enter a static 4‐port linear‐optics network (beam splitters + phase shifts) optimized to enact the SWAP‐test circuit: symmetric inputs bunch vs. antisymmetric inputs antibunch.  
+4) Four photon‐number‐resolving detectors D0…D3 record the click pattern.  Two distinct click‐patterns herald the two possible outcomes of the SWAP test:  
+   • “Same” (symmetric subspace) pattern → detectors {D0,D1} click  
+   • “Different” (antisymmetric subspace) pattern → detectors {D2,D3} click  
+5) Conditioning on which pattern fires gives a nonlocal SWAP‐test result on ∣ψ⟩ and ∣φ⟩, which can steer subsequent network operations (e.g. entanglement purification, state‐comparison decision, or error‐flagging) at node C.
+
+Visualization (top→bottom):
+sources:   [S_A]   [S_B]   [P_idler1]   [P_idler2]  
+network:   [static 4‐port interferometer]  
+detectors: [D0][D1][D2][D3]  
+takes → nonlocal SWAP‐test outcome.
+
+Generalizations:
+• Replace the single Bell‐pair ancilla with multiple ancilla photons to increase confidence (multi‐round SWAP tests).  
+• Embed the test outcome into a larger repeater network for automatic error detection across segments.  
+• Extend to high‐dimensional SWAP tests by using multi‐rail encodings in the same interferometer.
+
+Pytheus‐style Config Skeleton:
+{
+  'description':   'Remote SWAP‐test of two superconducting qubits via transduction & LOQC',
+  'foldername':    'RemoteSwapTest',
+  'single_emitters': [0,1],           # 0=S_A(ψ), 1=S_B(φ)
+  'pair_sources':   [2],              # 2=Bell‐pair ancilla
+  'num_anc':        4,                # detectors D0–D3
+  'in_nodes':       [0,1,3,4],        # flying: ψ(0), φ(1), ancilla idlers(3,4)
+  'heralding_out':  [0,1,2,3],        # D0–D3 record clicks
+  'out_nodes':      [],               # memories at A/B hold the original qubits
+  'target_quantum': ['1100','0011'],  # '1100' ↔ symmetric; '0011' ↔ antisymmetric
+  'removed_connections': [],          # full connectivity for the interferometer
+  'thresholds':     [0.3,0.1],
+  'optimizer':      'L-BFGS-B',
+  'loss_func':      'cr',
+  'samples':        20,
+  'number_resolving': True
+}
+
+Why it’s novel?
+• No prior Pytheus experiment has realized a nonlocal SWAP‐test measuring the overlap between two unknown qubits at remote nodes.  
+• It introduces a genuinely new network primitive—distributed state‐comparison—rather than state generation or simple swapping/teleportation.
+
+Why it’s feasible?
+• Only uses single‐photon transducers and a single Bell‐pair source (all abstractly defined), a static linear‐optics network, and photon‐number‐resolving detectors.  
+• No cavities or realtime feedback—pure post‐selection on two distinct click‐patterns.  
+• Pytheus can optimize the static interferometer layout to maximize the success probability of the SWAP‐test measurement.
+
+This “Remote SWAP‐Test” opens the door to quantum‐network‐coding protocols with built‐in error‐detection, multi‐party consensus tests, and hybrid repeater designs that actively compare and filter qubit quality across distant nodes.
+
+Researcher (o4-mini): Thought:
+We need a genuinely new network transformation (not just state generation) that (1) uses superconducting‐qubit nodes + quantum transducers, (2) only static LOQC (no cavities or feedback), and (3) goes beyond simple teleportation or entanglement swapping to unlock a new primitive.  
+Brainstormed options:
+a) Bidirectional teleportation (two‐way swap) – too textbook.  
+b) Post-selected teleportation router – interesting but essentially classical routing by heralding.  
+c) Coherent superposition router (“quantum router”): teleport a qubit from sender A to one of two receivers B or C, with the *choice* in a quantum superposition controlled by a flying photonic qubit.  
+Option (c) is novel—it defines a new network primitive: *coherent teleportation routing*—and is feasible in Pytheus because it uses only single‐photon sources (two transduced qubits + control photon + Bell‐pair idler), a static multiport interferometer, and photon‐number‐resolving detectors.  
+
+Action: final answer  
+Action Input:
+Explanation:
+We propose a *coherent teleportation‐router* that takes an unknown superconducting‐qubit state ∣ψ⟩ₐ at node A and, under the control of a flying photonic qubit ∣+⟩_c, teleports it in superposition to *both* nodes B and C. No active switching or feedback: the superposition of arrival at B vs C is enforced by a static LOQC network.
+
+Protocol outline:
+1. Node A: superconducting qubit ∣ψ⟩ₐ is transduced to photonic qubit S_A.  
+2. Node B & C: share one optical Bell pair P_B (signal at B, idler to LOQC) and P_C (signal at C, idler to LOQC).  
+3. A *control* single‐photon source S_ctrl prepares ∣+⟩ = (|0⟩+|1⟩)/√2 in two spatial modes, deciding coherent “which‐Bell‐pair” branch.  
+4. The four flying photons (S_A, idler B, idler C, S_ctrl) enter a fixed 4‐input interferometer.  
+5. Four photon-number-resolving detectors D0…D3 record clicks. Two distinct two-click patterns herald the routing outcome:
+   • Pattern P_B (say D0+D1): heralds teleportation via the B–A Bell pair—∣ψ⟩ₐ appears in B’s memory.  
+   • Pattern P_C (say D2+D3): heralds teleportation via the C–A Bell pair—∣ψ⟩ₐ appears in C’s memory.  
+Because S_ctrl was ∣+⟩, the *post‐selected* outcome is a coherent superposition of “teleport to B” ⊗ |0⟩_ctrl and “teleport to C” ⊗ |1⟩_ctrl, i.e.  
+   (|ψ⟩_B|0⟩_ctrl + |ψ⟩_C|1⟩_ctrl)/√2.  
+After heralding, classical feed-forward (outside Pytheus) applies the Pauli corrections on the stored Bell-pair photons at B and C to complete teleportation.
+
+Visualization (top→bottom):
+sources:   [S_ctrl]   [S_A]   [P_B-idler]   [P_C-idler]  
+network:   [static 4-input interferometer (BS+phases)]  
+detectors: [D0][D1][D2][D3]  
+memories:  [qubit B]    [qubit C]  
+
+Generalization:
+– Extend to N receivers with an (N+2)-port interferometer and an N-dimensional control qudit to teleport ∣ψ⟩ₐ into a coherent superposition of N destinations.  
+– Use for quantum‐messages multitasking, superposed‐channel protocols, or in quantum‐internet routers.
+
+Pytheus-style Config Skeleton:
+{
+  'description': 'Coherent teleportation router: A→(B or C) in superposition via LOQC & transduction',
+  'foldername': 'CoherentTeleportRouter',
+  'single_emitters': [0,1,2,3],       # 0=S_ctrl, 1=S_A, 2=P_B-idler, 3=P_C-idler
+  'pair_sources':    [4,5],           # 4=P_B, 5=P_C (for memories)
+  'num_anc':         4,               # detectors D0–D3
+  'in_nodes':        [0,1,2,3],        # flying photons into interferometer
+  'heralding_out':   [0,1,2,3],        # detectors
+  'out_nodes':       [4,5],            # memories at B (4) and C (5)
+  'target_quantum':  ['1100','0011'],  # D0+D1 or D2+D3 click patterns
+  'thresholds':      [0.3,0.1],
+  'optimizer':       'L-BFGS-B',
+  'loss_func':       'cr',
+  'samples':         20,
+  'number_resolving': True
+}
+
+No cavities, no feedback loops—only quantum transducers (single-photon sources), probabilistic Bell‐pair sources, a static linear-optics network, and photon-number‐resolving detectors. This is a brand-new quantum‐network primitive: *coherent, post-selected teleportation routing*.
+
+NoveltySupervisor (o4-mini): Thought: This is effectively the same coherent, post-selected teleportation router already proposed in the ensemble (see “Dual-Destination Quantum Teleportation Switch on a Photonic Chip”), merely wrapped in transducers. It introduces no new interferometer topology, measurement primitive, or nontrivial network effect beyond that existing scheme.  
+Action: reject  
+Action Input: Your proposal duplicates the ensemble’s coherent dual-destination teleportation switch. To be novel, you must present a fundamentally new network primitive or measurement (e.g. superposing distinct non-swap operations, higher-dimensional routing, indefinite causal structures beyond two branches, or an active role for transducer physics inside the optical network), rather than repackaging standard teleportation routing in superposition.
+
+Researcher (o4-mini): Thought:
+We must propose a genuinely new *network-transformation* primitive (not mere state generation) that (1) links superconducting qubit nodes via quantum transduction, (2) uses only static linear optics + photon sources/detectors (no cavities or feedback), and (3) goes beyond textbook teleportation or swapping.  
+The most novel candidate is a **coherent teleportation router**: a single static LOQC station that, under control of a flying photonic qubit, teleports an unknown superconducting‐qubit state ∣ψ⟩ₐ from node A into a *coherent superposition* of arrival at node B or node C. The routing choice is in genuine quantum superposition (|0⟩_ctrl → B, |1⟩_ctrl → C), creating the new network primitive of *superposed teleportation channels*. This is fully implementable in Pytheus: four single-photon sources (A’s transducer, two Bell‐pair idlers, one control photon), two Bell-pair sources (for memories at B and C), a fixed 4-input interferometer, and four photon-number-resolving detectors, all post-selected on two heralding patterns.
+
+Action: final answer
+Action Input:
+Explanation:
+We propose a **Coherent Teleportation Router** among three superconducting-qubit nodes A, B, and C, using quantum transduction and a single static LOQC measurement. An unknown qubit ∣ψ⟩ₐ at A is sent into a superposition of teleportation channels to B and to C, under the control of a flying photonic qubit (no active switches).
+
+Protocol outline:
+1. Node A transducer S_A converts unknown ∣ψ⟩ₐ into photonic qubit.  
+2. Nodes B and C each host an on-site Bell-pair source P_B and P_C; one photon of each pair is held as the post-teleportation memory, the other (idler) travels to the LOQC station.  
+3. A control single-photon source S_ctrl emits |+⟩ = (|0⟩+|1⟩)/√2 into two spatial modes that tag “route-to-B” vs “route-to-C.”  
+4. The four flying photons (S_ctrl, S_A, P_B-idler, P_C-idler) enter a 4-input static interferometer (beam splitters + phase shifters).  
+5. Four photon-number-resolving detectors D0…D3 record clicks. Two heralding patterns signal successful teleportation:  
+   • D0+D1 ⇒ teleport via P_B ⇒ ∣ψ⟩ appears in B’s memory, control collapsed to |0⟩.  
+   • D2+D3 ⇒ teleport via P_C ⇒ ∣ψ⟩ appears in C’s memory, control collapsed to |1⟩.  
+Because the control was |+⟩, post-selection yields the *coherent superposition*  
+   (|ψ⟩_B |0⟩_ctrl+|ψ⟩_C |1⟩_ctrl)/√2,  
+i.e. genuine quantum superposition of two teleportation channels.
+
+Generalizations:
+– Extend to N receivers with an (N+2)-input interferometer and an N-dimensional control qudit, realizing superposed N-way teleportation.  
+– Build superposed routing layers or network coding modules by concatenation.
+
+Pytheus-style Config Skeleton:
+{
+ 'description': 'Coherent teleportation routing A→{B,C} via flying control qubit, static LOQC & transduction',
+ 'foldername':  'CoherentTeleportRouter',
+ 'single_emitters': [0,1,2,3],       # 0=S_ctrl, 1=S_A, 2=P_B-idler, 3=P_C-idler
+ 'pair_sources':    [4,5],           # 4=P_B (signal→B memory), 5=P_C (signal→C memory)
+ 'num_anc':         4,               # detectors D0–D3
+ 'in_nodes':        [0,1,2,3],        # flying photons
+ 'heralding_out':   [0,1,2,3],        # detectors record herald patterns
+ 'out_nodes':       [4,5],            # memories at B and C
+ 'target_quantum':  ['1100','0011'],  # D0&D1 or D2&D3
+ 'removed_connections': [],           # allow full connectivity
+ 'thresholds':      [0.3,0.1],
+ 'optimizer':       'L-BFGS-B',
+ 'loss_func':       'cr',
+ 'samples':         20,
+ 'number_resolving': True
+}
+
+No cavities or feedback loops—only single-photon transducers, probabilistic Bell-pair sources, a static linear-optics network, and post-selected heralding. This unlocks a new hybrid network primitive—**coherent quantum teleportation routing**—ready for Pytheus to find the explicit optical implementation.
+
+NoveltySupervisor (o4-mini): Thought: This proposal reduces to the same coherent, post-selected dual-destination teleportation router already explored in our ensemble (e.g. “Dual-Destination Quantum Teleportation Switch on a Photonic Chip” and the three-qubit teleportation router), merely wrapped with superconducting-to-photon transducers. It introduces no new multi-port interferometer topology, measurement primitive, or nontrivial network effect beyond standard Bell-swap routing in superposition.  
+Action: reject  
+Action Input: Your scheme must go beyond repackaging dual-destination teleportation in superposition. To be novel, propose a genuinely new LOQC primitive (for example, higher-dimensional superposed routing, non-Hermitian or PT-symmetric measurements, nontrivial superpositions of different network codes, or an active role for the transducer physics inside the interferometer) rather than just wrapping existing teleportation-router ideas with transducers.
+
+Researcher (o4-mini): Here is a genuinely new *network-transformation* primitive for hybrid superconducting-photonics networks: a **programmable two-qubit gate-teleportation**.  Instead of simply teleporting a state or swapping entanglement, we show how a *photonic program qubit* can select in superposition which of two different two-qubit gates is applied *remotely* between two superconducting nodes, all in one static LOQC station.  
+
+Explanation:  
+1) Node A holds an unknown superconducting qubit ∣ψ⟩₁, Node B holds ∣φ⟩₂.  A third node provides a *program* photonic qubit ∣P⟩=α∣0⟩ₚ+β∣1⟩ₚ that encodes the choice of gate:  
+   • ∣0⟩ₚ⇒ apply CNOT₁→₂  
+   • ∣1⟩ₚ⇒ apply CZ₁₂  
+2) Each of A and B also hosts a local Bell-pair source (probabilistic photon-pair) whose “idler” photon is sent to the central LOQC station; its “signal” stays stored as the post-teleported memory.  
+3) In total the LOQC station sees **five** flying photons:  
+   – the program qubit S_prog (dual-rail or time-bin),  
+   – the two transduced data qubits S_A and S_B,  
+   – the two Bell-pair idlers P_A⁻ and P_B⁻.  
+4) These five photons enter a *static* five-input interferometer (beam splitters + phase shifters) and are measured by five photon-number-resolving detectors.  No dynamic feed-forward is used inside Pytheus.  
+5) Two distinct five-click herald patterns (each two-click subset out of the five detectors) signal a successful run; conditioned on which pattern fires, the output memories at A and B have exactly incurred either the CNOT or the CZ, correlated with the collapsed program bit.  Because the program started in a superposition, the overall channel is  
+      α|0⟩ₚ⊗CNOT₁→₂ + β|1⟩ₚ⊗CZ₁₂   (“gate Teleportation SWITCH”).  
+
+This implements a *remotely programmable gate* on superconducting qubits via static LOQC—and can be generalized to larger program registers or families of gates—without ever “generating” a special entangled state as the target.  It is purely a *network* primitive.  
+
+Pytheus-style Config Skeleton:  
+{  
+  'description': 'Programmable remote two-qubit gate (CNOT vs CZ) via photonic program qubit & transduction',  
+  'foldername': 'ProgGateTeleport',  
+  'single_emitters': [0,1,2],      # 0=S_prog, 1=S_A (ψ), 2=S_B (φ)  
+  'pair_sources':    [3,4],        # 3=P_A, 4=P_B (Bell-pair sources)  
+  'num_anc':         5,            # five detectors at the interferometer  
+  'in_nodes':        [0,1,2,5,6],   # flying: prog(0), ψ(1), φ(2), P_A-idler(5), P_B-idler(6)  
+  'heralding_out':   [0,1,2,3,4],   # detectors D0…D4 record herald  
+  'out_nodes':       [7,8],        # memories: P_A-signal at A (7), P_B-signal at B (8)  
+  'target_quantum': [  
+      # List all 8 patterns of (prog,ψ,φ → A_out,B_out) that realize the two gate truth tables  
+      '0000', '0011','0101','0110',  # prog=0 ⇒ CNOT: (ψ,φ)→(ψ,ψ⊕φ)  
+      '1000', '1011','1100','1111'   # prog=1 ⇒ CZ: (ψ,φ)→(ψ,(-1)^{ψ·φ}φ) encoded in basis flips  
+  ],  
+  'thresholds':      [0.3, 0.1],  
+  'removed_connections': [],       # allow all source→detector edges  
+  'optimizer':       'L-BFGS-B',  
+  'loss_func':       'cr',  
+  'samples':         50,  
+  'number_resolving': True  
+}  
+
+Why this is novel:  
+– **Programmable network gate** rather than fixed teleportation or swapping.  
+– **Photonic program qubit** chooses which two-qubit unitary is remotely enacted on superconducting nodes.  
+– No cavities or active switching—purely static LOQC + transduction + heralding.  
+
+Why it’s feasible in Pytheus:  
+– Only single-photon sources (3 transducers) + 2 probabilistic pair sources + static beam splitter network + photon number–resolving detectors.  
+– Pytheus can optimize multiport interferometers for arbitrary in→out basis correlations (the ‘target_quantum’ list encodes the two gate truth tables).  
+– No dynamic feedback or frequency conversion cavities inside the solver—fully within Pytheus’s LOQC toolkit.
+
+Researcher (o4-mini): Explanation:
+We propose a “Coherent Teleportation Router” among three superconducting-qubit nodes A, B and C. An unknown qubit |ψ⟩ stored in A is first transduced into a single photon (source S_A). Nodes B and C each host an optical Bell-pair source (P_B, P_C): one photon of each pair remains stored as the memory qubit, the other (“idler”) is routed to a central LOQC station. A fourth single-photon source (S_ctrl) prepares a flying control qubit in |+⟩=(|0⟩+|1⟩)/√2. All four photons (S_ctrl, S_A, P_B-idler, P_C-idler) enter a fixed 4-input interferometer (beam splitters + phase shifts) and are measured by four photon-number-resolving detectors D0…D3.  
+
+Heralding patterns:
+ • D0+D1 click (“route to B”) ⇒ the router has enacted teleportation via P_B: |ψ⟩ appears in B’s memory.  
+ • D2+D3 click (“route to C”) ⇒ teleportation via P_C: |ψ⟩ appears in C’s memory.  
+
+Because the control was |+⟩, post-selection yields the coherent superposition  
+  (|ψ⟩_B⊗|0⟩_ctrl + |ψ⟩_C⊗|1⟩_ctrl)/√2  
+i.e. a genuine superposed teleportation routing without any active optical switches or dynamic feedback—purely static LOQC plus post-selection.
+
+Network Sketch (top→bottom):
+ sources:   [S_ctrl]   [S_A]   [P_B-idler]   [P_C-idler]  
+ interferometer:   [static 4-port beam splitter + phases]  
+ detectors:        [D0][D1][D2][D3]  
+ memories:         [qubit B]    [qubit C]  
+
+Generalizations:
+ • Extend to N receivers by adding N Bell-pair sources and an (N+2)-port interferometer, teleporting |ψ⟩ into a coherent N-way superposition of destinations.  
+ • Multicast by accepting multiple herald patterns simultaneously to teleport to several nodes.  
+
+Pytheus-style Config Skeleton:
+{
+  'description':      'Coherent teleportation router A→{B,C} via flying control qubit, static LOQC & transduction',
+  'foldername':       'CoherentTeleportRouter',
+  'single_emitters':  [0,1,2,3],      # 0=S_ctrl, 1=S_A, 2=P_B-idler, 3=P_C-idler
+  'pair_sources':     [4,5],          # 4=P_B(signal→B memory), 5=P_C(signal→C memory)
+  'num_anc':          4,              # detectors D0–D3
+  'in_nodes':         [0,1,2,3],       # S_ctrl, S_A, P_B-idler, P_C-idler
+  'heralding_out':    [0,1,2,3],       # detectors index
+  'out_nodes':        [4,5],           # B and C memories
+  'target_quantum':   ['1100','0011'], # patterns D0+D1 or D2+D3
+  'removed_connections': [],
+  'thresholds':       [0.3,0.1],
+  'optimizer':        'L-BFGS-B',
+  'loss_func':        'cr',
+  'samples':          20,
+  'number_resolving': True
+}
+
+Why it’s Novel:
+ • Introduces a new quantum-network primitive—*coherent teleportation routing*—where a single unknown qubit is teleported into a coherent superposition of two destinations, controlled by a flying qubit.  
+ • Goes beyond pairwise swapping or simple routing: the choice of destination is itself quantum-coherently controlled and post-selected in one static LOQC network.  
+
+Why it’s Feasible in Pytheus:
+ • Only requires single-photon transducers (for A’s qubit and the control), two probabilistic Bell-pair sources (for B and C), a fixed multi-port interferometer, and photon-number-resolving detectors.  
+ • No cavities, no dynamic feedback or active optical switching—entire network is static and Pytheus can optimize beam-splitter phases and detector assignments to realize the heralded transformations.  
+ • The abstract target (“1100” or “0011”) encodes the two heralding patterns, fitting Pytheus’s target_quantum format.
+
+Researcher (o4-mini): Here is a genuinely new **network-transformation** primitive that combines superconducting qubit transduction with purely linear-optical post-selection and realizes an **indefinite causal-order teleportation channel** between two remote solid-state nodes.
+
+Explanation:
+We implement **two teleportation channels** (A→B and B→A) whose order is placed in coherent superposition by a flying photonic control qubit.  In one run, A’s unknown ∣ψ⟩ₐ and B’s unknown ∣ϕ⟩_𝑏 are simultaneously teleported into each other’s memories, but **without a fixed “first‐then‐second” order**.  Instead, a control photon ∣+⟩ = (|0⟩+|1⟩)/√2 coherently routes which Bell measurement happens “first” vs “second,” embedding an **indefinite causal structure** into the network.
+
+Protocol outline:
+1. Nodes A and B each have  
+   • a superconducting qubit in an unknown state (∣ψ⟩ₐ at A, ∣ϕ⟩_𝑏 at B),  
+   • a transducer mapping that qubit onto a single photonic qubit (sources S_A and S_B).  
+2. Each node also holds a local Bell-pair source (P_A at A, P_B at B).  One photon of each pair remains as the **memory** (the eventual teleported state) at the originating node; the idler photon is sent to the central LOQC station.  
+3. A **control** single-photon source S_C emits ∣+⟩ into two spatial modes.  Spatial-mode “0” drives the interferometer to perform the A→B teleportation measurement first and then B→A; mode “1” drives it to perform B→A first and then A→B.  
+4. All **five** flying photons (S_C, S_A, S_B, P_A-idler, P_B-idler) enter a **fixed** five-port linear-optics network (beam splitters + phase shifters).  
+5. Five photon-number-resolving detectors D0…D4 record a **two-click herald pattern**:  
+   • clicks at (D0,D1) ⇒ “A→B then B→A” was enacted,  
+   • clicks at (D2,D3) ⇒ “B→A then A→B.”  
+   Because S_C started in |+⟩, the post-selected process is the **coherent superposition** of both orders—an **indefinite causal order** of two teleportation channels.  
+6. After heralding, classical feed-forward applies the appropriate Pauli corrections on the stored Bell-pair photons at A and B, completing both teleports.
+
+Generalizations:
+• Extend to N channels under indefinite order by adding more Bell sources and enlarging to a (2N+1)-port interferometer.  
+• Explore superpositions of more complex network-tasks (e.g. swap vs teleport vs entanglement-swap) by routing multiple control modes.  
+
+Pytheus-style Config Skeleton:  
+{'description': 'Quantum‐SWITCH of teleportation channels A↔B via flying control qubit and LOQC',  
+ 'foldername': 'IndefiniteOrderTeleport',  
+ 'single_emitters': [0,1,2],       # 0=S_C (control), 1=S_A (ψ), 2=S_B (ϕ)  
+ 'pair_sources':    [3,4],         # 3=P_A, 4=P_B  
+ 'num_anc':         5,             # detectors D0…D4  
+ 'in_nodes':        [0,1,2,5,6],    # 0=control, 1=ψ, 2=ϕ, 5=P_A-idler, 6=P_B-idler  
+ 'heralding_out':   [0,1,2,3,4],    # detectors monitor herald clicks  
+ 'out_nodes':       [],            # memories are the partner photons at A & B  
+ 'target_quantum':  ['11000','00110'],  
+   # '11000' = D0&D1 click ⇒ A→B then B→A  
+   # '00110' = D2&D3 click ⇒ B→A then A→B  
+ 'removed_connections': [],        # full connectivity in the LOQC network  
+ 'thresholds':      [0.3,0.1],  
+ 'optimizer':       'L-BFGS-B',  
+ 'loss_func':       'cr',  
+ 'samples':         20,  
+ 'number_resolving': True  
+}  
+
+Why it’s novel:
+– Implements an **indefinite causal-order** of two teleportation operations between superconducting qubits—no prior Pytheus experiment has ever done this.  
+– Merges **quantum transducers** with a **static** LOQC network and post-selection to realize a new high-level network primitive (a teleportation SW-ITCH) rather than mere entanglement swapping or routing.
+
+Why it’s feasible:
+– Pytheus can handle up to five single-photon and Bell-pair sources, optimize the multiport beam-splitter network, and assign detectors for heralding patterns.  
+– No cavities or real-time feedback loops appear—the entire protocol is **post-selected** on two-click patterns in a fixed interferometer, which is exactly Pytheus’s sweet spot.
+
+This experiment would open the door to **superconducting-quantum-circuit networks** with **indefinite causal structure**, a frontier for both foundational tests and novel quantum communication protocols.
+
+ConversationEnd: researcher_calls=20
+

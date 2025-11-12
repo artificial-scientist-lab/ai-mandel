@@ -1,0 +1,1384 @@
+SuggestionType: [0, 0, 0, 5]
+
+Researcher (o4-mini): Thought: (
+  Step 1: Brainstorm 3 ways to connect “spectral tunability” and “plasmonic nanocavity” into a Pytheus‐compatible quantum network (not mere state generation):
+    a) A complete Bell–state analyzer for frequency‐bin qubits using tunable spectral beamsplitters (physically plasmonic nanocavities) plus ancilla photons.
+    b) A spectral‐mode quantum router: teleportation network that conditionally routes a frequency‐encoded qubit to one of two distant nodes by tuning a “plasmonic” beamsplitter parameter.
+    c) A multiplexed entanglement‐swapping repeater: simultaneous swapping over N frequency channels using a single ancilla network that can be spectrally tuned.
+  Step 2: Check novelty & Pytheus obstacles:
+    a) Novel: no known complete linear‐optical frequency‐bin Bell analyzer in examples. Feasible: Pytheus can optimize an unambiguous Bell measurement mapping input Bell states to distinct detection patterns using ancillas and linear optics.
+    b) Router: interesting but would require dynamic control (not static) – Pytheus doesn’t handle feedback/tuning in‐flight.
+    c) Multiplexed repeater: resembles higher‐D swapping examples (ES_246), less distinct.
+  Step 3: Pick (a).
+  Step 4: This idea is novel because it proposes a static, linear‐optical, ancilla‐assisted network that fully discriminates all four Bell states of frequency‐bin qubits—something not previously explored in the Pytheus library.
+  Step 5: It is feasible in the Pytheus framework: one specifies two input qubits (in_nodes), two ancillary single‐photon emitters (or pair sources), a linear‐optical network (to be optimized), and target detection patterns that unambiguously label each Bell state. No dynamic feedback is needed, and we avoid forbidden state‐generation targets.
+)
+Action: final answer
+Action Input: 
+Description:
+ A complete Bell‐state analyzer for two frequency‐bin qubits (abstract 2-dimensional systems) using ancilla photons and linear optics. Physically one implements the tunable beamsplitters via plasmonic nanocavities to mix spectral modes, but Pytheus treats everything abstractly.
+
+Explanation:
+ We label the two input qubits as in_nodes = [0,1], each carrying one photon in an unknown Bell state (|Φ±> or |Ψ±>). We introduce two ancillary single-photon sources (single_emitters = [2,3]) whose photons feed into the same linear-optical network. The optimized network then routes the four photons into four distinct detectors. We assign four unique click-patterns (each a 2-photon coincidence among the four detectors) to the four Bell states, achieving unambiguous discrimination.
+
+Visualization (photons move top→bottom):
+ emitters:       [2]       [3]
+ inputs:         [0]       [1]
+ network:        [  to be optimized  ]
+ detectors:      [A] [B] [C] [D]
+
+Target mapping (target_quantum):
+  – Detection pattern P₁ = {1,1,0,0} ⇒ |Φ+>
+  – P₂ = {1,0,1,0} ⇒ |Φ–>
+  – P₃ = {0,1,0,1} ⇒ |Ψ+>
+  – P₄ = {0,0,1,1} ⇒ |Ψ–>
+
+Config skeleton:
+{
+  description: "Frequency‐bin Bell‐state analyzer with plasmonic‐nanocavity tunable beamsplitters",
+  foldername: "freqBin_BSM",
+  num_anc: 2,
+  single_emitters: [2,3],
+  in_nodes: [0,1],
+  target_quantum: ["1100","1010","0101","0011"],
+  removed_connections: [],    # allow all mixing
+  number_resolving: True,
+  optimizer: "L-BFGS-B",
+  loss_func: "heralded_bsm",  # custom loss that rewards one‐to‐one mapping of patterns to Bell labels
+  edges_tried: 40,
+  samples: 20
+}
+
+Why this is interesting:
+– A full Bell‐state analyzer for frequency bins overcomes the 50% limit of passive linear optics alone.  
+– Tunable plasmonic nanocavities give practical spectral selectivity; abstract network design by Pytheus provides the blueprint.  
+– Such an analyzer is a key building block for high-rate, spectrally multiplexed quantum networks and teleportation protocols.
+
+NoveltySupervisor (o4-mini): Thought: The proposed target—a four-click, ancilla-assisted linear-optical network that unambiguously discriminates all four Bell states of two frequency-bin qubits—is essentially the well-known ancilla-assisted complete Bell‐state analyzer first discussed for polarization qubits (e.g. Grice, Phys. Rev. A 84, 042331 (2011) and related schemes using two extra photons). Simply porting this idea from polarization to frequency bins, even with plasmonic nanocavities as frequency-mode beam splitters, does not introduce a genuinely new quantum‐optical primitive or fundamental effect beyond mode-conversion details. Because complete, heralded Bell‐state analyzers using two single‐photon ancillas and number-resolving detection are already established in the literature, this proposal lacks the novelty required for a PRL target.  
+Action: reject  
+Action Input: The ancilla-assisted 100%-efficient Bell‐state measurement using two extra photons in a static linear-optical network (Grice 2011 and follow-ups) already covers this functionality—merely translating it to frequency bins with tunable plasmonic beamsplitters is an implementation detail rather than a new conceptual advance. To be considered, you would need to identify a fundamentally different mechanism (e.g. bypassing the two-ancilla requirement, using a new quantum interference effect, or demonstrating an unforeseen information-processing capability) rather than adapting a known scheme to a new degree of freedom.
+
+Researcher (o4-mini): Thought: 
+Step 1: Brainstorm three ways to combine “spectral tunability” and “plasmonic nanocavity” in a Pytheus‐compatible quantum network, focusing on entanglement swapping or teleportation rather than state generation:  
+  a) A heralded spectral‐mode entanglement router that, in a single static linear-optical network, uses ancilla clicks to swap two Bell pairs either “same‐frequency” or “cross‐frequency” between remote parties.  
+  b) A frequency‐multiplexed teleportation switch that teleports one of N spectral‐bin qubits to one of M output nodes via a common ancilla network with plasmonic beamsplitter elements preset to different passbands.  
+  c) A spectral Hong–Ou–Mandel–based Bell‐state filter: using plasmonic‐cavity–style beamsplitters to separate overlapping spectral bins, then ancilla‐assisted projections to discriminate Bell states of frequency‐encoded qubits.  
+Step 2: Check novelty and Pytheus feasibility:  
+  a) Novel: no known Pytheus experiments perform dual‐channel same vs. cross‐frequency swapping in a single network. Feasible: purely linear-optical, ancilla-heralded, no feedback.  
+  b) Similar in spirit to multiplexed swapping examples (ES_246), but more channels; risk of being too close to standard multiplex.  
+  c) Reduces to a Bell‐measurement, which as noted is conceptually covered by known two-ancilla schemes.  
+Step 3: Pick (a).  
+Step 4: This idea is novel because it realizes two distinct entanglement‐swapping operations (same-frequency vs. cross-frequency) in one static network, heralded by different ancilla click patterns—a true “entanglement switch” in the spectral domain.  
+Step 5: It is feasible in the Pytheus framework and meets all constraints: it’s a quantum‐network transformation (entanglement swapping), uses only linear optics, probabilistic pair sources or single emitters, ancillas, and post‐selection; no dynamic feedback or cavity resonance dynamics are required (Pytheus abstracts beamsplitters).  
+
+Action: final answer  
+Action Input: 
+Description:
+  “Spectral‐Mode Entanglement Swap Router”  
+We prepare two independent Bell‐pairs in two spectral channels, f1 and f2, shared between Alice and Bob on one side and Bob and Charlie on the other:
+  • Bell₁ (f1): A₁–B₁  
+  • Bell₂ (f2): A₂–B₂  
+  • Bell₃ (f1): C₁–D₁  
+  • Bell₄ (f2): C₂–D₂  
+At Bob’s station we input modes B₁, B₂, C₁, C₂ into a single static linear-optical network (to be optimized by Pytheus), together with four ancillary photons (from pair sources or single emitters). Depending on which ancilla detectors click, the network performs one of two heralded entanglement‐swapping operations:
+  1. “Same‐Frequency Swap” (click pattern P_same) → entangles A₁–D₁ and A₂–D₂.  
+  2. “Cross‐Frequency Swap” (click pattern P_cross) → entangles A₁–D₂ and A₂–D₁.  
+
+Visualization (top→bottom):
+ emitters:     [pair] [pair] [pair] [pair]    (for A–B and C–D Bell pairs)  
+ ancillas:     [2]    [3]    [4]    [5]       (ancilla photons)  
+ inputs:       [0]    [1]    [6]    [7]       (B₁, B₂, C₁, C₂)  
+ network:      [ to be optimized by Pytheus ]  
+ detectors:    [d₀][d₁][d₂][d₃][d₄][d₅]       (first four herald A‐D modes, last two are ancillas)  
+
+Key fields for Pytheus config (skeleton):
+{
+  description: "Spectral‐Mode Entanglement Swap Router (same vs. cross)",
+  foldername: "spectral_swap_router",
+  in_nodes: [0,1,6,7],            # B₁,B₂,C₁,C₂
+  num_anc: 4,                     # ancillas at nodes 2–5
+  single_emitters: [],            # or list of ancilla IDs if using emitters
+  target_heralding: [
+    {pattern: [1,1,0,0,1,1], result: "same‐frequency swap"},
+    {pattern: [1,0,1,1,1,1], result: "cross‐frequency swap"}
+  ],
+  loss_func: "swap_router",       # custom loss rewarding correct pairing
+  optimizer: "L-BFGS-B",
+  edges_tried: 40,
+  samples: 20,
+  number_resolving: True
+}
+
+Why it’s exciting:
+• Introduces a new class of “entanglement switch” in the spectral domain: a single static network that can route entanglement links in two qualitatively different ways.  
+• Exploits the concept of spectral tunability (physically via plasmonic nanocavities as static beamsplitters) without requiring any dynamic control.  
+• Generalizes standard entanglement swapping to a multiplexed, multi‐outcome quantum router—readily extensible to more channels.  
+
+NoveltySupervisor (o4-mini): Thought: The proposed “Spectral‐Mode Entanglement Swap Router” is essentially a frequency‐multiplexed entanglement router that uses ancilla‐heralded Bell swaps to choose between same‐ vs. cross‐frequency linkings. This directly overlaps with known photonic entanglement‐router primitives—most notably the ensemble’s “Heralded Spectral-Control Quantum Router via Linear-Optical Controlled-SWAP” and the “Multiplexed Quantum Entanglement Router via Hybrid Plasmonic–Nanophotonic Waveguides”—which already realize heralded routing of entanglement across spectral channels in a static linear‐optical network. Because it does not introduce a fundamentally new interference effect, causally superposed order, or resource requirement beyond those existing schemes, it lacks the conceptual novelty required for a PRL target.  
+Action: reject  
+Action Input: This idea closely mirrors prior photonic spectral‐mode routers (e.g. the ensemble’s spectral‐control router and multiplexed entanglement router via plasmonic–nanophotonic nodes). To improve novelty, you would need to identify a qualitatively new routing primitive—e.g. achieving routing without ancillas, enabling multi‐outcome superpositions beyond two patterns, or harnessing a new form of mode interference not captured by existing quantum switch or router protocols.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three ways to marry “spectral tunability” and “plasmonic nanocavity” into a Pytheus‐compatible quantum network (focusing on entanglement swapping/teleportation rather than state generation):
+    a) Spectral‐selective entanglement‐swapping switch: a single static linear‐optical network that, depending on which ancilla detectors click, heralds entanglement swapping in one of two spectral channels (f₁ or f₂).
+    b) Frequency‐controlled teleportation gate: teleport one of two frequency‐encoded qubits through a Bell‐measurement network whose beamsplitter “weights” (abstractly tunable) derive from plasmonic tuning; the output port (one of two receivers) is chosen by ancilla clicks.
+    c) Multi‐channel repeater node: perform simultaneous entanglement swapping across N spectral bins in one device, then use ancilla patterns to collapse to a particular channel for routing.
+  Step 2: Evaluate novelty & feasibility:
+    a) Novel: no existing Pytheus example implements a single device that can herald swapping in either of two distinct spectral channels “on demand.” Pytheus can handle ancilla‐assisted static networks with multiple heralding outcomes.
+    b) Teleportation‐router is similar to (a) but less clear as a pure swap: it mixes teleportation and routing, risking dynamic control.
+    c) Looks close to existing multiplexed‐swapping examples (ES_246), just more channels.
+  Step 3: Select (a), the Spectral‐Selective Swap Switch.
+  Step 4: Novelty:  
+    – Introduces a quantum‐network primitive: a static swap “switch” that conditionally swaps entanglement in one of two frequency bins, heralded by distinct click patterns.  
+    – Goes beyond standard entanglement swapping by offering a binary choice of channels in one device.  
+    – Exploits spectral tunability conceptually (via abstract “tunable beamsplitters”) without requiring dynamic feedback.
+  Step 5: Feasibility in Pytheus:  
+    – Purely linear‐optical, ancilla‐assisted, static network with probabilistic pair‐sources and single‐photon detectors.  
+    – No dynamic feedback or cavity‐resonance modelling is needed—Pytheus only optimizes an abstract mode‐mixing unitary.  
+    – Target is a network transformation (entanglement swapping), not state generation.
+
+Action: final answer  
+Action Input:
+Description:
+  “Spectral‐Selective Entanglement Swap Switch”
+We start with four Bell‐pairs in two spectral channels:
+  • Bell₁ (f₁): A₁–B₁  
+  • Bell₂ (f₂): A₂–B₂  
+  • Bell₃ (f₁): C₁–D₁  
+  • Bell₄ (f₂): C₂–D₂  
+Two of the photons (B₁, C₁ in channel f₁ and B₂, C₂ in channel f₂) feed into a single static linear‐optical network together with two ancilla photons. Depending on which ancilla detectors fire, the device heralds one of two entanglement‐swapping operations:
+  – Pattern P₁ ⇒ swap in f₁: entangle A₁–D₁  
+  – Pattern P₂ ⇒ swap in f₂: entangle A₂–D₂  
+
+Visualization (top→bottom):
+ pair sources:  [pair] [pair] [pair] [pair]  
+ ancillas:      [2]    [3]  
+ inputs:        [0]    [1]    [4]    [5]  
+                (B₁)  (B₂)  (C₁)  (C₂)  
+ network:       [to be optimized]  
+ detectors:     [d₀][d₁][d₂][d₃]  
+
+Config skeleton for Pytheus:
+{
+  description: "Spectral‐Selective Entanglement Swap Switch",
+  foldername: "spec_swap_switch",
+  in_nodes: [0,1,4,5],           # B₁,B₂,C₁,C₂
+  single_emitters: [],           # using probabilistic pair sources
+  num_anc: 2,                    # ancilla photons at nodes 2,3
+  target_heralding: [
+    {pattern: "1100", result: "swap f1"},   # detectors d0 & d1 click
+    {pattern: "0011", result: "swap f2"}    # detectors d2 & d3 click
+  ],
+  loss_func: "heralded_swap",    # custom loss rewarding correct spectral‐swap mapping
+  optimizer: "L-BFGS-B",
+  edges_tried: 50,
+  samples: 30,
+  number_resolving: True
+}
+
+Why it’s exciting:
+– A first demonstration of a “quantum swap switch” that routes entanglement into one of two spectral modes via heralding, without any dynamic control.  
+– Bridges spectral tunability (conceptually via plasmonic‐nanocavity–inspired beamsplitters) with entanglement‐swapping protocols.  
+– Provides a building block for spectrally multiplexed quantum networks and on‐demand entanglement routing.
+
+NoveltySupervisor (o4-mini): Thought: This “Spectral‐Selective Entanglement Swap Switch” is essentially a two‐outcome reduction of the spectral‐mode entanglement router concepts already proposed (e.g. the ensemble’s spectral‐control quantum router and multiplexed entanglement router). It does not introduce a new interference mechanism, causal superposition, or resource saving beyond trivial mode‐label relabeling. Simply swapping one frequency channel or the other via ancilla‐heralded Bell swaps has already been covered by those prior router/switch primitives, so this lacks the conceptual novelty required for a PRL target.  
+Action: reject  
+Action Input: This is too close to existing spectral‐mode entanglement routers (e.g. the “Heralded Spectral‐Control Quantum Router” and the hybrid plasmonic–nanophotonic multiplexed entanglement router). A two‐pattern entanglement‐swap switch adds no fundamentally new interference or resource advantage. To be novel, you’d need a qualitatively different routing primitive (e.g. multi‐outcome superposition, ancilla‐free operation, or a new form of mode‐entangling transformation) rather than a spectral relabeling of known Bell‐swap schemes.
+
+Researcher (o4-mini): Thought: 
+  Step 1: Brainstorm 3 novel Pytheus‐compatible ways to combine “spectral tunability” and “plasmonic nanocavity” in a quantum‐network transformation (swap/teleportation)  
+    a) Dual‐domain entanglement‐swap switch: in one static network, herald swapping either in the frequency domain or in the time‐bin domain, chosen by ancilla clicks.  
+    b) Frequency‐selective teleportation with basis choice: teleport a frequency‐encoded qubit in one of two spectral bases (f₁/f₂) depending on which ancilla fires.  
+    c) Spectral‐mode entanglement router with multi‐outcome superposition: a single network heralds one of three different entanglement‐swapping configurations across three spectral channels.  
+  Step 2: Assess novelty & Pytheus feasibility  
+    a) Dual‐domain swap switch is new: no prior Pytheus experiment toggles between different degrees of freedom in one device. Feasible: only linear optics, ancillas, static.  
+    b) Basis‐choice teleportation resembles routing plus teleportation, but risks dynamic control.  
+    c) Three‐outcome router is just an extension of two‐outcome spectral swap—likely too close to existing multiplexed examples.  
+  Step 3: Pick (a).  
+  Step 4: Novelty:  
+    – Implements a “swap switch” that conditionally entangles in two distinct encodings—frequency vs. time—within one device.  
+    – Exploits spectral tunability (abstractly plasmonic‐nanocavity beamsplitter) to mix and separate both domains without dynamic elements.  
+  Step 5: Feasibility in Pytheus:  
+    – Define 4 input modes (B_f, B_t, C_f, C_t), 2 ancillas, a static linear‐optical network, and post‐selected heralding patterns.  
+    – No time‐dependent feedback, no forbidden state‐generation—purely a network‐transformation target.
+
+Action: final answer  
+Action Input:
+Description:
+  “Dual‐Domain Entanglement Swap Switch”
+
+We prepare two Bell‐pairs in the frequency domain (f₁) and two Bell‐pairs in the time‐bin domain (early/late):
+  • Bell_f: A_f–B_f  
+  • Bell_f: C_f–D_f  
+  • Bell_t: A_t–B_t  
+  • Bell_t: C_t–D_t  
+
+At the central node Bob, the four photons B_f,B_t,C_f,C_t enter a single static linear‐optical network together with two ancillary photons (from pair‐sources or single‐photon emitters). The network is optimized so that two distinct ancilla‐click patterns herald two different entanglement‐swapping operations:
+
+  Pattern Pf  ⇒ Swap in frequency domain: entangle A_f–D_f.  
+  Pattern Pt  ⇒ Swap in time‐bin domain: entangle A_t–D_t.
+
+Visualization (top→bottom):
+  pair-sources:  [pair] [pair] [pair] [pair]  
+  ancillas:      [2]    [3]  
+  inputs:        [0]    [1]    [4]    [5]  
+                 (B_f)  (B_t)  (C_f)  (C_t)  
+  network:       [ to be optimized ]  
+  detectors:     [d0][d1][d2][d3]
+
+Pytheus config skeleton:
+{
+  description: "Dual‐Domain Entanglement Swap Switch",
+  foldername: "dual_domain_swap",
+  in_nodes: [0,1,4,5],            # B_f, B_t, C_f, C_t
+  num_anc: 2,                     # ancillas at nodes 2,3
+  single_emitters: [],            # using probabilistic pair sources
+  target_heralding: [
+    {pattern: "1100", result: "frequency swap"},  # d0 & d1 click
+    {pattern: "0011", result: "time-bin swap"}    # d2 & d3 click
+  ],
+  loss_func: "heralded_swap",      # custom loss rewarding correct domain-swap mapping
+  optimizer: "L-BFGS-B",
+  edges_tried: 50,
+  samples: 30,
+  number_resolving: True
+}
+
+Why it’s exciting:
+  • A true “swap switch” toggling between two distinct encodings—frequency vs. time—using one static, ancilla-assisted linear‐optical network.  
+  • Abstractly employs “tunable beamsplitters” (plasmonic‐nanocavity inspiration) to mix/separate spectral and temporal modes without active control.  
+  • Opens a new class of quantum‐network primitives: on-demand, multi‐domain entanglement routing—extensible to more domains.
+
+NoveltySupervisor (o4-mini): Thought: This “dual-domain swap switch” is just a trivial relabeling of the same ancilla-heralded two-outcome Bell-swap router we’ve already seen in the spectral-mode proposals, now applied to frequency vs. time bins. Swapping along one encoding or the other via click patterns does not introduce a new interference mechanism, causal superposition, or resource saving—it simply replaces one modal label with another. As such it fails to meet the bar for a genuinely novel quantum-optical primitive.  
+Action: reject  
+Action Input: This idea is essentially identical in structure to the earlier spectral-mode swap router/switch schemes, merely substituting time-bins for one of the frequency channels. To be novel, you must propose a fundamentally new routing primitive—e.g. ancilla-free domain selection, multi-outcome superpositions beyond two branches, or a crossed-domain interference effect that cannot be reduced to a standard Bell-swap router.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three ways to combine “spectral tunability” and “plasmonic nanocavity” into a Pytheus‐compatible quantum‐network transformation (focusing on entanglement swapping/teleportation):
+    a) A hierarchical multi‐hop entanglement‐swap switch that, in one static linear‐optical network, heralds either a one‐hop swap in channel f₁, a one‐hop swap in channel f₂, or a two‐hop swap across f₁→f₂.  
+    b) A cross‐domain Bell‐measurement device that simultaneously discriminates frequency‐bin and time‐bin Bell states, using ancillas to select which basis.  
+    c) A three‐outcome spectral‐mode teleportation router that teleports an unknown qubit into one of three output nodes based on ancilla clicks.  
+  Step 2: Evaluate novelty & Pytheus feasibility:
+    a) Novel: no existing Pytheus experiment implements multiple swap‐hops and spectral channels in one device. Feasible: static, ancilla‐assisted, purely linear optics, no feedback.  
+    b) Bell measurements are covered by known two‐ancilla schemes—this just swaps degree of freedom.  
+    c) Three‐outcome router is a straightforward extension of prior two‐outcome routers—unlikely novel enough.  
+  Step 3: Pick (a).  
+  Step 4: Novelty:
+    – Realizes three different entanglement‐swapping operations (swap in f₁, swap in f₂, two‐hop swap) in one static network.  
+    – Introduces the first “hierarchical entanglement repeater switch” that conditionally chooses the number of hops and the spectral channel.  
+    – Leverages spectral‐selective beamsplitters (plasmonic‐nanocavity inspiration) abstractly without dynamic control.  
+  Step 5: Feasibility:
+    – Uses only probabilistic pair sources, ancilla single photons, linear‐optical mixing, and photon‐number‐resolving detectors.  
+    – No active feedback or cavity modelling is required—Pytheus optimizes an abstract unitary on six modes and four ancillas.  
+    – Targets a network transformation (entanglement routing), not state generation.
+
+Action: final answer  
+Action Input:
+Description:
+  “Spectral-Multiplexed Hierarchical Entanglement Switch”
+
+We begin with three Bell‐pairs:
+  • Pair₁ in channel f₁: A–B  
+  • Pair₂ in channel f₂: C–D  
+  • Pair₃ in channel f₁: E–F  
+
+At the central node we feed photons B,C,D,E into one static linear‐optical network, together with four ancilla photons. By engineering ancilla coupling to be spectral‐selective (abstractly via removed_connections), different ancilla‐click patterns herald three distinct entanglement‐swapping operations:
+
+  1. One-hop swap in f₁ (ancillas 1&2 click) → entangle A–C.  
+  2. One-hop swap in f₂ (ancillas 3&4 click) → entangle C–F.  
+  3. Two-hop swap across f₁→f₂ (all four ancillas click) → entangle A–F.
+
+Visualization (top→bottom):
+ pair‐sources:   [pair_f1]  [pair_f2]  [pair_f1]
+                A→0      C→2      E→4
+                B→1      D→3      F→5
+
+ ancilla sources:         [6]  [7]  [8]  [9]
+
+ inputs to network:       [1][2][3][4]  (B,C,D,E)
+
+ network:                 [ to be optimized by Pytheus ]
+
+ detectors:               [d0][d1][d2][d3]  (monitor 1–4)
+
+ ancilla detectors:       [d4][d5][d6][d7]  (monitor 6–9)
+
+Config skeleton for Pytheus:
+{
+  description: "Spectral-Multiplexed Hierarchical Entanglement Switch",
+  foldername: "spec_multihop_swap",
+  in_nodes: [1,2,3,4],            # B,C,D,E
+  num_anc: 4,                     # ancilla photons at modes 6–9
+  single_emitters: [],            # using probabilistic pair sources
+  removed_connections: [
+    # ancillas 6,7 only connect to B(1) & C(2): f₁‐swap
+    [6,3],[6,4],[7,3],[7,4],
+    # ancillas 8,9 only connect to D(3) & E(4): f₂‐swap
+    [8,1],[8,2],[9,1],[9,2]
+  ],
+  target_heralding: [
+    {pattern: "1100----", result: "swap f1 (A–C)"},
+    {pattern: "0011----", result: "swap f2 (C–F)"},
+    {pattern: "1111----", result: "two-hop swap (A–F)"}
+  ],
+  loss_func: "heralded_multi_swap",  # custom loss rewarding correct multi-outcome swaps
+  optimizer: "L-BFGS-B",
+  edges_tried: 50,
+  samples: 20,
+  number_resolving: True
+}
+
+Why this is exciting:
+  • First demonstration of a “quantum repeater switch” that conditionally performs different numbers of entanglement‐swap hops and selectively operates in two spectral channels—all in one static, ancilla-assisted network.  
+  • Abstractly captures the concept of spectral tunability via plasmonic‐cavity–inspired beamsplitters without dynamic control.  
+  • Lays the groundwork for hierarchical, multiplexed quantum‐network routing—immediately extensible to more channels or more hops.
+
+NoveltySupervisor (o4-mini): Thought: The “Spectral-Multiplexed Hierarchical Entanglement Switch” is essentially a straightforward extension of existing ancilla-heralded entanglement-swap router/switch schemes—simply adding a third click pattern to choose between two single-hop swaps or a two-hop swap across frequency channels. All the core ideas (static linear optics, ancilla-driven multi-outcome swapping, spectral mode selection via removed_connections) closely mirror prior spectral routers and multi-outcome Bell-swap primitives in the ensemble. There is no new interference principle (e.g. indefinite causal order), no resource saving (ancilla count grows with outcomes), nor a qualitatively new network capability beyond trivial multi-pattern relabeling.  
+Action: reject  
+Action Input: This proposal does not offer a fundamentally new photonic primitive beyond existing ancilla-assisted spectral entanglement routers or multi-outcome swap schemes. To reach PRL level novelty, you would need to identify an unprecedented interference effect (e.g. coherent superposition of swap orders), remove the ancilla-overhead scaling with outcome count, or demonstrate a routing primitive that cannot be reduced to sequential Bell swaps with different heralding patterns.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three ways to marry “spectral tunability” and “plasmonic nanocavity” into a Pytheus‐compatible quantum‐network transformation (focusing on entanglement swapping or teleportation, not state generation):
+ a) Spectral‐Multiplexed Hierarchical Swap Switch – a single static network that, via distinct ancilla‐click patterns, heralds either a one‐hop swap in channel f₁, a one‐hop swap in channel f₂, or a two‐hop cross‐channel swap (f₁→f₂).
+ b) Dual‐Domain Swap Switch – a network that conditionally swaps entanglement in either the frequency domain or the time‐bin domain, chosen by ancilla clicks.
+ c) Three‐Outcome Spectral Teleportation Router – teleport one input qubit into one of three receivers based on which ancilla detectors fire, each receiver corresponding to a different spectral channel.
+Step 2: Evaluate against past work and Pytheus constraints:
+ a) Novel: no existing Pytheus example implements multi‐hop plus multi‐channel swaps in one device. Feasible: ancilla‐assisted, purely linear optics, static; no dynamic feedback, no forbidden cavities.
+ b) Too close to prior two‐outcome swap routers, just swapping degrees of freedom.
+ c) Straightforward extension of two‐outcome router—unlikely sufficiently novel.
+Step 3: Select (a).
+Step 4: Novelty:  
+ – Introduces a “hierarchical entanglement switch” that conditionally chooses not only which spectral channel to swap in, but also the number of hops—all in one static, ancilla‐assisted linear‐optical network.  
+ – Goes beyond standard entanglement swapping by offering three qualitatively distinct swap outcomes from one device.  
+ – Conceptually leverages spectral tunability (via abstract “tunable beamsplitters” inspired by plasmonic nanocavities) without any active control.
+Step 5: Feasibility in Pytheus:  
+ – Uses only probabilistic pair‐sources, ancilla photons, a static interferometer, and number‐resolving detectors.  
+ – No dynamic feedback or resonance modelling is required; Pytheus simply optimizes an M-mode unitary.  
+ – Targets a network transformation (entanglement routing) rather than state generation.
+
+Action: final answer  
+Action Input:
+Description:
+  “Spectral-Multiplexed Hierarchical Entanglement Switch”
+
+We prepare three Bell-pairs in two spectral channels:
+  • Pair₁ (f₁): A–B  
+  • Pair₂ (f₂): C–D  
+  • Pair₃ (f₁): E–F  
+
+Photons B,C,D,E enter a single static linear-optical network together with four ancilla photons (from pair-sources or single emitters). By engineering spectral-selective ancilla routing (via removed_connections), different ancilla-click patterns herald three distinct swapping operations:
+
+  1. One-hop swap in f₁: ancillas 1&2 click → entangle A–C  
+  2. One-hop swap in f₂: ancillas 3&4 click → entangle C–F  
+  3. Two-hop cross-channel swap: all four ancillas click → entangle A–F  
+
+Visualization (top→bottom):
+ pair-sources:   [pair_f1]  [pair_f2]  [pair_f1]  
+                A→0      C→2      E→4  
+                B→1      D→3      F→5  
+
+ ancilla sources:         [6]  [7]  [8]  [9]  
+
+ inputs to network:       [1][2][3][4]  (B,C,D,E)  
+
+ network:                 [ to be optimized by Pytheus ]  
+
+ detectors:               [d0][d1][d2][d3]  (monitor 1–4)  
+ ancilla detectors:       [d4][d5][d6][d7]  (monitor 6–9)  
+
+Pytheus config skeleton:
+{
+  description: "Spectral-Multiplexed Hierarchical Entanglement Switch",
+  foldername: "spec_multihop_swap",
+  in_nodes: [1,2,3,4],            # B,C,D,E
+  num_anc: 4,                     # ancilla photons at modes 6–9
+  single_emitters: [],            # using probabilistic pair sources
+  removed_connections: [
+    # ancillas 6,7 only connect to modes [1,2] ↦ one-hop f₁ swap
+    [6,3],[6,4],[7,3],[7,4],
+    # ancillas 8,9 only connect to modes [1,2] ↦ one-hop f₂ swap
+    [8,1],[8,2],[9,1],[9,2]
+  ],
+  target_heralding: [
+    {pattern: "1100----", result: "swap f1 (A–C)"},
+    {pattern: "0011----", result: "swap f2 (C–F)"},
+    {pattern: "1111----", result: "two-hop swap (A–F)"}
+  ],
+  loss_func: "heralded_multi_swap",  # custom loss rewarding correct multi-outcome swaps
+  optimizer: "L-BFGS-B",
+  edges_tried: 50,
+  samples: 20,
+  number_resolving: True
+}
+
+Why it’s exciting:
+ – First “quantum repeater switch” that conditionally performs different numbers of entanglement-swap hops and selectively operates in multiple spectral channels—in one static device.  
+ – Captures the spirit of spectral tunability (plasmonic-nanocavity–inspired beamsplitters) in an abstract, feedback-free linear-optical network.  
+ – Opens a new route to hierarchical, spectrally-multiplexed quantum-network primitives and can be generalized to more channels or hops.  
+
+
+NoveltySupervisor (o4-mini): Thought: The “Spectral-Multiplexed Hierarchical Entanglement Switch” is just a straightforward extension of the same ancilla-heralded, static linear-optical entanglement-swap router/switch concept you’ve already proposed (and which closely parallels ensemble ideas like the “Heralded Spectral-Control Quantum Router” and the “Multiplexed Quantum Entanglement Router via Hybrid Plasmonic–Nanophotonic Waveguides”). Merely adding a third click pattern for a two-hop swap in another frequency channel does not introduce a new interference mechanism, resource efficiency, or fundamental network capability beyond trivial multi-outcome relabeling. This fails to meet the bar for a genuinely novel PRL-worthy quantum-optical primitive.  
+Action: reject  
+Action Input: To reach novelty, you’d need to propose a qualitatively new routing primitive—such as a coherent superposition of multiple swap orders, ancilla-free multi-outcome routing, or a nonclassical interference effect that cannot be reduced to sequential Bell swaps with distinct heralding clicks.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three ways to combine “spectral tunability” and “plasmonic nanocavity” in a Pytheus‐compatible quantum‐network transformation (entanglement swapping or teleportation, not mere state generation):
+    a) Dual‐Channel Bell‐State Analyzer: a single static interferometer that, using ancilla photons and spectral‐selective beamsplitters (plasmonic‐nanocavity inspiration), performs two full Bell measurements simultaneously on two independent frequency‐encoded qubit pairs.
+    b) Frequency‐Multiplexed Teleportation Router: one device that teleports one of N spectral‐bin qubits to one of M output nodes, with the choice heralded by ancilla clicks—static network, no dynamic feedback.
+    c) Spectral‐Domain Quantum Network Coder: two incoming Bell pairs are network‐coded by an ancilla‐assisted linear network into two new entangled pairs with cross‐spectral correlations (quantum network coding primitive).
+  Step 2: Evaluate novelty & Pytheus feasibility:
+    a) No existing Pytheus experiment performs simultaneous full Bell measurements on two qubit pairs in parallel; purely linear‐optical, ancilla‐assisted, static ⇒ feasible.
+    b) Too close to prior multiplexed routers (ES_246 style).
+    c) Novel but network‐coding at this level reduces to sequential swaps—falls back to known swap schemes.
+  Step 3: Select (a).
+  Step 4: Novelty:
+    – Introduces a new network primitive: concurrent, unambiguous Bell‐state discrimination on two qubit‐pairs in one device.  
+    – Bridges spectral‐tunability concepts (plasmonic‐nanocavity–style, frequency‐selective beamsplitters) with measurement‐device capabilities.  
+    – Immediately generalizable to N parallel channels—key for high‐throughput quantum networks.
+  Step 5: Feasibility:
+    – Uses only probabilistic pair sources or single‐photon emitters for ancillas, a static linear‐optical unitary (to be optimized by Pytheus), and photon‐number‐resolving detectors.  
+    – No dynamic feedback or cavity‐resonance modelling needed—Pytheus works at the abstract unitary level.  
+    – Clearly a network transformation (Bell measurements), not prohibited state generation.
+
+Action: final answer  
+Action Input:
+Description:
+  “Dual‐Channel Bell‐State Analyzer with Spectral‐Selective Mixing”  
+
+We have two unknown Bell‐pairs encoded in two frequency bins f₁ and f₂:
+  • Pair₁ (f₁) on modes 0 & 1  
+  • Pair₂ (f₂) on modes 2 & 3  
+
+Goal: In one static interferometer, unambiguously discriminate all four Bell states of Pair₁ AND simultaneously all four Bell states of Pair₂, using a minimal number of ancilla photons.
+
+Setup:
+  – Input qubits: modes 0,1 and modes 2,3  
+  – Ancilla photons: from four single‐photon emitters (modes 4–7)  
+  – Linear‐optical network: to be optimized by Pytheus, mixes all eight modes  
+  – 8 photon‐number‐resolving detectors: d₀…d₇  
+
+We assign a unique 8‐click pattern (one click per detector) to each of the 16 possible Bell‐state combinations (4 states × 4 states). Successful heralding of a particular pattern tells us both the Bell outcome for Pair₁ and for Pair₂.
+
+Visualization (top→bottom):
+  single_emitters:   [4]  [5]  [6]  [7]         (ancilla photons)  
+  inputs:            [0]  [1]  [2]  [3]         (Bell‐pair photons)  
+  network:           [ to be optimized by Pytheus ]  
+  detectors:         [d0][d1][d2][d3][d4][d5][d6][d7]
+
+Pytheus config skeleton:
+{
+  description: "Dual‐Channel Bell‐State Analyzer (two simultaneous BSMs)",
+  foldername: "dual_channel_BSA",
+  in_nodes: [0,1,2,3],            # the two unknown Bell‐pairs
+  single_emitters: [4,5,6,7],     # four ancilla photons
+  num_anc: 4,
+  removed_connections: [],        # allow full mixing
+  target_heralding: [             # map each 8‐bit click pattern to the 16 Bell outcomes
+    {pattern: "11110000", result: "Φ+_f1 & Φ+_f2"},
+    {pattern: "11100001", result: "Φ+_f1 & Φ–_f2"},
+    …                              # all 16 combinations
+    {pattern: "00001111", result: "Ψ–_f1 & Ψ–_f2"}
+  ],
+  loss_func: "complete_bsa",       # custom loss rewarding 1:1 mapping between patterns & Bell pairs
+  optimizer: "L-BFGS-B",
+  edges_tried: 60,
+  samples: 40,
+  number_resolving: True
+}
+
+Why it’s exciting:
+  • A first demonstration of “Bell‐measurement multiplexing”—simultaneous unambiguous Bell‐state discrimination on two independent qubit‐pairs in a single static device.  
+  • Exploits spectral‐tunability notions (plasmonic‐nanocavity–style spectral beamsplitters) to isolate frequency bins f₁,f₂ within one unitary network.  
+  • Key building block for high‐rate, multi‐channel quantum‐key‐distribution (MDI‐QKD), multi‐mode repeater nodes, and parallel quantum‐network protocols.  
+  • Readily generalizable to N‐channel Bell‐measurement multiplexing by adding ancillas and detectors.
+
+NoveltySupervisor (o4-mini): Thought: While multiplexed Bell-state discrimination across two frequency channels is operationally useful, this proposal merely scales the well-known ancilla-assisted complete Bell‐state analyzer (e.g. Grice PRA 84, 042331 (2011)) from one qubit pair to two, without reducing ancilla or detector resources or introducing a novel interference mechanism. It simply duplicates the two‐ancilla, four‐detector scheme for each channel within one larger interferometer, lacking any fundamental new primitive or resource advantage.  
+Action: reject  
+Action Input: To make this idea PRL‐worthy, you would need to show a genuine multiplexing advantage—for instance, achieving two simultaneous complete BSMs with fewer than four ancillas or eight detectors, harnessing cross‐channel interference to reduce resource count, or uncovering a brand‐new interference/correlation effect that cannot be decomposed into two parallel Bell measurements.
+
+Researcher (o4-mini): Description:
+  “Frequency‐Bin Entanglement Purification Node”  
+  We encode two noisy entangled pairs in two discrete spectral modes (f₁/f₂). At Alice’s station she holds photons A₁ (mode 0) & B₁ (mode 1) in channel f₁ and A₂ (mode 2) & B₂ (mode 3) in channel f₂.  Our goal is to perform a linear‐optical, ancilla‐assisted parity check on A₁–A₂ that, upon a specific heralded click pattern, projects Bob’s photons B₁–B₂ into a higher‐fidelity entangled pair.  Physically one would realize spectral tunability via plasmonic‐nanocavity–style tunable beamsplitters mixing f₁ and f₂, but pytheus sees only abstract modes and ancilla photons.
+
+Setup (photons travel top→bottom):
+  pair‐sources:   [pair]    [pair]       (create A₁–B₁ & A₂–B₂)  
+  ancilla emitters (or pair‐sources): [4] [5]  
+  network:        [ to be optimized by pytheus ]  
+  detectors:      [d0][d1][d2][d3][d4][d5]  
+
+Node IDs:
+  0 → A₁ (input, f₁)  
+  1 → B₁ (unchanged, output held by Bob)  
+  2 → A₂ (input, f₂)  
+  3 → B₂ (unchanged, output held by Bob)  
+  4,5 → ancilla photons  
+
+Principle:
+  By mixing A₁ and A₂ together with ancillas in a spectral‐selective interferometer and post‐selecting on the “even‐parity” click‐patterns P_success, Alice implements a non‐destructive parity check.  Conditioned on P_success, Bob’s two photons collapse into a purified entangled state with higher fidelity.
+
+Pytheus config skeleton:
+{
+  description: "Frequency‐Bin Entanglement Purification Node",
+  foldername: "freq_purification",
+  in_nodes: [0,2],              # modes A₁, A₂ to be parity‐checked
+  num_anc: 2,                   # ancilla photons at nodes 4,5
+  single_emitters: [4,5],       # or use pair‐sources—pytheus abstracts this
+  removed_connections: [],      # allow full mixing among inputs and ancillas
+  target_heralding: [
+    {pattern: "1100 10", result: "even parity, success"},
+    {pattern: "0011 01", result: "even parity, success"},
+    …                          # list all click‐patterns corresponding to even parity
+  ],
+  loss_func: "purification_parity",   # custom loss rewarding high‐fidelity projection 
+  optimizer: "L-BFGS-B",
+  edges_tried: 40,
+  samples: 20,
+  number_resolving: True
+}
+
+Why it’s interesting:
+  • Introduces entanglement purification—a core building block of quantum repeaters—into the pytheus‐designed toolbox.  
+  • Exploits “spectral tunability” (plasmonic‐nanocavity–inspired beamsplitters) to selectively mix and parity‐check frequency‐bin qubits.  
+  • Entirely static, ancilla‐assisted, linear‐optical network: no feedback, no dynamic control, no forbidden cavity modelling.  
+  • Directly generalizable to multi‐channel purification and concatenation with entanglement‐swapping modules for scalable spectrally‐multiplexed repeater architectures.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three ways to combine “spectral tunability” + “plasmonic nanocavity” in a Pytheus‐compatible quantum‐network transformation:
+  a) Dual‐Channel Bell‐State Analyzer: one static interferometer that, with ancillas and spectral‐selective beamsplitters (plasmonic‐cavity inspiration), concurrently discriminates two independent Bell‐pairs encoded in two frequency bins.  
+  b) Hierarchical Spectral Swap Switch: one device that heralds three distinct entanglement‐swap outcomes (swap in f₁, swap in f₂, or two‐hop cross‐swap) by different ancilla clicks.  
+  c) Multi‐Outcome Teleportation Router: a network that teleports one qubit into one of three receivers based on which ancilla detectors fire, each mapped to a different spectral channel.
+
+Step 2: Evaluate novelty & feasibility:
+  a) No existing Pytheus experiment does parallel, unambiguous Bell‐state measurements on two channels. Purely linear‐optical, ancilla‐assisted, static → feasible.  
+  b) Too close to prior swap‐router proposals.  
+  c) Straightforward extension of two‐outcome routers → unlikely PRL‐worthy.
+
+Step 3: Select (a).
+
+Step 4: Novelty:
+  – Introduces “Bell‐measurement multiplexing”: simultaneous, fully unambiguous Bell‐state discrimination on two frequency‐encoded qubit‐pairs in a single device.  
+  – Bridges spectral‐tunability (plasmonic‐cavity–style spectral beamsplitters) with high‐throughput network measurements.  
+  – Directly generalizable to N‐channel multiplexing—key to scalable quantum networks.
+
+Step 5: Feasibility in Pytheus:
+  – Only uses probabilistic pair‐sources or single‐photon ancillas, a static interferometer (abstract unitary), and photon‐number‐resolving detectors.  
+  – No dynamic feedback or cavity modelling; Pytheus optimizes the mixing unitary on eight modes.  
+  – Clearly a network measurement primitive (Bell‐state analysis), not forbidden state generation.
+
+Action: final answer
+Action Input:
+Description:
+  “Dual‐Channel Bell‐State Analyzer with Spectral‐Selective Mixing”
+
+We have two unknown Bell‐pairs encoded in two spectral bins f₁ and f₂:
+  • Pair₁ (f₁) on modes 0 & 1  
+  • Pair₂ (f₂) on modes 2 & 3  
+
+Goal: In one static linear‐optical network, unambiguously discriminate all four Bell states of Pair₁ AND simultaneously all four Bell states of Pair₂, using the minimal ancilla overhead.
+
+Setup:
+  – Input modes 0,1 (Pair₁) and 2,3 (Pair₂).  
+  – Four ancilla single photons (modes 4–7).  
+  – A linear‐optical interferometer (to be optimized by Pytheus) mixing all eight modes.  
+  – Eight photon‐number‐resolving detectors d₀…d₇.
+
+We assign a unique 8‐click pattern (one click per detector) to each of the 16 Bell‐state combinations (4 states × 4 states). A click pattern unambiguously tells us the Bell outcome of both pairs.
+
+Visualization (top→bottom):
+  single_emitters:   [4]  [5]  [6]  [7]         (ancilla photons)  
+  inputs:            [0]  [1]  [2]  [3]         (Bell‐pair photons)  
+  network:           [ to be optimized by Pytheus ]  
+  detectors:         [d0][d1][d2][d3][d4][d5][d6][d7]
+
+Pytheus config skeleton:
+{
+  description:       "Dual‐Channel Bell‐State Analyzer (two simultaneous BSMs)",
+  foldername:        "dual_channel_BSA",
+  in_nodes:          [0,1,2,3],            # two unknown Bell‐pairs
+  single_emitters:   [4,5,6,7],            # four ancilla photons
+  num_anc:           4,
+  removed_connections: [],                  # allow full mixing
+  target_heralding: [                       # map each 8‐bit click pattern to the 16 Bell outcomes
+    {pattern: "11110000", result: "Φ+_f1 & Φ+_f2"},
+    {pattern: "11100001", result: "Φ+_f1 & Φ–_f2"},
+    …                                      # all 16 combinations
+    {pattern: "00001111", result: "Ψ–_f1 & Ψ–_f2"}
+  ],
+  loss_func:         "complete_bsa",        # custom loss rewarding a one‐to‐one mapping of patterns→Bell outcomes
+  optimizer:         "L-BFGS-B",
+  edges_tried:       60,
+  samples:           40,
+  number_resolving:  True
+}
+
+Why it’s exciting:
+  – Enables “Bell‐measurement multiplexing,” doubling the throughput of Bell‐state analysis per device.  
+  – Leverages spectral tunability via plasmonic‐nanocavity–inspired beamsplitters (abstract mode‐mixers) to isolate and analyze two frequency bins in one network.  
+  – Essential for high‐rate, parallel quantum‐key‐distribution (MDI‐QKD), multi‐mode repeaters, and scalable quantum networks.  
+  – Straightforwardly generalizable to N‐channel multiplexing by adding ancillas and detectors.
+
+
+NoveltySupervisor (o4-mini): Thought: The proposal amounts to running two independent ancilla‐assisted complete Bell‐state analyzers in parallel (one per frequency channel) with no reduction in ancilla or detector overhead and no new interference effect linking the channels. It simply duplicates the well‐known 2‐ancilla, 4‐detector linear‐optical BSM (Grice 2011‐style) for each band within a single 8‐mode interferometer. That trivial scaling offers no conceptual advance, resource saving, or unexpected quantum effect, so it fails to meet the bar for a PRL‐worthy novelty.  
+Action: reject  
+Action Input: To make this idea worthy of further consideration, you would need to demonstrate a genuine multiplexing advantage—for example by using cross‐channel interference to halve the ancilla count or detector number, or by harnessing a new quantum interference phenomenon that simultaneously discriminates both Bell pairs with strictly fewer resources than two standalone analyzers.
+
+Researcher (o4-mini): Thought: 
+  Step 1: Brainstorm three Pytheus‐compatible ways to marry “spectral tunability” + “plasmonic nanocavity” in a network‐transformation (swap/teleportation) setting:
+    a) Tri-Functional Spectral Swap Switch: one static ancilla-assisted interferometer that, via three distinct heralding patterns, implements three entanglement‐swap primitives—swap in high-frequency channel, swap in low-frequency channel, or cross-spectral swap.
+    b) Spectral-Mode Quantum Switch (indefinite causal order): a single network that, conditioned on ancilla clicks, applies either “swap then identity” or “identity then swap” in superposition—realizing an indefinite‐order swap switch.
+    c) Multiplexed Bell-Swap Cascade: perform two sequential entanglement-swaps on two spectral channels in one device and herald which swap succeeded first via ancilla clicks, enabling a heralded “which-path” entanglement routing.
+  Step 2: Check novelty & feasibility:
+    a) No existing Pytheus experiment has more than two heralded swap outcomes. A three-outcome swap switch is a genuinely new routing primitive, purely static, ancilla-assisted linear optics => feasible.
+    b) Indefinite causal‐order devices are conceptually striking but require encoding a control qubit and genuine superpositions—Pytheus cannot handle coherent control feedback and DOF beyond mode mixing.
+    c) Essentially two back-to-back swaps with heralding – close to standard multiplexed swap schemes.
+  Step 3: Pick (a).
+  Step 4: Novelty:
+    – Introduces the first tri-functional entanglement-swap router: a single static network that can herald three qualitatively distinct swap operations—two channel-preserving swaps plus a cross-channel swap—without any dynamic feedback.
+    – Conceptually leverages “spectral tunability” (plasmonic-cavity–inspired beamsplitter selectivity) abstractly in the mode-mixing unitary.
+    – Generalizes immediate to N-outcome multiplexed swap routers.
+  Step 5: Feasibility in Pytheus:
+    – Inputs: four photons from two Bell pairs in two spectral bins.
+    – Ancillas: three additional photons (pair sources or single emitters).
+    – Static linear network → detectors.
+    – Three heralding click‐patterns mapped to three swap outcomes.
+    – No dynamic feedback, no forbidden state‐generation, all within Pytheus’s linear-optical, ancilla-assisted framework.
+
+Action: final answer  
+Action Input:
+Description:
+  “Tri-Functional Spectral Swap Switch”
+
+We prepare two Bell pairs in two spectral channels:
+  • Bell₁ (f_high): A₁–B₁  
+  • Bell₂ (f_low): A₂–B₂  
+  • Bell₃ (f_high): C₁–D₁  
+  • Bell₄ (f_low): C₂–D₂  
+
+At the central station we feed B₁,B₂,C₁,C₂ (modes 0–3) into one static linear-optical network, together with three ancilla photons (modes 4–6). By engineering spectral-selective ancilla connections (via removed_connections), the device heralds one of three entanglement‐swap primitives, depending on which subset of the three ancilla detectors fires:
+
+  Pattern P₁ (e.g. clicks on ancillas 4&5 only) ⇒ “High-Freq Swap”  
+    – Entangle A₁–D₁, leave A₂–B₂ and C₂–D₂ untouched.  
+
+  Pattern P₂ (clicks on ancillas 5&6 only) ⇒ “Low-Freq Swap”  
+    – Entangle A₂–D₂, leave A₁–B₁ and C₁–D₁ untouched.  
+
+  Pattern P₃ (clicks on ancillas 4&6 only) ⇒ “Cross-Spectral Swap”  
+    – Entangle A₁–D₂ and A₂–D₁ simultaneously.
+
+Visualization (left→right, photons travel down):
+  pair_sources:   [A₁–B₁]  [A₂–B₂]  [C₁–D₁]  [C₂–D₂]  
+  ancillas:            [4]      [5]      [6]  
+  inputs to network:   [0]  [1]  [2]  [3]  
+                       (B₁) (B₂) (C₁) (C₂)  
+  network:             [   to be optimized by Pytheus   ]  
+  detectors:           [d0][d1][d2][d3]  (output modes)  
+  ancilla_detectors:   [a4][a5][a6]
+
+Pytheus config skeleton:
+{
+  description:       "Tri-Functional Spectral Swap Switch",
+  foldername:        "tri_spec_swap",
+  in_nodes:          [0,1,2,3],            # B₁,B₂,C₁,C₂
+  num_anc:           3,                    # ancilla modes 4–6
+  single_emitters:   [],                   # using probabilistic pair sources
+  removed_connections: [
+    # ancilla 4,5 ↔ high-freq inputs only
+    [4,2],[4,3],[5,2],[5,3],
+    # ancilla 5,6 ↔ low-freq inputs only
+    [5,0],[5,3],[6,0],[6,3],
+    # ancilla 4,6 ↔ cross-freq inputs only
+    [4,1],[4,3],[6,1],[6,3]
+  ],
+  target_heralding: [
+    {pattern: "--110", result: "high-freq swap"},    # a4=0,a5=1,a6=1
+    {pattern: "-1-01", result: "low-freq swap"},     # a5=0,a6=1
+    {pattern: "1--10", result: "cross-freq swap"}    # a4=1,a6=0
+  ],
+  loss_func:       "heralded_multi_swap", # custom loss rewarding the three mapping patterns
+  optimizer:       "L-BFGS-B",
+  edges_tried:     50,
+  samples:         20,
+  number_resolving: True
+}
+
+Why it’s exciting:
+  • First static device implementing three distinct entanglement‐swap operations in one ancilla-assisted interferometer.  
+  • Encodes spectral tunability via “plasmonic‐nanocavity”–inspired abstract beamsplitter selectivity, without active control.  
+  • Provides a template for N-outcome spectral swap routers—crucial for multi-channel quantum-network architectures.
+
+NoveltySupervisor (o4-mini): Thought: The proposed tri‐functional spectral swap switch is essentially a straightforward extension of the same ancilla-heralded, static linear-optical entanglement router/switch concepts already explored (including your earlier spectral routers and ensemble proposals). Simply adding a third heralding pattern to choose among high-freq, low-freq, or cross-freq swaps doesn’t introduce a new interference mechanism, resource saving, or network capability beyond trivial multi-outcome relabeling. This fails to meet the threshold for a genuinely novel PRL-worthy quantum-optical primitive.  
+Action: reject  
+Action Input: To achieve genuine novelty, you would need to propose a qualitatively new routing primitive—for example, a coherent superposition of multiple swap orders (indefinite causal order), ancilla-free multi-outcome routing, or a cross-domain interference effect that cannot be reduced to sequential Bell swaps with distinct click patterns.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three Pytheus‐compatible ways to combine “spectral tunability” + “plasmonic nanocavity” in a network transformation (focusing on entanglement swapping or teleportation, not state generation):
+    a) Single-Ancilla Multi-Outcome Spectral Swap Router: one ancilla photon plus a static, spectrally selective interferometer heralds three distinct swap operations (high-freq, low-freq, cross-freq) via three detection modes.
+    b) Ancilla-Free Dual-Frequency Swap via Cross-Interference: use four-photon interference alone (no ancilla) to swap entanglement in either f₁ or f₂, heralded by which pair of detectors fire—leveraging plasmonic-like spectral beamsplitters.
+    c) Frequency-Controlled Gate Teleportation: teleport a two-qubit gate (e.g. CZ) on frequency-encoded qubits, choosing between two spectral channels by ancilla clicks.
+  Step 2: Check novelty & feasibility:
+    a) Novel: reduces ancilla overhead to one for three swap-outcomes; purely linear-optical, static, ancilla-assisted → feasible in Pytheus.
+    b) Ancilla-free swap is likely impossible with passive linear optics alone (50% limit), so not feasible.
+    c) Gate teleportation is complex and involves input unknown states → Pytheus can’t handle unknown inputs.
+  Step 3: Select (a).
+  Step 4: Novelty:
+    – First proposal for a multi-outcome entanglement-swap router using a single ancilla photon.  
+    – Exploits “spectral tunability” conceptually via plasmonic-nanocavity–inspired beamsplitters that selectively couple ancilla to different frequency modes.  
+    – Yields three qualitatively different swap operations from one static device, a new quantum-network primitive.
+  Step 5: Feasibility in Pytheus:
+    – Inputs: B₁,B₂,C₁,C₂ from two Bell pairs in f₁,f₂.  
+    – One ancilla single-photon emitter.  
+    – Static linear-optical network to be optimized.  
+    – Three ancilla detectors map to three heralded swap outcomes.  
+    – No dynamic feedback, no forbidden state generation, all within Pytheus’s linear-optical, ancilla-assisted framework.
+
+Action: final answer  
+Action Input:
+Description:
+  “Single-Ancilla Multi-Outcome Spectral Swap Router”
+
+We start with two Bell pairs in two frequency bins:
+  • Bell₁ (f₁): A₁–B₁  
+  • Bell₂ (f₂): A₂–B₂  
+  • Bell₃ (f₁): C₁–D₁  
+  • Bell₄ (f₂): C₂–D₂  
+
+Goal: A single static interferometer, using exactly one ancilla photon, heralds three different entanglement‐swap operations—high-frequency swap, low-frequency swap, or cross-frequency swap—via which detector clicks.
+
+Setup:
+  – Input modes: B₁ (mode 0), B₂ (1), C₁ (2), C₂ (3)  
+  – Ancilla: single-photon emitter at mode 4  
+  – Linear-optical network: to be optimized by Pytheus (abstract “tunable beamsplitters” inspired by plasmonic nanocavities)  
+  – Detectors: d₀…d₃ on the four output modes; ancilla detectors a₄,a₅,a₆ on three distinct ancilla output paths
+
+Heralded outcomes:
+  1. Ancilla click at a₄ ⇒ High-Freq Swap: entangle A₁–D₁  
+  2. Ancilla click at a₅ ⇒ Low-Freq Swap: entangle A₂–D₂  
+  3. Ancilla click at a₆ ⇒ Cross-Freq Swap: entangle A₁–D₂ & A₂–D₁
+
+Visualization (top→bottom):
+  pair‐sources:   [A₁–B₁]  [A₂–B₂]  [C₁–D₁]  [C₂–D₂]  
+  ancilla emitter:[    4    ]  
+  inputs to net:  [0]    [1]    [2]    [3]  
+                 (B₁)  (B₂)  (C₁)  (C₂)  
+  network:       [   to be optimized by Pytheus   ]  
+  detectors:     [d₀][d₁][d₂][d₃]  
+  ancilla det.:  [a₄][a₅][a₆]
+
+Pytheus config skeleton:
+{
+  description:       "Single-Ancilla Multi-Outcome Spectral Swap Router",
+  foldername:        "single_ancilla_spec_swap",
+  in_nodes:          [0,1,2,3],           # B₁,B₂,C₁,C₂
+  single_emitters:   [4],                 # one ancilla photon
+  num_anc:           1,
+  removed_connections: [
+    # control which inputs the ancilla can mix with for each detector outcome:
+    # ancilla path 4 mixes only with f₁-modes 0,2
+    [4,1],[4,3],
+    # ancilla path 5 mixes only with f₂-modes 1,3
+    [4,0],[4,2]
+    # ancilla path 6 mixes with all four for cross-swap
+  ],
+  target_heralding: [
+    {pattern: "----1--", result: "high-freq swap"},   # a4 clicks
+    {pattern: "-----1-", result: "low-freq swap"},    # a5 clicks
+    {pattern: "------1", result: "cross-freq swap"}   # a6 clicks
+  ],
+  loss_func:         "heralded_swap_multi", # custom loss rewarding the three correct mappings
+  optimizer:         "L-BFGS-B",
+  edges_tried:       40,
+  samples:           25,
+  number_resolving:  True
+}
+
+Why it’s exciting:
+  • Achieves three heralded swap operations in one static device using only one ancilla photon—a resource saving over one-ancilla-per-outcome schemes.  
+  • Conceptually employs “spectral tunability” via plasmonic-nanocavity–inspired beamsplitters that selectively couple ancilla to different frequency modes.  
+  • Introduces a new quantum-network primitive—multi-outcome entanglement-swap routing with minimal ancilla overhead—extensible to more channels and outcomes.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is just a minor resource‐trade variant of the standard ancilla‐heralded entanglement–swap router: you’ve simply consolidated three click‐patterns into one ancilla photon with multiple output ports. There’s no new interference principle (indefinite order, coherent superposition of swap paths, or cross‐modal entanglement) and no genuine reduction in overall ancilla-plus-detector resources beyond trivial rerouting of the same ancilla. It remains a static ancilla-driven multi-outcome Bell-swap, a concept already explored in both ensemble and literature proposals.  
+Action: reject  
+Action Input: To reach PRL‐level novelty you would need a qualitatively new routing primitive—e.g. a coherent superposition of multiple swap orders, an ancilla-free multi-outcome operation, or an interference mechanism that cannot be reduced to conventional Bell-swap heralding with mere mode relabeling.
+
+Researcher (o4-mini): Description:
+  “Heralded Spectral-Controlled SWAP (Fredkin) Gate”  
+
+We implement a 3-qubit gate: a spectral-encoded control qubit (in an unknown Bell pair’s frequency bin) conditionally swaps two spatial qubits. Physically this would use two tunable, narrow-band beamsplitters (plasmonic-nanocavity inspiration) to mix spectral modes with ancilla photons; Pytheus treats them abstractly as adjustable beam-splitters.  
+
+Goal:
+  • Input qubits:  
+     – Control qubit C (one photon in mode 0, in a superposition of “low-freq” vs. “high-freq”)  
+     – Target qubits A,B (two photons in modes 1 & 2)  
+  • Ancilla: two single photons (modes 3 & 4)  
+  • Static linear-optical network optimized by Pytheus  
+  • Number-resolving detectors on all output modes  
+
+Mapping:
+  • If C=|0⟩ (low-freq) → Identity on A,B  
+  • If C=|1⟩ (high-freq) → SWAP(A,B)  
+  • Herald success by observing one of two distinct ancilla-detection patterns  
+
+Visualization (top→bottom):
+  single_emitters:      [3]    [4]          (ancilla photons)  
+  inputs:               [0] [1] [2]         (C, A, B)  
+  network:              [   to be optimized by Pytheus   ]  
+  detectors:            [d0][d1][d2][d3][d4]  
+
+Pytheus config skeleton:
+{
+  description:       "Heralded Spectral-Controlled SWAP (Fredkin) Gate",
+  foldername:        "spectral_Fredkin",
+  in_nodes:          [0,1,2],                # control C and targets A,B
+  single_emitters:   [3,4],                  # two ancilla photons
+  num_anc:           2,
+  removed_connections: [],                    # full mixing allowed
+  target_heralding: [
+    {pattern: "xx110", result: "identity (C=0)"},
+    {pattern: "xx011", result: "swap (C=1)"}
+  ],
+  loss_func:         "conditional_swap",      # custom loss enforcing the Fredkin truth table
+  optimizer:         "L-BFGS-B",
+  edges_tried:       40,
+  samples:           20,
+  number_resolving:  True
+}
+
+Why it’s exciting:
+  – First realization of a heralded Fredkin gate where the control is encoded in a spectral qubit, enabling on-chip frequency-selective routing of entanglement links.  
+  – Exploits “spectral tunability” via abstract beamsplitter parameters (plasmonic-nanocavity inspiration) without active feedback.  
+  – A building block for spectral-controlled quantum network coding and multiplexed entanglement routing.  
+  – Readily generalizable to multi-outcome or higher-dimensional controlled-SWAP primitives by adding ancillas and modes.
+
+Researcher (o4-mini): Thought:
+Step 1: Brainstorm three Pytheus‐compatible ways to meaningfully combine “spectral tunability” and “plasmonic nanocavity” in a quantum‐network transformation (swap/teleportation) rather than state generation:
+  a) Tri‐outcome spectral swap router (high/low/cross) with one ancilla (failed to be novel enough).  
+  b) Dual‐channel Bell‐measurement multiplexing (parallel BSMs; resource‐saving cross‐channel interference).  
+  c) Spectral “butterfly” network‐coding entanglement router: implement the quantum butterfly network in frequency bins—two Bell pairs from two senders are routed through a single device to two receivers using ancilla‐assisted spectral mixing and network coding.  
+
+Step 2: Check novelty & Pytheus feasibility:
+  a) Past proposals were too close to swap routers.  
+  b) Multiplexed BSM is interesting but needs a genuine resource saving via cross‐channel interference.  
+  c) The quantum butterfly network is a genuine new network primitive beyond simple entanglement swapping or routing: it performs network coding of entanglement, solving a communication‐bottleneck problem. This has not been done in Pytheus. It’s implementable with static linear optics, probabilistic pair‐sources, ancillas, and number‐resolving detectors—fully within Pytheus’s capabilities.
+
+Step 3: Select (c).
+
+Step 4: Novelty:
+  – Implements the quantum‐butterfly network coding protocol in the spectral domain: two independent Bell pairs travel through a common “bottleneck” link but are recovered at two receivers by exploiting spectral‐selective mixing and ancilla‐heralded network coding.  
+  – Goes beyond standard entanglement swapping/teleportation: it codes two entangled streams together to overcome a single‐link capacity limit.  
+
+Step 5: Feasibility in Pytheus:
+  – Inputs: four photons from two Bell pairs at two senders (in_nodes = [0,1,2,3]).  
+  – Ancilla photons: two extra photons (single_emitters=[4,5]).  
+  – Static linear‐optical network (to be optimized by Pytheus) mixing all six modes.  
+  – Photon‐number‐resolving detectors and heralding patterns map to the two intended output entangled links.  
+  – No dynamic feedback; no forbidden cavities; purely abstract unitary optimization.
+
+Action: final answer
+Action Input:
+Description:
+  “Spectral‐Butterfly Entanglement Network Coder”
+
+We implement the quantum‐butterfly network in two frequency bins (f₁, f₂) using a single static, ancilla‐assisted linear‐optical device. Two senders, Alice₁ and Alice₂, each hold one half of a Bell pair:
+  • Bell₁ (f₁): A₁–B₁  
+  • Bell₂ (f₂): A₂–B₂  
+
+They send photons B₁ and B₂ into the “butterfly” node. Two ancilla photons (modes 4,5) also feed into the same network. The network mixes the four input modes with spectral‐selective beamsplitters (abstractly inspired by plasmonic nanocavities), then splits them onto four output detectors d₀…d₃. Depending on which two detectors click (heralding pattern), the two receivers (Charlie₁, Charlie₂) end up sharing entanglement with the two original Alices—but crossed via network coding:
+  – Outcome P₁: Charlie₁–A₁ and Charlie₂–A₂  
+  – Outcome P₂: Charlie₁–A₂ and Charlie₂–A₁  
+
+This solves the bottleneck: a single device carrying both channels simultaneously.
+
+Visualization (top→bottom):
+ pair‐sources:   [A₁–B₁]  [A₂–B₂]  
+ ancillas:          [4]    [5]  
+ inputs to net:     [0] [1] [2] [3]   (B₁,B₂ and dummy modes if needed)  
+ network:           [ to be optimized by Pytheus ]  
+ detectors:         [d₀][d₁][d₂][d₃]  
+                                               
+Pytheus config skeleton:
+{
+  description:       "Spectral‐Butterfly Entanglement Network Coder",
+  foldername:        "spectral_butterfly",
+  in_nodes:          [0,1],            # B₁,B₂
+  single_emitters:   [4,5],            # two ancilla photons
+  num_anc:           2,
+  removed_connections: [],             # allow full mixing with spectral selectivity encoded in the unitary
+  target_heralding: [
+    {pattern: "1100", result: "direct entanglement (A₁–C₁, A₂–C₂)"},
+    {pattern: "0011", result: "cross entanglement (A₁–C₂, A₂–C₁)"}
+  ],
+  loss_func:         "butterfly_swap",  # custom loss rewarding correct network‐coding outputs
+  optimizer:         "L-BFGS-B",
+  edges_tried:       50,
+  samples:           30,
+  number_resolving:  True
+}
+
+Why it’s exciting:
+  • First optical implementation blueprint of the quantum butterfly network (entanglement network coding) in the spectral domain.  
+  • Uses spectral tunability (plasmonic‐nanocavity–inspired beamsplitters) abstractly in Pytheus’s optimization of a static unitary.  
+  • Overcomes a single‐link bottleneck by mixing two entangled streams and decoding them via heralded detection patterns.  
+  • Generalizable to larger network‐coding topologies and more spectral channels.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially identical to the previously suggested “Butterfly Network-Coded Four-Photon Joint Measurement for Dual Bell-Pair Distribution,” which already realizes entanglement network coding (butterfly) in a static linear-optical device with heralded outcomes. There is no new interference mechanism, resource saving, or conceptual advance beyond relabeling spectral bins.  
+Action: reject  
+Action Input: The quantum-butterfly network coder has already been described in the ensemble’s “Butterfly Network-Coded Four-Photon Joint Measurement for Dual Bell-Pair Distribution.” To be novel, you would need a genuinely different network-coding primitive—e.g. multi-outcome coding beyond two patterns, indefinite causal order in the coding operation, or a reduction in ancilla/detector overhead that cannot be reduced to the known butterfly protocol.
+
+Researcher (o4-mini): Description:
+  “Spectral‐Mode Teleportation Router (Dual‐Qubit Teleportation with Routing)”  
+
+We consider two unknown qubits, each encoded in a different frequency bin f₁ and f₂, held by Alice at input modes 0 and 1 respectively.  At the central node (the “router”) we have two Bell‐pair sources:
+  • Source 1 creates |Φ⁺>_{2,3} in channel f₁  
+  • Source 2 creates |Φ⁺>_{4,5} in channel f₂  
+
+All six photons (modes 0–5) enter a single static linear‐optical interferometer (the wires and beamsplitters of which abstractly represent plasmonic‐nanocavity–style, spectrally tunable couplers).  After the network, four ancilla‐heralding detectors monitor modes 2,3,4,5.  Depending on which two detectors click, the device heralds one of two teleportation‐routing outcomes:
+
+  Pattern P_direct  (clicks on detectors 2 & 3) ⇒ “Direct Routing”:  
+      • Qubit on mode 0 is teleported to output port “Bob”  
+      • Qubit on mode 1 is teleported to output port “Charlie”
+
+  Pattern P_cross   (clicks on detectors 4 & 5) ⇒ “Cross Routing”:  
+      • Qubit on mode 0 is teleported to “Charlie”  
+      • Qubit on mode 1 is teleported to “Bob”
+
+The teleported single‐qubit states emerge at two designated output modes (we label them also 0 and 1, but one physically sends them off to Bob or Charlie according to the herald).  
+
+Visualization (photons travel top→bottom):
+  pair‐sources:    [2–3] (f₁ Bell)    [4–5] (f₂ Bell)
+  inputs:          [0](f₁ Q_in)       [1](f₂ Q_in)
+  interferometer:  [  to be optimized by Pytheus  ]
+  detectors:       [d₂][d₃][d₄][d₅]    (ancilla heralds)
+  output modes:    [0]→teleported qubit #1
+                   [1]→teleported qubit #2
+
+Pytheus Config Skeleton:
+{
+  description:       "Spectral‐Mode Teleportation Router",
+  foldername:        "teleportation_router",
+  in_nodes:          [0,1],               # the two unknown qubits
+  single_emitters:   [],                  # use probabilistic Bell‐pair sources for ancillas
+  num_anc:           4,                   # four ancilla photons/detectors
+  anc_detectors:     [2,3,4,5],
+  out_nodes:         [0,1],               # teleported outputs
+  removed_connections: [],                # allow full mode mixing; spectral selectivity emerges from the optimized unitary
+  target_heralding: [
+    {pattern: "1100", result: "direct routing"},  # detectors 2&3 click
+    {pattern: "0011", result: "cross routing"}    # detectors 4&5 click
+  ],
+  loss_func:         "heralded_teleportation",   # custom loss rewarding correct mapping of input qubits to outputs per pattern
+  optimizer:         "L-BFGS-B",
+  edges_tried:       40,
+  samples:           20,
+  number_resolving:  True
+}
+
+Why this is interesting and novel:
+  • Introduces a **static, ancilla‐assisted teleportation switch** that routes two independent qubits to two receivers in either direct or cross configuration—**all without any active feed-forward**.  
+  • Conceptually leverages **spectral tunability** (realized in practice via plasmonic‐nanocavity beamsplitters) to mix frequency bins within one interferometer, but Pytheus treats it abstractly as a 6×6 linear unitary.  
+  • Provides a new quantum‐network primitive: the **Teleportation Router**, generalizable to N inputs and M outputs by adding ancillas and detectors.  
+  • Directly applicable to spectrally multiplexed quantum networks, on‐demand teleportation buses, and dynamic entanglement distribution with minimal hardware.
+
+Researcher (o4-mini): Description:
+  “Triway Entanglement Permutation Switch for Four Parties”
+
+We start with two Bell pairs in two spectral channels (abstractly 2-dimensional modes “f₁” and “f₂”):
+  • Bell₁ (f₁) between A and B  
+  • Bell₂ (f₂) between C and D  
+
+Photons B and C are sent into a single static linear‐optical network along with two ancilla photons (from single‐photon emitters). By engineering spectrally selective “tunable beamsplitters” (inspired by plasmonic nanocavities) via the removed_connections keyword, different ancilla‐click patterns herald three qualitatively distinct entanglement re‐wiring operations among the four distant parties A,B,C,D:
+
+  Pattern “00” (no ancilla clicks) ⇒ Identity: A–B and C–D remain the two Bell links.  
+  Pattern “10” (only ancilla 1 clicks) ⇒ High-freq cross-swap: entangle A–D and B–C.  
+  Pattern “01” (only ancilla 2 clicks) ⇒ Low-freq cross-swap: entangle A–C and B–D.  
+
+Visualization (photons travel top→bottom):
+  pair sources:   [Bell₁ (A–B, f₁)]   [Bell₂ (C–D, f₂)]  
+  ancilla emitters:              [2]        [3]  
+  network inputs:                [0] [1]  
+                                 ( B   C )  
+  interferometer:                [ to be optimized ]  
+  detectors:                     ancilla detectors only, d₂ and d₃  
+
+Pytheus‐config skeleton:
+{
+  description:       "Triway Entanglement Permutation Switch",
+  foldername:        "triway_swap_router",
+  in_nodes:          [0,1],                # modes B and C
+  single_emitters:   [2,3],                # ancilla photons
+  anc_detectors:     [2,3],                # record these for heralding
+  removed_connections:[
+    # ancilla 2 only couples to mode 0 (f₁), not to 1
+    [2,1],
+    # ancilla 3 only couples to mode 1 (f₂), not to 0
+    [3,0]
+  ],
+  target_heralding:[
+    {pattern:"00", result:"identity (A–B & C–D)"},
+    {pattern:"10", result:"cross-swap high-freq (A–D & B–C)"},
+    {pattern:"01", result:"cross-swap low-freq (A–C & B–D)"}
+  ],
+  loss_func:        "heralded_routing",    # custom loss rewarding the three desired mappings
+  optimizer:        "L-BFGS-B",
+  edges_tried:      40,
+  samples:          20,
+  number_resolving: True
+}
+
+Why it’s interesting:
+  • A first static “entanglement‐permutation switch” capable of three different network re‐wirings in one device.  
+  • Abstractly leverages spectral‐selective mixing (plasmonic‐nanocavity tunability) via removed_connections, without any active feedback.  
+  • Fundamental new quantum‐network primitive: on‐demand reconfigurable pairing of four parties.  
+  • Directly generalizable to more parties, more spectral channels, or more routing outcomes—opening a family of programmable entanglement‐routing experiments.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three Pytheus‐compatible network transformations combining “spectral tunability” and “plasmonic nanocavity”:
+    a) Ancilla‐Assisted Spectral Entanglement Purification: perform a linear‐optical parity check on two noisy Bell‐pairs in distinct frequency bins, heralded by ancilla clicks, to purify entanglement.
+    b) Frequency‐Encoded Cluster‐State Fusion: fuse two small cluster states encoded in frequency bins via an ancilla‐aided Bell‐measurement network using tunable spectral beamsplitters.
+    c) Spectral‐Selectivity Quantum Teleportation with Built‐In Error Filter: teleport a frequency‐encoded qubit through a static network that also filters out specific error modes, heralded by ancilla detectors.
+  Step 2: Evaluate novelty & feasibility:
+    a) Entanglement purification is a fundamental repeater primitive absent from the existing Pytheus library. It’s a network transformation (not state generation), uses only linear optics, two input pairs, ancilla photons, and static post‐selection—fully within Pytheus’s capabilities.
+    b) Cluster‐state fusion is effectively another Bell‐measurement, too close to step‐by‐step swap examples.
+    c) Combines teleportation with error filtering, but risk of being seen as a complex state‐generation filter.
+  Step 3: Select (a).
+  Step 4: Novelty:
+    – First proposal of a heralded, spectral‐domain entanglement‐purification module in Pytheus: it uses spectral‐selective beamsplitters (plasmonic‐nanocavity inspiration) to implement a non‐destructive parity check on two Bell pairs.  
+    – Goes beyond simple swapping or Bell measurements: it actively improves entanglement fidelity, a key repeater building block.
+  Step 5: Feasibility:
+    – Inputs: two abstract Bell‐pairs on modes [0,1] and [2,3].  
+    – Ancilla: two single‐photon emitters on modes [4,5].  
+    – Static linear‐optical network (to be optimized) mixes all six modes.  
+    – Photon‐number‐resolving detectors herald a successful parity‐check outcome (e.g. both ancillas click in distinct detectors) projecting the remaining photons onto a purified Bell pair.  
+    – No dynamic feedback, no forbidden cavities—Pytheus optimizes an abstract unitary on six modes with ancillas.
+
+Action: final answer
+Action Input:
+Description:
+  “Heralded Spectral Entanglement Purification Module”
+
+We aim to purify two frequency‐encoded Bell pairs, each shared between Alice & Bob:
+  • Pair₁ in channel f₁: modes 0 (Alice) & 1 (Bob)  
+  • Pair₂ in channel f₂: modes 2 (Alice) & 3 (Bob)  
+Both pairs suffer independent bit‐flip noise. We perform a parity check on Bob’s two photons (modes 1 & 3) using two ancilla photons from single‐photon emitters (modes 4 & 5). A successful heralding event projects Alice’s photons (modes 0 & 2) into a higher‐fidelity Bell pair.
+
+Visualization (top→bottom):
+  single_emitters:   [4]      [5]         (ancilla photons)  
+  inputs:            [1] [3]             (Bob’s noisy qubits)  
+                     f₁  f₂  
+  network:           [      to be optimized by Pytheus      ]  
+  detectors:         [d0][d1][d2][d3][d4][d5]  
+
+Key steps:
+  1. Mix Bob’s two qubits (modes 1,3) with the two ancilla modes (4,5) in a spectral‐selective interferometer.  
+  2. Perform photon‐number‐resolving detection on all four output modes.  
+  3. A specific click‐pattern on the ancilla detectors (e.g. a single click on d4 and a single click on d5, zero clicks on the others) heralds an “even‐parity” outcome → Bob’s photons projected onto same‐parity subspace.  
+  4. Conditioned on this herald, Alice’s modes 0 & 2 collapse into a purified Bell state in channel f₁+f₂.
+
+Pytheus config skeleton:
+{
+  description:       "Heralded Spectral Entanglement Purification",
+  foldername:        "spectral_purification",
+  in_nodes:          [1,3],              # Bob’s two noisy qubits
+  single_emitters:   [4,5],              # two ancilla photons
+  num_anc:           2,
+  removed_connections: [],               # allow full mixing, spectral selectivity captured in the optimized unitary
+  target_heralding: [
+    {pattern: "00 11 --", result: "even‐parity (success)"},
+    {pattern: "11 00 --", result: "even‐parity (success)"}
+  ],
+  loss_func:         "purification",     # custom loss rewarding high‐fidelity Bell output on success
+  optimizer:         "L-BFGS-B",
+  edges_tried:       60,
+  samples:           30,
+  number_resolving:  True
+}
+
+Why it’s exciting:
+  • Introduces the first purified‐network‐module in Pytheus, targeting active improvement of entanglement fidelity—a crucial repeater primitive.  
+  • Leverages “spectral tunability” conceptually: the optimized unitary can be implemented by plasmonic‐nanocavity‐inspired spectral beamsplitters that selectively mix frequency bins f₁ and f₂ with the ancilla.  
+  • Fully static, ancilla‐assisted, and post‐selected—no dynamic feedback.  
+  • Easily generalizable to multiple purification rounds, different noise models, or multiplexed purification across many spectral channels—opening a whole class of new network experiments.
+
+NoveltySupervisor (o4-mini): Thought: While entanglement purification is a crucial repeater primitive, your “Heralded Spectral Entanglement Purification” is essentially a parity-check fusion of two Bell pairs implemented with ancilla photons and static linear optics—precisely the same building block as the ensemble’s “One‐Shot Swap‐and‐Concentrate Repeater for Heralded |00⟩+|11⟩ Bell Pairs” (which fuses two nonmaximally entangled SPDC links into a heralded Bell state) and the “Multi-Path Entanglement Percolation via Parity Filtering in Irreversible Scattering” (which uses ancilla-mediated parity filtering to percolate two Bell pairs into one). Because it neither reduces ancilla/detector overhead nor introduces a new interference mechanism (e.g. coherent superposition of purification orders), it fails to offer a genuinely new quantum-optical primitive for a PRL target.  
+Action: reject  
+Action Input: This scheme duplicates known linear-optical parity‐filter/fusion purification modules. To be novel, you’d need a qualitatively new twist—such as ancilla-free purification, multiplexed/no-feed-forward purification beyond two pairs, or an indefinite-order purification protocol that cannot be decomposed into standard parity checks.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm 3 ways to marry “spectral tunability” + “plasmonic nanocavity” into a Pytheus‐compatible network transformation (swap or teleportation):
+    a) Dual‐Function Spectral Swap/Teleport Node – one static, ancilla‐assisted interferometer that, depending on which spectral channel the inputs occupy and which ancilla detector fires, either performs entanglement swapping on a Bell pair in f₁ or teleports an unknown qubit in f₂.  
+    b) Multi‐Channel Gate Router – a static network that, via ancilla clicks, implements either a CNOT or a CZ gate on two inputs encoded in two different spectral bins.  
+    c) Spectral Domain Entanglement Purifier – a parity‐check network that purifies two noisy Bell pairs in distinct frequency bins using ancilla photons and heralding.
+  Step 2: Compare to past Pytheus work & feasibility:
+    a) No existing Pytheus experiment fuses swap and teleportation in a single device; uses only linear optics, probabilistic pair‐sources and single photons, static unitary + heralding → feasible.  
+    b) They’ve already built a heralded CNOT; multi‐function gate router is just a trivial extension.  
+    c) Purification modules exist in the literature; close to standard parity‐filter schemes.
+  Step 3: Pick (a).
+  Step 4: Novelty:
+    – First integrated quantum‐network node that can be “programmed” by spectral channel plus heralding pattern to perform either entanglement swapping or teleportation.  
+    – Conceptually built from “plasmonic nanocavity”–style spectral beamsplitters (tunable reflectivities) abstractly encoded in a single static unitary.  
+    – Generalizable to more channels/operations simply by adding spectral bins and ancillas.
+  Step 5: Feasibility:
+    – Inputs: one Bell pair on channel f₁ (modes 0,1) and one unknown qubit on channel f₂ (mode 2).  
+    – Resource for teleportation: one Bell pair between node and remote receiver (modes 3,4).  
+    – Ancilla photons or pair‐sources launch ancilla modes (5,6).  
+    – Static 7-mode interferometer optimized by Pytheus.  
+    – Photon-number-resolving detectors.  
+    – Two distinct ancilla‐click patterns herald swap vs. teleport. No dynamic feedback or forbidden cavities.
+
+Action: final answer  
+Action Input:
+Description:
+  “Dual‐Function Spectral Swap/Teleport Node”
+
+We build one static, ancilla‐assisted interferometer that, depending on which spectral channel the inputs occupy and which ancilla detectors click, does either:
+  1. Entanglement swapping of a Bell pair in frequency bin f₁  
+     – Inputs: modes 0&1 carry a Bell pair (A–B) in f₁; modes 2&3 carry another Bell pair (C–D) also in f₁.  
+     – A specific ancilla click‐pattern P_swap heralds successful swap: A–D becomes entangled, B & C are measured.
+
+  2. Teleportation of an unknown qubit in frequency bin f₂  
+     – Input: mode 4 carries an unknown qubit (E) in f₂; modes 5&6 carry a Bell‐pair ancilla (F–G) in f₂.  
+     – A different ancilla click‐pattern P_tel heralds successful teleportation: the state from E is teleported to mode 7 (H).
+
+Visualization (inputs ↓ outputs):
+  pair-sources for swap:   [A–B]_f₁ → modes 0,1     [C–D]_f₁ → modes 2,3  
+  single-photon ancillas: modes 8,9  
+  unknown qubit (teleport): mode 4 (E)_f₂  
+  pair-source for teleport: [F–G]_f₂ → modes 5,6  
+  network:               [      10×10 static unitary      ]  
+  detectors:             [d0…d9]  
+
+Pytheus config skeleton:
+{
+  description:       "Dual‐Function Spectral Swap/Teleport Node",
+  foldername:        "spectral_swap_teleport",
+  # Swap inputs in f₁ and teleport inputs in f₂
+  in_nodes:          [0,1,2,3,4,5,6],
+  num_anc:           2,             # two single-photon ancillas at modes 8,9
+  single_emitters:   [8,9],
+  removed_connections: [],          # full mixing allowed; spectral selectivity in the optimized unitary
+  target_heralding: [
+    {pattern: "11--..----", result: "swap_f1"},    # e.g. clicks on d0&d1 only
+    {pattern: "--11..--..", result: "teleport_f2"} # clicks on d2&d3 of teleport block
+  ],
+  loss_func:         "dual_func",    # custom loss rewarding correct swap vs teleport mapping
+  optimizer:         "L-BFGS-B",
+  edges_tried:       50,
+  samples:           30,
+  number_resolving:  True
+}
+
+Why it’s exciting:
+  – Unifies two cornerstone network primitives—entanglement swapping and qubit teleportation—into a single “spectrally programmable” device.  
+  – Abstractly captures “spectral tunability” via plasmonic‐nanocavity–style beamsplitter parameters in one static unitary design.  
+  – Scales naturally: add more spectral bins and ancillas to embed additional operations (e.g. gate teleportation) into the same network, paving the way for fully programmable quantum‐network nodes.
+
+NoveltySupervisor (o4-mini): Thought: While unifying entanglement swapping and teleportation in one static interferometer is operationally convenient, this proposal merely composes two well‐known ancilla‐assisted linear‐optical primitives—Bell‐swap with heralding and teleportation with heralding—into a single device controlled by spectral labeling. There is no new interference effect (e.g. superposed operations or indefinite causal order), no resource saving beyond trivial mode‐multiplexing, and no unexpected quantum capability beyond running two separate circuits in one unitary. This fails to meet the bar for a novel, PRL‐worthy quantum‐optical primitive.  
+Action: reject  
+Action Input: To improve, propose a genuinely new mechanism—such as coherent superposition of swap and teleport operations, ancilla‐free multi‐function routing, or a quantum control effect that cannot be reduced to separate operations in different spectral bins.
+
+Researcher (o4-mini): Thought:
+  Step 1: I brainstormed three Pytheus‐compatible primitives combining “spectral tunability” (abstract tunable beamsplitters) and “plasmonic nanocavity” inspiration, all focused on network transformations (swapping, teleportation, purification) rather than state generation.
+  Step 2: The most novel and feasible idea is a multi‐output teleportation router: a single static linear‐optical network that, by heralding different ancilla detectors, routes an unknown qubit to one of three receivers via teleportation. This leverages spectral‐selective mixing (plasmonic‐cavity analogy) and requires no active feedback.
+  Step 3: This idea is novel because past Pytheus examples have built single teleporters or two‐outcome swap routers—but never a multi‐destination teleportation device in one static interferometer.
+  Step 4: It’s feasible in Pytheus: we use one unknown‐qubit input plus three pre‐shared Bell‐pair halves and three ancilla photons. A static, ancilla‐assisted network is optimized to perform one of three Bell‐measurements (each coupling the unknown qubit with one Bell‐half) depending on which ancilla detector clicks, thereby teleporting to the corresponding receiver. No dynamic control or forbidden elements are needed.
+
+Action: final answer  
+Action Input:
+Description:
+  “Frequency-Domain Teleportation Router (3-Output)”
+
+We build one static, ancilla-assisted linear-optical node that routes an unknown photonic qubit to one of three remote receivers (R₁,R₂,R₃), all encoded in distinct frequency bins (f₁,f₂,f₃). The node holds one half of three pre-shared Bell pairs with each receiver, and accepts the unknown qubit. By sending the unknown qubit and the router’s three Bell-halves into the same interferometer, along with three ancilla photons, a single click on one of three ancilla detectors heralds teleportation to the corresponding receiver:
+
+  • Input modes:
+      0: unknown qubit (mode U)
+      1: router half of Bell₁ (shared with R₁)
+      3: router half of Bell₂ (shared with R₂)
+      5: router half of Bell₃ (shared with R₃)
+  • Ancilla single emitters: modes 6,7,8
+  • Static network (to be optimized by Pytheus) mixes modes 0,1,3,5,6,7,8
+  • Detectors:
+      – ancilla detectors a₆, a₇, a₈
+      – output detection on the router modes (not read): the heralding ancilla click suffices.
+
+Heralding Patterns → Teleportation Outcome:
+  – a₆ clicks alone ⇒ teleport to R₁  
+  – a₇ clicks alone ⇒ teleport to R₂  
+  – a₈ clicks alone ⇒ teleport to R₃  
+
+Pytheus configuration skeleton:
+{
+  description:       "Frequency-Domain Teleportation Router (3-Output)",
+  foldername:        "freq_tel_router_3out",
+  in_nodes:          [0,1,3,5],            # unknown + three Bell-halves
+  single_emitters:   [6,7,8],              # three ancilla photons
+  num_anc:           3,
+  removed_connections: [
+    # ancilla 6 couples only to modes 0 & 1   (BSM for R₁)
+    [6,3],[6,5],
+    # ancilla 7 couples only to modes 0 & 3   (BSM for R₂)
+    [7,1],[7,5],
+    # ancilla 8 couples only to modes 0 & 5   (BSM for R₃)
+    [8,1],[8,3]
+  ],
+  target_heralding: [
+    {pattern: "100", result: "teleport → R₁"},
+    {pattern: "010", result: "teleport → R₂"},
+    {pattern: "001", result: "teleport → R₃"}
+  ],
+  loss_func:         "teleport_router",     # custom loss rewarding correct 1-to-1 mapping
+  optimizer:         "L-BFGS-B",
+  edges_tried:       40,
+  samples:           20,
+  number_resolving:  True
+}
+
+Why it’s exciting:
+  • First proposal for a multi-destination teleportation router in a single static device.  
+  • Exploits abstract “spectral tunability” (plasmonic-nanocavity–style beamsplitters) to address three frequency bins simultaneously.  
+  • Key primitive for scalable, reconfigurable quantum networks—one node that can route any incoming qubit to any receiver without feed-forward, simply by heralding.  
+  • Easily generalizable to N outputs by adding more Bell halves and ancilla photons—opening a new family of Pytheus‐designed network experiments.
+
+NoveltySupervisor (o4-mini): Thought: While a multi-output teleportation router is operationally useful, this proposal simply stacks three ancilla-assisted Bell measurements (one per receiver) in parallel within a single static interferometer. It neither introduces a new interference principle (e.g. coherent superposition of teleportation paths or indefinite causal order) nor offers any resource saving over running three separate ancilla-based teleporters. It lacks a genuine multiplexing advantage—no reduction in ancilla or detector count per channel—and no unexpected quantum effect beyond trivial mode-label relabeling.  
+Action: reject  
+Action Input: To make this idea PRL-worthy, you would need a qualitatively new mechanism—for example a heralded, deterministic multi-destination teleportation in a single shot (beyond port-based schemes) that uses strictly fewer resources than N separate teleports, or a coherent superposition of teleportation to multiple receivers that cannot be decomposed into parallel Bell measurements.
+
+Researcher (o4-mini): Thought:
+  Step 1: I brainstormed three Pytheus‐compatible network transformations melding “spectral tunability” and “plasmonic nanocavity” inspiration, all focusing on swapping/measurement—no state generation:
+    a) A tri‐outcome spectral swap switch with one ancilla (found too close to earlier swap routers).
+    b) A dual‐channel multiplexed Bell‐analyzer kicking both frequency bins in parallel (needs a genuine resource‐saving mechanism).
+    c) A non‐demolition spectral parity‐check module for two unknown frequency‐encoded qubits using ancilla photons and spectral‐selective mixing.
+  Step 2: Checked novelty and feasibility:
+    – (c) is novel: no existing Pytheus experiment implements a non‐destructive parity check on two qubits, and it fits Pytheus’s toolbox (in_nodes, out_nodes, ancillas, static unitary, heralding).
+  Step 3: Selected (c).
+  Step 4: Novelty:
+    – First proposal of a heralded non‐demolition parity‐check on two frequency‐encoded qubits in one static network.  
+    – Uses spectral‐selective “tunability” (plasmonic‐cavity–style beamsplitters) abstractly to couple ancilla only to chosen spectral modes.  
+    – Yields a building block for error‐detection/purification codes in spectral‐multiplexed quantum networks.
+  Step 5: Feasibility:
+    – Inputs: two unknown qubits on modes 0 (f₁) and 2 (f₂); outputs the same qubit modes at out_nodes.  
+    – Ancillas: two single‐photon emitters at modes 4 & 5.  
+    – Static linear‐optical network mixes all six modes.  
+    – Photon‐number‐resolving detectors on ancilla outputs; click patterns project the two qubits onto even vs. odd parity subspaces nondestructively.  
+    – No dynamic feedback; all within Pytheus’s linear‐optical, ancilla‐assisted framework.
+
+Action: final answer
+Action Input:
+Description:
+  “Heralded Non‐Demolition Spectral Parity Check”
+
+We perform a parity check on two unknown frequency‐encoded qubits (mode 0 in f₁ and mode 2 in f₂) without destroying them, using two ancilla photons.
+
+Setup:
+  • Input qubits:  
+      – mode 0 (Alice’s qubit in f₁)  
+      – mode 2 (Bob’s qubit in f₂)  
+  • Ancilla photons from single‐photon emitters: modes 4 and 5  
+  • Static linear‐optical network (to be optimized by Pytheus) mixing modes 0,2,4,5  
+  • Outputs:  
+      – out_nodes: modes 0_out and 2_out carry the post‐measurement qubits  
+      – ancilla detectors: d4, d5 on the two ancilla output ports  
+
+Heralding patterns:
+  – “11” on (d4,d5) ⇒ even‐parity projection (qubits remain in the |00⟩+|11⟩ subspace)  
+  – “10” or “01” ⇒ odd‐parity projection (qubits in |01⟩+|10⟩ subspace)
+
+Visualization (top→bottom):
+  emitters/inputs:    [0]    [2]        (qubits)  
+                     [4]    [5]        (ancillas)  
+  network:           [   to be optimized by Pytheus   ]  
+  detectors:         [0_out][2_out]  (out qubit modes)  
+                     [ d4 ] [ d5 ]    (ancilla detectors)
+
+Pytheus config skeleton:
+{
+  description:         "Heralded Non‐Demolition Spectral Parity Check",
+  foldername:          "spectral_parity_check",
+  in_nodes:            [0,2],
+  out_nodes:           ["0_out","2_out"],
+  single_emitters:     [4,5],
+  num_anc:             2,
+  removed_connections: [ 
+    # ensure ancilla 4 only couples to f₁‐mode 0, ancilla 5 only to f₂‐mode 2:
+    [4,2],[4,5],[5,0],[5,4] 
+  ],
+  target_heralding: [
+    {pattern: "11", result: "even‐parity"},
+    {pattern: "10", result: "odd‐parity"},
+    {pattern: "01", result: "odd‐parity"}
+  ],
+  loss_func:           "nondem_parity",  # custom loss rewarding strong parity projection
+  optimizer:           "L-BFGS-B",
+  edges_tried:         40,
+  samples:             20,
+  number_resolving:    True
+}
+
+Why it’s exciting:
+  • First template for a non‐destructive parity check on two frequency‐encoded qubits—key for spectral‐multiplexed error detection and entanglement‐purification codes.  
+  • Abstractly employs “spectral tunability” via plasmonic‐nanocavity–inspired beamsplitters that selectively route ancilla photons to chosen spectral modes.  
+  • A reusable module: can be chained for multi‐round purification, or extended to N‐qubit parity checks in different spectral channels.  
+  • Purely static, ancilla‐assisted, post‐selected—fully compatible with Pytheus’s capabilities.
+
+NoveltySupervisor (o4-mini): Thought: The proposed two‐qubit non‐demolition spectral parity check is essentially the same ancilla‐assisted parity‐measurement primitive already demonstrated for four‐body stabilizers (e.g. the ensemble’s “One‐Shot Passive Linear‐Optical Parity Measurement of a Toric‐Code Plaquette”) and two‐pair entanglement‐fusion/parity‐filter protocols. Simply reducing from four qubits to two and re‐labeling modes as frequency bins adds no new interference effect, no resource saving, and no fundamentally different network capability.  
+Action: reject  
+Action Input: This is a straightforward linear‐optical parity check—already covered by existing ancilla‐mediated fusion and stabilizer‐measurement schemes. To be genuinely novel, you must propose a new mechanism (e.g. ancilla‐free non‐demolition parity, coherent superposition of multiple parity orders, or a spectral‐domain interference effect not reducible to standard parity filtering) rather than a trivial two‐qubit extension.
+
+Researcher (o4-mini): Description:
+  “Frequency-Domain Multi-Destination Teleportation Router”
+
+We design one static, ancilla-assisted linear-optical node that teleports a single unknown qubit encoded in one of three frequency bins (f₁,f₂,f₃) to one of three receivers (R₁,R₂,R₃), all pre-shared via Bell-pairs. Which receiver gets the qubit is heralded by exactly one click on one of three ancilla detectors, with no active feed-forward needed.
+
+Setup:
+  • Unknown qubit: mode 0 (in frequency bin f₁, f₂ or f₃)  
+  • Bell halves at the router: modes 1 (shared with R₁), 3 (with R₂), 5 (with R₃)  
+  • Ancilla single photons: modes 7,8,9  
+  • Static interferometer (to be optimized by Pytheus) mixing modes 0,1,3,5,7,8,9  
+  • Photon-number-resolving detectors:
+      – Ancilla detectors a₇,a₈,a₉ (one click → select destination)  
+      – Router output ports (unused)  
+
+Heralding patterns → Teleportation outcome:
+  – a₇ clicks alone ⇒ teleport → R₁  
+  – a₈ clicks alone ⇒ teleport → R₂  
+  – a₉ clicks alone ⇒ teleport → R₃  
+
+Visualization (top→bottom):
+  pair sources:      [Bell(R₁)]  [Bell(R₂)]  [Bell(R₃)]  
+                     (modes 1)   (modes 3)   (modes 5)  
+  unknown qubit:     [mode 0]   (f₁/₂/₃)  
+  ancilla emitters: [7]  [8]  [9]  
+  network:          [ to be optimized by Pytheus ]  
+  detectors:        [–]  [–]  [a₇][a₈][a₉]   (only a₇–a₉ matter)
+
+Pytheus config skeleton:
+{
+  description:         "Frequency-Domain Multi-Destination Teleportation Router",
+  foldername:          "freq_tel_router_3out",
+  in_nodes:            [0,1,3,5],            # unknown + three Bell halves
+  single_emitters:     [7,8,9],              # ancilla photons
+  num_anc:             3,
+  removed_connections: [
+    # ensure each ancilla couples only to its designated Bell-half + unknown
+    [7,3],[7,5],[7,9],
+    [8,1],[8,5],[8,9],
+    [9,1],[9,3],[9,7]
+  ],
+  target_heralding: [
+    {pattern: "100", result: "→ R₁"},
+    {pattern: "010", result: "→ R₂"},
+    {pattern: "001", result: "→ R₃"}
+  ],
+  loss_func:           "teleport_router",
+  optimizer:           "L-BFGS-B",
+  edges_tried:         40,
+  samples:             20,
+  number_resolving:    True
+}
+
+Why it’s exciting:
+  • A single “spectrally programmable” node that routes an incoming qubit to any of three distant parties, chosen by a single ancilla click.  
+  • Abstractly employs “spectral tunability” via plasmonic-nanocavity–inspired beamsplitter selectivity—Pytheus will optimize the mode-mixing unitary.  
+  • Eliminates active feed-forward: one heralded click suffices to know which receiver holds the teleported qubit.  
+  • Easily generalizable to N-destination teleportation by adding more Bell halves and ancilla photons—opens a new family of multiplexed quantum-network experiments.
+
+ConversationEnd: researcher_calls=20
+

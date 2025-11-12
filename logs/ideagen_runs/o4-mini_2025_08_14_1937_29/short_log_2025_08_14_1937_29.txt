@@ -1,0 +1,280 @@
+SuggestionType: [0, 0, 0, 5]
+
+Researcher (o4-mini): Thought: 
+  Step 1: Brainstorm three ways to combine “mirror cavity” and “integrated photonic circuit” into a Pytheus‐compatible network target.  
+    1) A three‐segment entanglement‐swapping chain on chip, where on‐chip waveguide loops mimic “mirror cavities” to buffer/delay photons for Bell‐measurements at intermediate nodes.  
+    2) A heralded SWAP operation between two photonic qubits routed through an integrated re‐circulating loop (“cavity”) so that the swap gate is performed by entanglement swapping in a single photonic circuit.  
+    3) A triangular network bilocality test on a photonic chip, using three entangled pair sources and three on‐chip loops (cavity analogs) to synchronize photons for the triangle BSMs.  
+  Step 2: Novelty vs. past experiments and obstacles:  
+    1) The three‐segment chain extends standard entanglement swapping beyond two links, uses on‐chip loops as delays—no previous Pytheus example used more than two Bell measurements in series or loops. Pytheus can handle loops and probabilistic sources, so feasible.  
+    2) A SWAP gate via entanglement‐based routing is conceptually interesting, but resembles known heralded CNOT/Toffoli examples; less novel.  
+    3) The triangle nonclassicality test is novel but pushes Pytheus toward inequality violation rather than a concrete state or transformation—hard to encode as target_quantum.  
+  Step 3: Pick idea (1), the three‐segment entanglement‐swapping chain with delay loops.  
+  Step 4: This idea is novel because no previous design chains three Bell‐measurements in a single integrated circuit and employs on‐chip looped waveguides as “mirror cavities” to buffer photons for synchrony.  
+  Step 5: This idea is feasible in the Pytheus framework because it only uses probabilistic pair sources, linear optics, on‐chip loops (Pytheus supports “loops”), Bell‐measurements via ancillary detectors, and no dynamic feedback.  
+Action: final answer  
+Action Input: 
+Here is the proposed target for Pytheus—“Three‐segment entanglement swapping with on‐chip delay cavities”:
+
+Explanation:
+We aim to teleport entanglement from Node A to Node D by cascading three Bell‐state measurements at intermediate nodes B and C, all realized on a single integrated photonic circuit. On this chip, small waveguide loops serve as fixed “mirror cavities” (pure linear‐optical delay lines) to buffer photons until their partners arrive for Bell measurements. This demonstrates a multi‐link quantum repeater‐style network in one device.
+
+Structure visualization (photons travel top→bottom through the circuit):
+
+Node A                Node B                 Node C               Node D  
+ ┌────────┐            ┌────────┐            ┌────────┐            ┌────────┐  
+ │ Pair S1│───(1,2)───▶│ Loop L₁│───(2,3)───▶│ Loop L₂│───(3,4)───▶│ Output │  
+ └────────┘            └────────┘            └────────┘            └────────┘  
+ detectors: [A1][B1][anc BSM1…][anc BSM1…][B2][C1][anc BSM2…][anc BSM2…][C2][D1]
+
+• Pair S1 at A emits photons 1 & 2.  
+• Photon 2 is delayed in Loop L₁ (mirror‐cavity analog) until photon 3 from Pair S2 (at B) arrives.  
+• A Bell‐measurement on (2,3) at B projects 1 and 4 into entanglement across the next segment.  
+• Photon 4 is delayed in Loop L₂ until photon 5 from Pair S3 (at C) arrives.  
+• A second Bell‐measurement on (4,5) at C delivers photon 6 to D.  
+• At the end, photons 1 (at A) and 6 (at D) share a Bell state—demonstrating two‐link entanglement swapping in series.  
+
+Key Pytheus config elements:
+• num_anc: 4  (two ancilla detectors per BSM)  
+• loops: specify two on‐chip delay loops (L₁, L₂) through the “loops” parameter  
+• probabilistic photon‐pair sources at nodes A, B, C  
+• removed_connections: enforce no direct source linking nonadjacent detectors (e.g. A→C, A→D, B→D)  
+• target_quantum: Bell‐state amplitudes ['00','11'] between in_node=0 (A1) and out_node=N-1 (D1)  
+• in_nodes: [0] and out_nodes: [last]  
+• number_resolving detectors at all outputs, linear‐optics only  
+
+This target will generate a family of experiments by varying the number of segments (loops), swapping stages, or the dimensionality (extending qutrits), all on a single integrated photonic platform with “mirror cavity” loops—opening a route toward on‐chip modular quantum repeater architectures.
+
+NoveltySupervisor (o4-mini): Thought: The proposal is essentially a straightforward cascading of standard Bell‐swap steps into a three‐segment repeater chain, merely adding on‐chip delay loops to buffer photons. This is functionally identical to existing two‐link entanglement‐swapping experiments (and even the ensemble’s temporal‐mode loop scheme) but with one extra segment, rather than a new network primitive or measurement. It doesn’t introduce a fundamentally new target map beyond the familiar multi‐link Bell–state projection.  
+Action: reject  
+Action Input: While on‐chip delay loops are nice engineering, the core protocol is just more segments of entanglement swapping—a trivial extension of well‐known Bell‐swap chains (cf. “Temporal‐Mode Multiplexed Entanglement Swapping” and repeater node demonstrations). To be novel, you need a transformation or network primitive not captured by standard multi‐hop swapping, such as a coherent superposition of swap paths, a nontrivial multi‐party projection, or a new use of the delay cavities beyond mere timing.
+
+Researcher (o4-mini): Thought: 
+Step 1: Brainstorm three ways to combine “mirror cavity” and “integrated photonic circuit” in a Pytheus‐compatible target:
+ 1) A linear chain of three entanglement‐swapping links on a monolithic photonic chip, where on‐chip waveguide loops (the “mirror cavities”) buffer photons between Bell–state measurement (BSM) stations.  
+ 2) A heralded SWAP gate between two remote modes implemented by routing single photons through an integrated re‐circulating loop (“cavity”) combined with an entanglement‐swapping module—resembles known CNOT/Toffoli but with cavity‐based delay.  
+ 3) A “quantum switch” for entanglement swapping: two BSM modules (at nodes B and C) are placed in series on‐chip with identical linear‐optics blocks, and a control photon routes the swapping order into a coherent superposition via MZI arms and loop delays.  
+
+Step 2: Check novelty and Pytheus feasibility:
+ 1) Trivial multi‐link extension of standard swapping—already routine in literature.  
+ 2) Too similar to heralded two‐qubit gates previously explored.  
+ 3) Novel: introduces indefinite causal order into entanglement distribution, combining on‐chip loops as “mirror cavities” and integrated circuits for coherent routing. Pytheus supports linear optics, probabilistic sources, loops, and passive interferometers—no dynamic feedback needed.  
+
+Step 3: Select idea (3).
+
+Step 4: This idea is novel because it implements a quantum‐switch version of entanglement swapping: two identical BSM modules act on three pair sources, but the *order* in which those modules act is put into a coherent superposition by an on‐chip MZI and delay‐line “mirror cavities.” No prior Pytheus experiment realizes indefinite causal order in a repeater‐style network.
+
+Step 5: This idea is feasible in the Pytheus framework and satisfies all constraints because:
+ • It uses only probabilistic photon‐pair sources and single‐photon sources,  
+ • Passive linear optics—MZIs for control, waveguide loops (“loops” keyword) for fixed delays,  
+ • Bell–state measurement blocks (ancilla detectors) at nodes B and C,  
+ • No dynamic feedback, no cavities with resonances—only fixed loop delays.
+
+Action: final answer
+Action Input:
+Here is the proposed target for Pytheus – “Quantum‐Switch Entanglement Swapping on Chip”:
+
+Explanation:
+We build a three‐node repeater network (A–B–C–D) on a single integrated photonic circuit. Two identical Bell–state measurement modules (BSM₁ at B, BSM₂ at C) sit in series. A control photon, emitted in a superposition of two spatial modes via an on‐chip MZI, directs the *order* in which a traveling photon from node‐chain S_AB–S_BC–S_CD encounters BSM₁ and BSM₂. On‐chip loop waveguides (“mirror cavities”) buffer the photon so that regardless of the chosen path it meets both BSM modules but in a superposed temporal order. This realizes indefinite causal order of successive entanglement‐swapping operations. At the end, node A and D share entanglement *and* are coherently entangled with the control photon’s path, witnessing a quantum switch in entanglement distribution.
+
+Circuit visualization (photons travel top→bottom; red path = control photon, blue = data photons):
+
+ Emitters:  
+  S_AB emits photons 1→A, 2→BSM modules  
+  S_BC emits 3→BSM modules  
+  S_CD emits 4→C, 5→D  
+  S_ctrl emits photon c into MZI  
+
+ On‐chip blocks:  
+   ┌── MZI ──┐  
+   │  /    \  │  
+ c: ┴         ┴────────────────┐  
+                            Loop L₁  
+                              │  
+ Data chain: 2→BSM₁→Loop L₂→BSM₂  
+  ┌───┐      ┌─────┐      ┌─────┐  
+  │BSM₁│◀─2─▶│Loop L₂│◀─4─▶│BSM₂│  
+  └───┘      └─────┘      └─────┘  
+                              │  
+                             photon 5→D  
+
+ Detectors:  
+  • At BSM₁: two ancilla detectors  
+  • At BSM₂: two ancilla detectors  
+  • At A and D: number‐resolving detectors for output  
+  • At MZI outputs: detectors for c
+
+Key Pytheus config hints:
+ • probabilistic pair‐sources at S_AB, S_BC, S_CD  
+ • single‐photon source at S_ctrl  
+ • loops: specify two delay loops L₁, L₂  
+ • in_nodes: [A‐detector, c‐detector inputs]  
+ • out_nodes: [D‐detector, c‐detector outputs]  
+ • anc_detectors: [BSM₁ outputs, BSM₂ outputs]  
+ • removed_connections: forbid any source from directly connecting A↔BSM₂ or D↔BSM₁  
+ • target: a network (quantum‐switch) mapping control‐path input to a superposition of two entanglement‐swap orders  
+ • loss_func: design for maximal coherence between the two swap‐order processes  
+
+This experiment will open up a new domain of *indefinite causal order* in quantum‐network primitives and can be generalized to multi‐BSM switches, higher dimensions, or cascaded switch protocols—facilitating a suite of novel on‐chip repeater and network‐coding architectures.
+
+NoveltySupervisor (o4-mini): Thought: This proposal is essentially the same “quantum‐switch” entanglement‐swapping primitive already in the ensemble (“Implementing an Entanglement-Switch Quantum Switch via Photonic-Controlled Superposition of Swap Orders”), merely moved onto an integrated chip with loops. It does not introduce a new target map or measurement beyond superposing two swap orders—only an engineering variant.  
+Action: reject  
+Action Input: The core operation—indefinite causal‐order swapping via a control photon—is already covered by the ensemble’s “entanglement-switch quantum switch” suggestion. To be novel, you must propose a fundamentally new network primitive or multi-party projection (e.g. a genuinely higher-order superposition of more than two swap paths, a new multi-node non-linear transformation, or a projected measurement not reducible to two sequential swaps), not just chip-scale buffering of the same protocol.
+
+Mediator (o4-mini): [discussion]
+The Researcher first suggested cascading three entanglement‐swapping links on-chip using waveguide loops as “mirror cavities.” The Supervisor rejected it as a trivial extension of existing two‐link schemes. The Researcher then refined the proposal into an on‐chip quantum‐switch version of entanglement swapping (superposing the order of two Bell‐measurements using loops and an on‐chip MZI). The Supervisor again rejected it, noting it duplicates an ensemble suggestion (“entanglement‐switch quantum switch”) and introduces no genuinely new primitive. No target was accepted.
+
+[bullet points]
+• The Researcher repeated an idea already in the ensemble list, showing they did not check prior suggestions.  
+• Refinements focused on engineering details (integrated loops) rather than proposing truly novel network primitives.  
+• Both proposals essentially realized standard entanglement‐swapping or quantum‐switch schemes already covered.  
+• Conversation looped without yielding a new, acceptable target.  
+
+Mediator feedback for researcher:
+Please review the ensemble’s list of suggestions before proposing to avoid duplications. Aim to define a fundamentally new network primitive or measurement (e.g. beyond two‐path swap superpositions), not just a chip‐scale variation. Ensure your next idea introduces a novel quantum transformation or protocol that Pytheus hasn’t already explored.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three ways to marry “mirror cavity” (i.e. fixed on‐chip delay loops) with an integrated photonic circuit in a Pytheus‐compatible quantum‐network experiment:
+    1) A straight three‐link entanglement‐swap chain on a single chip, using two delay loops as “cavities” to buffer photons between Bell‐measurements.
+    2) A heralded two‐qubit SWAP gate implemented via a loop‐based entanglement‐swapping subcircuit—essentially a CNOT‐style gate but with re‐circulating delay lines.
+    3) A genuine quantum 3‐switch for entanglement distribution: three independent pair‐sources, three Bell‐measurement modules, and a control photon in a superposition of three looped paths, creating a coherent superposition of all three possible orders in which the BSMs act.  
+
+  Step 2: Check novelty & Pytheus viability:
+    1) Too incremental—a trivial extension of prior two‐link swaps.
+    2) Too close to existing heralded CNOT/Toffoli examples.
+    3) Novel: implements *indefinite causal order* with three BSMs (“3-switch”) on chip. Pytheus can handle probabilistic pair sources, single‐photon sources, passive linear optics (MZIs), multiple “loops” (delay lines), and ancilla detectors—no feedback required.
+
+  Step 3: Choose idea (3).
+
+  Step 4: This idea is novel because no previous Pytheus design has superposed *three* entanglement‐swap operations in a network‐switch primitive. It pushes beyond a 2-switch (“quantum switch”) to a genuine 3-switch, exploring higher‐order causal structures in quantum repeater‐style networks.
+
+  Step 5: This idea is feasible in Pytheus since it uses only:
+    • Three probabilistic photon‐pair sources  
+    • One single‐photon source (control)  
+    • Passive linear‐optics elements (beam splitters/MZIs)  
+    • Two integrated delay loops per swap path (“mirror cavities”) specified via Pytheus’s `loops` keyword  
+    • Bell-measurement modules (ancilla detectors) at three nodes  
+    • No dynamic feed-forward or resonant cavities  
+
+Action: final answer
+Action Input:
+Here is the proposed target for Pytheus — “Quantum 3-Switch Entanglement Swapping”:
+
+Explanation:
+We construct on a single integrated photonic chip a 4-node network A→B→C→D with *three* independent Bell-state measurement (BSM) modules at the intermediate locations labeled BSM₁, BSM₂ and BSM₃. Three pair‐sources S_AB, S_BC, S_CD each emit one photon toward the chain’s ends (A, D) and one photon toward the central switch network. A *control* photon is launched into a 3-arm MZI, putting it into an equal superposition of three paths. Each control‐path arm engages a different ordering of the three BSM modules by routing the data photons through on-chip delay loops (the “mirror cavities”) before they encounter each BSM. As a result, the three entanglement-swap operations happen—but in a coherent superposition of the six possible partial orders—entangling node A and D while the control photon’s path remains entangled with the *order* in which swaps occurred. This implements a *quantum 3-switch* on entanglement distribution, directly probing higher-order causal structures in a repeater-style network.
+
+Circuit sketch (photons travel top→bottom; red = control, blue = data):
+
+ Emitters:
+   S_ctrl→ control photon c into 3-arm MZI
+   S_AB → photons 1→A, 2→switch network
+   S_BC → photons 3→switch network
+   S_CD → photons 4→D, 5→switch network
+
+ Switch network:
+    ┌─── MZI ───┐
+    │  /   |   \│
+ c: ┴      |     ┴─────────┐
+             |             │
+        ┌─Loop L₁─┐   ┌─Loop L₂─┐   ┌─Loop L₃─┐
+   BSM₁◀─┤         ├─▶BSM₂◀─┤         ├─▶BSM₃◀─┤         ├
+        └─────────┘   └─────────┘   └─────────┘
+             │             │             │
+            data paths recombine and
+            exit to D’s detector and A’s
+
+Detectors:
+ • BSM modules: each has two ancilla detectors (total 6)  
+ • A and D: number-resolving detectors for final photons  
+ • MZI outputs: detectors monitoring control‐photon path  
+
+Pytheus config hints:
+  • probabilistic pair‐sources at nodes S_AB, S_BC, S_CD  
+  • single-photon source at S_ctrl  
+  • loops: define three delay loops L₁, L₂, L₃ to buffer data photons  
+  • in_nodes: [A_detector, control_input]  
+  • out_nodes: [D_detector, control_outputs]  
+  • anc_detectors: outputs of BSM₁, BSM₂, BSM₃  
+  • removed_connections: forbid any source from directly connecting nonadjacent detectors (e.g. A→BSM₂/₃, D→BSM₁/₂)  
+  • target_quantum: coherent superposition of three Bell swaps entangling A & D, correlated with the 3 control paths  
+  • loss_func: maximize fidelity to the ideal 3-switch superposed swap process  
+
+This experiment inaugurates *higher-order* network primitives—extending the 2-switch to a 3-switch in entanglement distribution—and can be generalized to N-switches, multi-dimensional encodings, or concatenated switch architectures in integrated photonics with “mirror cavity” delays.
+
+NoveltySupervisor (o4-mini): Thought: The “quantum 3-switch” is conceptually the same higher‐order indefinite causal-order swap primitive already in the ensemble (“Cyclic Indefinite-Order Entanglement-Swapping Switch for the Three-State Bargmann Invariant”), merely transplanted onto a chip. It does not introduce a new network map or measurement beyond superposing multiple entanglement-swapping orders and so fails the novelty bar.  
+Action: reject  
+Action Input: This is essentially the same 3-order swap superposition as in the ensemble’s “Cyclic Indefinite-Order Entanglement-Swapping Switch”; to be novel you need a genuinely new primitive beyond higher-order causal superposition—e.g. a non-trivial multi-party projector or a completely new network resource, not just more swaps on a chip.
+
+Researcher (o4-mini): Thought:
+  Step 1: Brainstorm three ways to combine “mirror cavity” (i.e. fixed on-chip delay loops) with an integrated photonic circuit in a Pytheus-compatible network target:
+    1) A multi-link repeater chain with three cascaded Bell swaps and on-chip loops as “cavities” to buffer photons between BSMs.  
+    2) A heralded two-qubit SWAP gate via loop-based entanglement swapping (too close to Toffoli/CNOT examples).  
+    3) A *quantum teleportation router*—coherently splitting an input qubit and teleporting it, via two separate Bell-measurements, to two different output nodes in superposition—using on-chip loops for timing (“mirror cavity” analog).  
+  Step 2: The first is incremental; the second duplicates known gates; the third is novel: it implements a quantum-network primitive (a router) beyond mere state generation or swapping, and uses only probabilistic pair sources, beam splitters, loops, and ancilla detectors—within Pytheus’s capabilities.  
+  Step 3: Select idea (3).  
+  Step 4: This idea is novel because it realizes a *quantum teleportation router*: a single unknown qubit at node A is split in superposition and simultaneously teleported—via two independent Bell-measurements—to nodes B and C, producing a coherent superposition of the qubit being at B and at C.  
+  Step 5: It is feasible in the Pytheus framework since it uses only probabilistic photon-pair sources at B and C, a single-photon emitter at A, passive linear optics (50:50 beam splitters + loops for fixed delays), Bell-measurement stages with ancilla detectors, and post-selection on a single Bell outcome (avoiding feed-forward).  
+
+Action: final answer  
+Action Input:
+Here is the proposed target for Pytheus — “Quantum Teleportation Router with On‐Chip Delay Cavities”:
+
+Explanation:
+We implement on a single integrated photonic chip a *quantum router* primitive: an unknown qubit |ψ⟩ prepared at node A is coherently split by a 50:50 beam splitter into two spatial modes. Each branch heads toward one of two remote nodes (B and C), where an independent probabilistic photon-pair source shares an auxiliary photon with a Bell-measurement (BSM) stage. On-chip delay loops (“mirror cavities”) buffer the traveling qubit modes so that each arrives synchronously with its partner from the pair source. Post-selecting one fixed Bell outcome at each BSM teleports the qubit onto the remaining halves of the two pairs—one at B and one at C. Because the input was in a coherent superposition of both branches, the teleported qubit ends up in the coherent superposition (|ψ⟩_B + |ψ⟩_C)/√2. This realizes a network transformation: a single input mapped into a coherent superposition at two outputs, constituting a genuine routing primitive for quantum networks.
+
+Circuit sketch (photons travel top→bottom; blue = data qubit paths, green = ancillary pair photons):
+
+   Single-photon source at A emits |ψ⟩  
+             │  
+           BS(50:50)  
+           ↙       ↘  
+      path₁        path₂  
+       │             │  
+   Loop L₁        Loop L₂  ← two on-chip delay loops  
+       │             │  
+  ┌─────────┐   ┌─────────┐  
+  │  BSM_B  │   │  BSM_C  │  
+  └─────────┘   └─────────┘  
+     ∕  ∖          ∕  ∖       ← each BSM projects onto one fixed Bell state  
+    det det      det det  
+     │   │         │   │  
+   Teleported    Teleported  
+    qubit at B    qubit at C  
+
+Pair sources:
+ • S_B at node B emits photon b1→BSM_B, b2→output B  
+ • S_C at node C emits photon c1→BSM_C, c2→output C  
+
+Detectors:
+ • BSM_B and BSM_C each have two ancilla detectors (post-select on one Bell outcome)  
+ • A and B, C outputs are number-resolving detectors  
+
+Key Pytheus config elements:
+ • num_anc: 4  (two ancilla detectors per BSM)  
+ • in_nodes: [A_input]  
+ • out_nodes: [B_output, C_output]  
+ • single_emitters: [A]  
+ • probabilistic pair‐sources: at B and C  
+ • loops: define two delay loops L₁, L₂ to synchronize |ψ⟩ modes with b1, c1  
+ • removed_connections: forbid any source directly linking BSM_B’s output to C_output or vice versa  
+ • target_quantum: the mapping |ψ⟩_in → (|ψ⟩_B|0⟩_ctrl + |ψ⟩_C|1⟩_ctrl)/√2 (post-selected on specific Bell outcomes)  
+ • loss_func: maximize coherence between the two teleportation paths  
+
+This router primitive can be generalized to N-output teleportation routers, dynamic multiplexing of qubit traffic, or higher-dimensional routing by extending to qutrit pairs—all on an integrated photonic platform with fixed “mirror cavity” delays.
+
+NoveltySupervisor (o4-mini): Thought: This proposal defines a genuinely new network‐level primitive—a coherent “one‐to‐two” teleportation router—that is not just a switch or a sequence of standard Bell swaps but a map sending a single qubit into a delocalized superposition across two remote nodes. None of the listed or ensemble targets realize exactly this “teleportation router” transformation (|ψ⟩ₐ→( |ψ⟩ᵦ+|ψ⟩𝒸 )/√2) using on-chip delay loops. It goes beyond choice‐of‐destination or superposed causal orders; it distributes one qubit coherently to two endpoints in a single static circuit. This clear, publishable network primitive merits further exploration.  
+Action: accept  
+Action Input: The coherent one-to-two teleportation map using on-chip delay cavities represents a new target quantum operation—distinct from dual-destination switches or standard entanglement-swapping chains—and is worthy of a PRL-level submission.
+
+Researcher Summarizing (o4-mini): Title:  
+Integrated Photonic Quantum Teleportation Router with On-Chip Delay Cavities  
+
+Mini-Abstract:  
+We demonstrate the target “Quantum Teleportation Router with On-Chip Delay Cavities” by coherently splitting an unknown single-photon qubit at node A and teleporting it, via two independent probabilistic entangled-pair sources and synchronized on-chip delay loops, onto two remote outputs at nodes B and C. Post-selecting a fixed Bell outcome in each Bell-state measurement and employing only passive 50:50 beam splitters, fixed delay cavities, ancilla detectors, and single-photon emitters realizes a genuine quantum routing primitive that maps |ψ⟩ₐ → (|ψ⟩ᵦ + |ψ⟩𝒸)/√2 without feed-forward.
+
+Judge (o4-mini): Thought: The proposal outlines a coherent, post‐selected teleportation router that uses two SPDC pair sources, on‐chip delays and static beam splitters to split an unknown photonic qubit into a spatial superposition at nodes B and C, which respects the no‐cloning theorem while enabling path‐encoded quantum routing. It fits squarely within PyTheus’s capabilities for designing measurement‐based protocols and linear‐optics teleportation circuits and appears experimentally feasible on an integrated platform.  
+Action: accept  
+Action Input: The concept of routing an unknown photonic qubit onto a coherent superposition of two remote outputs via post‐selected teleportation and on‐chip delay loops is both innovative and compatible with PyTheus‐designed linear‐optics circuits. The use of static beam splitters and fixed delays without active feed‐forward makes this a practical target for current integrated photonic technology.
+
+ConversationEnd: researcher_calls=4
+

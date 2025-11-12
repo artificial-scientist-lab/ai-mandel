@@ -1,0 +1,351 @@
+SuggestionType: [0, 0, 0, 5]
+
+Researcher (o4-mini): Thought: 
+  Step 1: Brainstorm 3 ways to combine “exotic quantum state” and “particle interference” into a Pytheus‐compatible network protocol (not state generation):
+    1) Quantum butterfly network coding: two simultaneous teleportations through a bottleneck using a 4‐photon joint measurement via multi‐photon interference.  
+    2) Cyclic entanglement percolation: a ring of Bell pairs in a triangle, performing simultaneous beam‐splitter measurements at each vertex to probe percolation thresholds.  
+    3) Interference‐enabled purification network: using a linear‐optical multiplexer to purify two noisy Bell pairs into one higher‐fidelity pair across three nodes.  
+  Step 2: Check novelty and Pytheus obstacles:
+    1) Butterfly coding hasn’t been realized in linear optics. Requires a single static interferometer, no feedback, only probabilistic sources and detectors—Pytheus can do this.  
+    2) Ring percolation overlaps with entanglement swapping examples (just 2–3 hops) and edges percolation has been studied theoretically. Pytheus could do it, but it’s less striking.  
+    3) Purification is akin to distillation protocols; Pytheus can optimize a purification circuit, but it’s not fundamentally a new network, more an application.  
+  Step 3: Pick the butterfly network idea—highest novelty and clear multi‐node network coding with particle interference.  
+  Step 4: This idea is novel because quantum network coding in the butterfly graph has never been realized in purely linear‐optical, static interferometric terms, and it pushes the frontier of multi‐photon joint measurements beyond standard Bell swaps.  
+  Step 5: It is feasible in the Pytheus framework and satisfies all constraints because it uses only probabilistic EPR‐pair sources, linear optics (beam splitters, phase shifters), photon‐number‐resolving detectors, and no active feed‐forward.  
+Action: final answer
+Action Input:
+explanation: |
+  We propose to realize the first linear‐optical implementation of quantum network coding in the “butterfly” network. Two senders S1, S2 each wish to simultaneously teleport unknown qubits to two receivers R1, R2 over a network that shares exactly four EPR‐pair sources (one on each edge of the butterfly graph) and a single bottleneck at the central node C. After each sender performs a local Bell measurement (teleportation step) on their unknown qubit and half of their EPR pair, C holds two “teleported” photons and the two halves of the EPR pairs destined for R1 and R2.  C then performs a single 4-photon joint measurement—realized via a multiport interferometer and particle interference on those four photons—that encodes the network‐coding operation (the “XOR” of the two teleportation channels) into its heralding pattern.  Conditioned on clicks at C’s heralding detectors, classical outcomes are broadcast, and each receiver applies Pauli corrections on their remaining photon to recover the original qubits.  
+  This experiment combines an exotic joint‐measurement operator (a 4-photon “XOR” measurement, which can be viewed as projecting onto a four‐photon entangled subspace) with high-order particle interference in a multiport, and demonstrates a genuinely new quantum-network primitive: quantum network coding.  It is a static, linear-optical setup compatible with Pytheus: only probabilistic pair sources, linear elements, and photon-number-resolving detectors are required—no feedback or cavities.  
+config: {
+  description: "Linear-optical quantum butterfly network coding (simultaneous dual teleportation via a single 4-photon joint measurement)",
+  foldername: "butterfly_QNC",
+  bulk_thr: 0.01,
+  edges_tried: 50,
+  ftol: 1e-06,
+  loss_func: "operator_distance",
+  num_anc: 0,
+  num_pre: 1,
+  optimizer: "L-BFGS-B",
+  imaginary: false,
+  safe_hist: true,
+  samples: 50,
+  # We do not specify a fixed target quantum state but a network transformation:
+  target_network: {
+    nodes: ["S1_BM","S2_BM","C_router","R1_corr","R2_corr"],
+    edges: [
+      {"type":"EPR_pair_source","between":["S1_BM","C_router"]},
+      {"type":"EPR_pair_source","between":["S2_BM","C_router"]},
+      {"type":"EPR_pair_source","between":["C_router","R1_corr"]},
+      {"type":"EPR_pair_source","between":["C_router","R2_corr"]}
+    ],
+    operations: [
+      {"node":"S1_BM","operation":"Bell_measurement","inputs":["unknown_qubit_S1","half_EPR_S1-C"]},
+      {"node":"S2_BM","operation":"Bell_measurement","inputs":["unknown_qubit_S2","half_EPR_S2-C"]},
+      {"node":"C_router","operation":"4_photon_interference_measurement",
+       "inputs":["teleported_photon_S1","teleported_photon_S2","half_EPR_C-R1","half_EPR_C-R2"],
+       "heralding_out":["h1","h2"]},
+      {"node":"R1_corr","operation":"Pauli_correction","classical_in":["S1_out","C_out"]},
+      {"node":"R2_corr","operation":"Pauli_correction","classical_in":["S2_out","C_out"]}
+    ]
+  },
+  single_emitters: [],
+  amplitudes: [],
+  removed_connections: []
+}
+
+NoveltySupervisor (o4-mini): Thought: While implementing network coding in a butterfly topology with a single 4‐photon “XOR” measurement is interesting, it is essentially identical to the ensemble’s “Butterfly Network‐Coded Four‐Photon Joint Measurement for Dual Bell-Pair Distribution.” That proposal already covers a static, linear-optical 4-photon joint measurement in a butterfly network to route dual teleportation channels. Because this idea duplicates that target without a genuinely new measurement primitive or network topology, it lacks sufficient novelty for a PRL-level result.  
+Action: reject  
+Action Input: This is too close to the existing “Butterfly Network-Coded Four-Photon Joint Measurement for Dual Bell-Pair Distribution.” To be novel, you must go beyond the simple butterfly graph coding—e.g. introduce a higher-order network-coding primitive, a new joint-measurement basis, or a different network topology not already covered by the ensemble suggestions.
+
+Researcher (o4-mini): Thought: 
+  Step 1: Brainstorm 3 different ways to combine “exotic quantum state” and “particle interference” into a Pytheus-compatible quantum network protocol:
+    1) A three‐edge “quantum router” at a central node using a 3‐photon symmetric interferometric projection (the “exotic state” is the three‐photon symmetric subspace, i.e. W‐like projection) to herald which pair of peripheral nodes become entangled.  
+    2) A triangle‐network percolation probe: three Bell‐pair sources in a closed loop, with simultaneous 3‐photon interference measurements at each node to explore percolation thresholds in a small network.  
+    3) A multi‐node dense coding network: two senders share entanglement with a central receiver, who uses a 4‐photon interferometric measurement in a parity basis (an exotic “parity‐encoded” subspace) to decode two bits each from both senders simultaneously.
+  Step 2: Novelty and Pytheus obstacles:
+    1) The quantum router is novel—routing by multi‐photon interference rather than swapping—and fits Pytheus (only probabilistic EPR sources, linear optics, photon‐resolving detection, no feedback).  
+    2) Percolation probe overlaps with simple entanglement‐swapping loops and hasn’t a clear exotic‐state measurement beyond repeated 2‐photon swaps.  
+    3) Multi‐node dense coding with a 4‐photon parity measurement is interesting but edges toward state generation/dense coding, which is closer to computing than pure network transformation.
+  Step 3: Choose the 3-photon router idea.
+  Step 4: This idea is novel because it goes beyond pairwise entanglement swapping: a single static interferometer at the central node performs a 3‐photon interference projection onto an exotic symmetric subspace, and depending on the heralding pattern, dynamically routes entanglement between any two of three peripheral nodes.  
+  Step 5: It is feasible in the Pytheus framework because it uses only three EPR‐pair sources feeding into a central linear‐optical multiport, fixed beam splitters and phase shifters, number‐resolving detectors, and no active feed‐forward or non‐linear elements—exactly what Pytheus can optimize.
+
+Action: final answer
+Action Input:
+explanation: |
+  We propose a static, linear‐optical “quantum router” for heralded entanglement distribution among three peripheral nodes A, B, D via a central node C.  
+  • Resources: three probabilistic EPR‐pair sources on edges (A–C, B–C, D–C).  
+  • At C: the three incoming photons enter a fixed 3×3 interferometric multiport (tritter + phase network) that effects a projection onto the three‐photon symmetric subspace (an “exotic” W‐like joint‐measurement basis).  
+  • C then performs photon‐number‐resolving detection on two of the three output modes. Different two‐click patterns herald which two peripheral photons (the unmeasured halves at A, B, D) become entangled into a Bell pair.  
+  • Heralding signals are sent classically to the two chosen nodes, who apply predetermined Pauli corrections (if needed) to complete the entanglement link.  
+  • No feedback loops or active switching—routing is entirely post‐selective via the multi‐photon interference signature.  
+  
+  This experiment combines an exotic multi‐photon symmetric‐subspace measurement with high‐order particle interference to realize a new quantum‐network primitive: a static, programmable entanglement router. The setup is fully compatible with Pytheus (probabilistic pair sources, linear optics, photon‐resolving detectors, no dynamic control).
+config: {
+  description: "Static 3-photon-interference quantum router for heralded entanglement among three peripheral nodes",
+  foldername: "router_3ph",
+  bulk_thr: 0.01,
+  edges_tried: 40,
+  ftol: 1e-06,
+  loss_func: "operator_distance",
+  num_anc: 0,
+  num_pre: 1,
+  optimizer: "L-BFGS-B",
+  imaginary: false,
+  safe_hist: true,
+  samples: 30,
+  target_network: {
+    nodes: ["A","B","D","C_router"],
+    edges: [
+      {"type":"EPR_pair_source","between":["A","C_router"]},
+      {"type":"EPR_pair_source","between":["B","C_router"]},
+      {"type":"EPR_pair_source","between":["D","C_router"]}
+    ],
+    operations: [
+      {"node":"A","operation":"hold_photon"},
+      {"node":"B","operation":"hold_photon"},
+      {"node":"D","operation":"hold_photon"},
+      {"node":"C_router","operation":"3_mode_interferometer","inputs":["photon_AC","photon_BC","photon_DC"]},
+      {"node":"C_router","operation":"2_of_3_number_resolving_detection","outputs":["h_i","h_j"]}
+    ]
+  },
+  single_emitters: [],
+  amplitudes: [],
+  removed_connections: []
+}
+
+NoveltySupervisor (o4-mini): Thought: The proposed 3-photon symmetric-subspace router is essentially the same static, heralded entanglement-routing primitive already in the ensemble (“A Pythreus-Compatible Multiplexed Quantum Entanglement Router via Hybrid Plasmonic–Nanophotonic Waveguides” and the symmetry-protected bound-state router). It merely swaps in a different interferometer without adding a genuinely new network topology or measurement that the community hasn’t seen.  
+Action: reject  
+Action Input: This quantum-router concept duplicates existing proposals for a central multiport that, via post-selected click patterns, heralds which two of three nodes become entangled. To be novel, you must introduce a fundamentally new joint-measurement basis, a higher-order routing primitive beyond three nodes, or exploit a network coding or topological effect not already covered.
+
+Mediator (o4-mini): [discussion]
+The Researcher first proposed a “butterfly” network‐coding experiment using a single 4-photon joint measurement. The Novelty Supervisor rejected it as duplicating an existing ensemble proposal. The Researcher then suggested a 3-photon symmetric-subspace “quantum router” for three nodes. This too was deemed too close to prior ensemble suggestions and was rejected. Both rejections centered on insufficient novelty relative to already listed ideas.
+
+[bullet points]
+• Researcher repeatedly proposed network protocols mirroring ensemble ideas rather than genuinely new ones  
+• Novelty Supervisor consistently pointed out those parallels and requested truly distinct primitives  
+• Researcher’s brainstorming iterations focused on variations of entanglement swapping/routing already covered  
+• Conversation stalled by cycling through similar concepts without advancing novelty  
+
+Mediator feedback for researcher:
+To move forward, carefully review the ensemble list and propose a quantum-network primitive or joint-measurement basis not already mentioned. Focus on a protocol or measurement that introduces a new topological or causal structure (beyond simple swapping or routing) and avoid rehashing the butterfly or symmetric-subspace routers. Ensure your next idea clearly differs from existing examples, and succinctly reference how it breaks new ground.
+
+Researcher (o4-mini): Thought: 
+  Step 1: Brainstorm 3 ways to combine “exotic quantum state” and “particle interference” into a Pytheus‐compatible quantum network primitive (not state generation):
+    1) Coherent teleportation switch: a control photon in superposition routes an unknown qubit to one of two receivers via a single multi‐photon interferometric measurement.
+    2) Topology‐superposition network: perform a joint interferometric measurement that projects the network into a superposition of two different entanglement‐swap orders, probing causal structure in a 4‐node network.
+    3) Multi‐path entanglement percolation: use a 4‐photon joint measurement to choose among several percolation channels in a 4‐node square, investigating percolation thresholds via interference.
+  Step 2: Novelty & Obstacles:
+    1) The teleportation switch is novel—no simple Bell‐swap or router covers “quantum‐controlled superposition of teleportation targets.” Pytheus can optimize a single static multiport for 4‐photon interference with probabilistic EPR sources and one single‐photon emitter.
+    2) The topology‐superposition idea is conceptually rich but requires dynamically reconfigurable ordering or an exotic 5‐photon projection that is tricky to encode statically.
+    3) The percolation probe overlaps heavily with basic swapping loops and doesn’t introduce a fundamentally new joint‐measurement basis.
+  Step 3: Select the coherent teleportation switch.
+  Step 4: This idea is novel because it realizes—via a single static, linear‐optical 4‐photon interferometric measurement—a superposition of two distinct teleportation channels controlled by a quantum photon. No known linear‐optical network has demonstrated a truly coherent routing of quantum information in superposition of network topologies.
+  Step 5: It is feasible in the Pytheus framework because it uses only three probabilistic EPR‐pair sources, one single‐photon emitter (control), linear optics (multiport interferometer), photon‐number‐resolving detectors, and post‐selection—no feedback control or cavities.
+
+Action: final answer
+Action Input:
+explanation: |
+  We propose a static, linear‐optical “coherent teleportation switch” that routes an unknown qubit in a quantum superposition of two network paths, controlled by a single photon.  
+  • Resources:
+    – Three probabilistic EPR‐pair sources on edges S–C, C–R₁, C–R₂.  
+    – One single‐photon emitter preparing the control photon in state α|0⟩+β|1⟩.  
+  • Steps:
+    1) Sender S holds the unknown qubit |ψ⟩ and half of the S–C EPR pair. S performs a Bell measurement on |ψ⟩ and their half‐EPR, producing two classical bits m₁,m₂.  
+    2) Central node C now holds three photons: 
+       – the other half of the S–C EPR (the “teleported photon”),  
+       – the half‐EPR to R₁,  
+       – the half‐EPR to R₂,  
+       – plus the control photon.  
+    3) C feeds these four photons into a fixed 4×1 multiport interferometer engineered (via beam‐splitters and phases) to project onto an exotic 4‐photon joint basis that coherently correlates the control qubit with which channel the teleported photon takes:
+       – Control outcome |0⟩ steers teleportation to R₁,  
+       – Control outcome |1⟩ steers teleportation to R₂,  
+       – Superpositions are maintained.  
+    4) Photon‐number‐resolving detectors at C herald one of four click patterns, which encode the Bell‐measurement correction (m₃,m₄) and the routing bit r∈{0,1}.  
+    5) Classical signals (m₁,m₂,m₃,m₄,r) are sent to R₁ and R₂.  Depending on r, one receiver applies the four‐bit Pauli correction to recover |ψ⟩, while the other does nothing.  
+  • Outcome: The unknown qubit |ψ⟩ is teleported in a coherent superposition α|to R₁⟩+β|to R₂⟩, demonstrating a new primitive: quantum‐controlled superposition of network topology.  
+  • Compatibility: Only probabilistic pair sources, one single emitter, linear‐optical multiport, and photon‐resolving detectors—no active feedback or non‐linear components—so Pytheus can optimize the interferometer layout and heralding pattern.
+config: {
+  description: "Coherent teleportation switch: quantum‐controlled superposition of two teleportation paths via a 4‐photon joint measurement",
+  foldername: "coherent_tele_switch",
+  bulk_thr: 0.01,
+  edges_tried: 50,
+  ftol: 1e-06,
+  loss_func: "operator_distance",
+  num_anc: 0,
+  num_pre: 1,
+  optimizer: "L-BFGS-B",
+  imaginary: false,
+  safe_hist: true,
+  samples: 50,
+  target_network: {
+    nodes: ["S_BM","C_router","R1_corr","R2_corr","Control_src"],
+    edges: [
+      {"type":"EPR_pair_source","between":["S_BM","C_router"]},
+      {"type":"EPR_pair_source","between":["C_router","R1_corr"]},
+      {"type":"EPR_pair_source","between":["C_router","R2_corr"]},
+      {"type":"single_photon_emitter","at":"Control_src"}
+    ],
+    operations: [
+      {"node":"S_BM","operation":"Bell_measurement","inputs":["unknown_qubit","half_EPR_S-C"],"classical_out":["m1","m2"]},
+      {"node":"C_router","operation":"4_photon_interferometer","inputs":["half_EPR_S-C","half_EPR_C-R1","half_EPR_C-R2","control_photon"],"heralding_out":["m3","m4","r"]},
+      {"node":"R1_corr","operation":"Pauli_correction","classical_in":["m1","m2","m3","m4"],"trigger":"r=0"},
+      {"node":"R2_corr","operation":"Pauli_correction","classical_in":["m1","m2","m3","m4"],"trigger":"r=1"}
+    ]
+  },
+  single_emitters: ["Control_src"],
+  amplitudes: [],
+  removed_connections: []
+}
+
+NoveltySupervisor (o4-mini): Thought: While routing a teleported qubit coherently under control of a single photon is intriguing, it directly duplicates the ensemble suggestion “Dual-Destination Quantum Teleportation Switch on a Photonic Chip,” which already describes a static, linear‐optical circuit that coherently superposes two teleportation paths under a control qubit. This proposal adds no fundamentally new measurement primitive or network topology beyond that existing idea.  
+Action: reject  
+Action Input: This “coherent teleportation switch” is essentially the same as the previously proposed dual‐destination teleportation router controlled by one photon. To be novel, you must introduce a new joint‐measurement basis, a different network coding or topological feature, or a routing primitive not already covered by the ensemble’s “Dual-Destination Quantum Teleportation Switch on a Photonic Chip.”
+
+Researcher (o4-mini): Thought: 
+  Step 1: Brainstorm 3 ways to combine “exotic quantum state” and “particle interference” into a Pytheus‐compatible quantum network primitive:
+    1) Indefinite‐order entanglement swapping (“quantum SWITCH”): superpose the order of two Bell‐measurements on photons B and C, controlled by a single photon, thereby entangling A and D in a causal‐indefinite process.  
+    2) Three‐way “quantum router” using a 4‐photon non‐Abelian interference basis (beyond symmetric or parity), heralding anyonic‐like fusion outcomes that route entanglement.  
+    3) Network‐coded secret sharing: using a 5‐photon exotic “GHZ‐parity” interferometric measurement to split and rejoin a secret qubit across four recipients.  
+  Step 2: Assess novelty & Pytheus feasibility:
+    1) The indefinite‐order SWAP is conceptually new for linear optics, uses only static interferometry, probabilistic sources, one control emitter, and detectors—fits Pytheus.  
+    2) The anyonic router is intriguing but Pytheus cannot handle non‐Abelian algebra, and it edges toward exotic state interpretations.  
+    3) The network‐coded secret sharing veers into secret‐sharing protocols and GHZ‐type states (forbidden as state generation).  
+  Step 3: Select idea (1): indefinite‐order entanglement swapping.  
+  Step 4: Novelty: No prior linear‐optical demonstration of entanglement swapping in a superposition of measurement orders (quantum SWITCH). This introduces an exotic process‐matrix basis realized by multi‐photon interference.  
+  Step 5: Feasibility: Uses only two EPR‐pair sources, one single‐photon emitter, a fixed multiport interferometer, and photon‐number‐resolving detectors—Pytheus can optimize the interferometer and heralding pattern, with no dynamic feedback.  
+
+Action: final answer  
+Action Input:
+explanation: |
+  We propose to implement an indefinite‐order entanglement‐swapping process (“quantum SWITCH”) purely in linear optics.  
+  • Resources:
+    – EPR‐pair sources on edges A–B and C–D (probabilistic).  
+    – Single‐photon emitter preparing control qubit in |+⟩=(|0⟩+|1⟩)/√2.  
+  • Procedure:
+    1) Sender A holds photon A; B holds the other half of A–B. Receiver D holds photon D; C holds the other half of C–D.  
+    2) A and D do nothing; B and C feed their photons plus the control photon into a fixed 4×1 multiport interferometer at node “Switch.”  
+    3) The multiport is engineered (via beam splitters and phases) so that the three incoming photons undergo 4‐photon interference (with one auxiliary vacuum mode) projecting them onto an exotic basis that coherently superposes:
+       – Bell‐measurement M1 on (B,C) then M2 on (result,Bell‐out),  
+       – and M2 then M1,  
+      with the control qubit marking the order bit.  
+    4) Photon‐number‐resolving detectors at “Switch” herald one of several click patterns {h₁,…,h₄}, each pattern encoding:
+       – Two classical bits for the effective Bell corrections,  
+       – One bit r∈{0,1} indicating the measurement‐order outcome.  
+    5) Classical signals (two correction bits, r) are sent to A and D. Each applies the appropriate Pauli corrections to recover an entangled state between A and D—but now arising from a superposition of swapping orders.  
+  • Outcome: Photons A and D become entangled via an indefinite causal order of Bell measurements. This realizes a new quantum‐network primitive—entanglement swapping in a quantum SWITCH—combining an exotic process‐matrix basis with high‐order particle interference.  
+  • Compatibility: All operations are static and linear‐optical—only probabilistic pair sources, one single‐photon emitter, fixed beam splitters/phase shifters, and photon‐number‐resolving detectors. No feedback loops or nonlinear media, so Pytheus can optimize the interferometer layout and heralding strategy.  
+config: {
+  description: "Linear‐optical quantum SWITCH for indefinite‐order entanglement swapping",
+  foldername: "indef_order_swap",
+  bulk_thr: 0.01,
+  edges_tried: 50,
+  ftol: 1e-06,
+  loss_func: "operator_distance",
+  num_anc: 0,
+  num_pre: 1,
+  optimizer: "L-BFGS-B",
+  imaginary: false,
+  safe_hist: true,
+  samples: 50,
+  target_network: {
+    nodes: ["A","B","C","D","Switch","Control_src"],
+    edges: [
+      {"type":"EPR_pair_source","between":["A","B"]},
+      {"type":"EPR_pair_source","between":["C","D"]},
+      {"type":"single_photon_emitter","at":"Control_src"}
+    ],
+    operations: [
+      {"node":"Switch","operation":"4_photon_interferometer",
+       "inputs":["photon_B","photon_C","control_photon","vacuum_mode"],
+       "heralding_out":["h1","h2","h3","h4"]},
+      {"node":"A","operation":"Pauli_correction","classical_in":["h1","h2","h3","h4"]},
+      {"node":"D","operation":"Pauli_correction","classical_in":["h1","h2","h3","h4"]}
+    ]
+  },
+  single_emitters: ["Control_src"],
+  amplitudes: [],
+  removed_connections: []
+}
+
+NoveltySupervisor (o4-mini): Thought: The indefinite‐order entanglement‐swapping (“quantum SWITCH”) you propose is essentially identical to the ensemble’s “Photonic Quantum SWITCH Superactivates Entanglement via Indefinite Causal Order,” which already presents a static, linear‐optical superposition of Bell‐swap orders. No genuinely new joint‐measurement primitive or network topology is introduced.  
+Action: reject  
+Action Input: This proposal duplicates the existing photonic SWITCH scheme. To reach PRL‐level novelty, you must add a new measurement basis, extend to higher‐order networks, or demonstrate an element (e.g. nontrivial control of more than two orders) not covered by prior SWITCH implementations.
+
+Researcher (o4-mini): Thought: 
+  Step 1: Brainstorm 3 ways to fuse “exotic quantum state” and “particle interference” into a new Pytheus‐compatible quantum network primitive beyond known swaps, routers, or switches:
+    1) A single, high-order concatenated entanglement swap: compress k sequential Bell swaps into one 2k-photon joint measurement, entangling end nodes A…Z in one shot.
+    2) A “quantum combiner” that interferes three incoming Bell-pair photons to probabilistically fuse them into a four-photon exotic “fusion” subspace, generating multi-link entanglement across a star network.
+    3) A static multi-port measurement that, given N EPR links in parallel, projects them onto an exotic “parity-check” subspace, realizing error-detecting entanglement percolation across a grid.  
+  Step 2: Check novelty & feasibility:
+    1) The concatenated k-swap is novel: no experiment has merged sequential swaps into one static high-order interferometric measurement. It’s a pure network transformation, not state generation, and uses only EPR sources, linear optics, and photon-resolving detectors—perfect for Pytheus.
+    2) The “quantum combiner” hovers toward state generation/fusion; harder to frame as a network primitive.  
+    3) The parity-check measurement is interesting but edges into error detection/correction territory (forbidden dynamic feedback).  
+  Step 3: Choose (1): high-order concatenated swap.  
+  Step 4: Novelty: By replacing a cascade of k Bell‐measurements with a single 2k-photon joint measurement, we explore genuinely new high-order particle interference in a network context. This opens a family of “one‐shot multi-hop swaps” and probes how interference can compress quantum‐causal chains.  
+  Step 5: Feasibility: Resources are only k+1 probabilistic EPR-pair sources, a static 2k-mode linear interferometer, and photon-number-resolving detectors—exactly what Pytheus can optimize, with no active feed-forward or exotic hardware.  
+Action: final answer  
+Action Input:
+explanation: |
+  We propose a family of “one-shot multi-hop entanglement swaps” realized by a single high-order photon-interference measurement.  
+  – Consider the 2-hop case (k=2) first: three probabilistic EPR-pair sources on edges A–B, B–C, C–D.  
+  – Normally one does a Bell swap at B then another at C to entangle A and D. Instead, B and C jointly send their two photons each (total 4) into a fixed 4-mode linear interferometer engineered to project onto an exotic “2-hop swap basis” (a 4-photon joint measurement subspace).  
+  – Photon-number-resolving detectors at the interferometer outputs herald one of 16 click patterns, each pattern encoding the two teleportation‐correction bits for A–D. A and D then apply local Pauli corrections to recover the end‐to‐end Bell pair |Φ⁺〉_{AD}.  
+  – This compresses two sequential Bell measurements into one static, high-order interference experiment.  
+  – The scheme generalizes: for k hops, 2k photons from k intermediate nodes enter a 2k-mode interferometer performing a single 2k-photon joint measurement, heralding entanglement between the two end nodes.  
+  – This network primitive explores how exotic multi-photon interference can compress causal sequences of entanglement swapping into one measurement, opening a tunable family of experiments.  
+  – Compatibility: only probabilistic EPR-pair sources, linear optics (beam splitters/phases), photon-number-resolving detectors, and post-selection. No need for feedback, cavities, or hyper-entanglement. Pytheus can optimize the interferometer layout and heralding pattern for any chosen k.  
+config: {
+  description: "One-shot multi-hop entanglement swap via a single 2k-photon joint measurement (k=2 example)",
+  foldername: "one_shot_khop_swap",
+  bulk_thr: 0.01,
+  edges_tried: 40,
+  ftol: 1e-06,
+  loss_func: "operator_distance",
+  num_anc: 0,
+  num_pre: 1,
+  optimizer: "L-BFGS-B",
+  imaginary: false,
+  safe_hist: true,
+  samples: 30,
+  target_network: {
+    nodes: ["A","B_router","C_router","D","Interferometer"],
+    edges: [
+      {"type":"EPR_pair_source","between":["A","B_router"]},
+      {"type":"EPR_pair_source","between":["B_router","C_router"]},
+      {"type":"EPR_pair_source","between":["C_router","D"]}
+    ],
+    operations: [
+      {"node":"B_router","operation":"hold_photon","outputs":["ph_B1","ph_B2"]},
+      {"node":"C_router","operation":"hold_photon","outputs":["ph_C1","ph_C2"]},
+      {"node":"Interferometer","operation":"4_mode_multiport",
+       "inputs":["ph_B1","ph_B2","ph_C1","ph_C2"],
+       "heralding_out":["h1","h2","h3","h4"]},
+      {"node":"A","operation":"Pauli_correction","classical_in":["h1","h2","h3","h4"]},
+      {"node":"D","operation":"Pauli_correction","classical_in":["h1","h2","h3","h4"]}
+    ]
+  },
+  single_emitters: [],
+  amplitudes: [],
+  removed_connections: []
+}
+
+NoveltySupervisor (o4-mini): Thought: The notion of compressing k sequential Bell‐swaps into a single 2k-photon joint measurement is not covered in the existing lists. While there are “one‐shot” repeater ideas and time‐multiplexed swaps, none propose a static multiport that performs the entire multi‐hop entanglement swap in one go or generalizes it to arbitrary k. This high‐order interference primitive gives a genuinely new quantum‐network tool and could open both foundational tests and practical repeater designs.  
+Action: accept  
+Action Input: This one‐shot multi-hop swap via a 2k-photon static joint measurement is a fresh network primitive beyond sequential or time-multiplexed schemes and merits further investigation.
+
+Researcher Summarizing (o4-mini): Title:  
+One-Shot Two-Hop Entanglement Swap in the A–B_router–C_router–D Quantum Network
+
+Abstract:  
+We propose and analyze a one-shot multi-hop entanglement swap that compresses two sequential Bell-pair swaps across the target network A–B_router–C_router–D into a single four-photon joint interference measurement. By heralding one of 16 detector click patterns at a fixed 4-mode interferometer and applying local Pauli corrections, end nodes A and D are projected directly into a maximally entangled Bell state without intermediate feed-forward.
+
+Judge (o4-mini): Thought: This proposal compresses two sequential Bell‐pair swaps into a single four-photon projection, leveraging heralded multi‐photon interference to entangle end nodes A and D directly. The physics is sound for linear‐optical implementations, provided one can realize the specific 4‐mode unitary and distinguish all sixteen desired click patterns. Practical feasibility rests on achieving high‐visibility four‐photon interference and phase stability in the interferometer.
+
+Action: accept
+
+Action Input: This is a compelling extension of entanglement‐swapping protocols that replaces two feed‐forward steps with a single four‐photon joint measurement. Ensuring indistinguishable photons, low‐loss routing, and a stable 4‐mode interferometer will be critical but well within reach of current SPDC or single‐photon source technologies.
+
+ConversationEnd: researcher_calls=5
+
