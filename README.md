@@ -1,4 +1,8 @@
-# AI-Mandel
+# AI-Mandel -- A prototype AI-physicist
+
+**Towards autonomous quantum physics research using LLM agents with access to intelligent tools**\
+_Sören Arlt, Xuemei Gu, Mario Krenn_\
+[https://arxiv.org/abs/2511.11752](https://arxiv.org/abs/2511.11752)
 
 ![Workflow](assets/workflow.png)
 
